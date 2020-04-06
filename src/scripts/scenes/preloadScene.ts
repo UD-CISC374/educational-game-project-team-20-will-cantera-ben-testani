@@ -4,6 +4,7 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.image("party_parrot", "assets/images/party_parrot.gif");
   }
 
   create() {
