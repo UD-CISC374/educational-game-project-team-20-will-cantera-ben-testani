@@ -1,21 +1,21 @@
 {
-  "name": "educational-phaser-game-template",
+  "name": "time-commander",
   "version": "0.0.2",
   "description": "Phaser 3 starter template for educational games, using TypeScript, webpack, and Github Pages.",
-  "homepage": "https://github.com/acbart/educational-phaser-game-template#readme",
+  "homepage": "https://github.com/UD-CISC374/educational-game-project-team-20-will-cantera-ben-testani.git",
   "main": "index.js",
   "game": {
-    "url": "educational-phaser-game-template",
+    "url": "https://github.com/UD-CISC374/educational-game-project-team-20-will-cantera-ben-testani.git",
     "shortName": "EdGame",
-    "name": "Educational Phaser Game Template"
+    "name": "time-commander"
   },
   "author": {
-    "name": "Austin Cory Bart",
-    "url": "https://github.com/acbart"
+    "name": "William Cantera, Benjamin Testani",
+    "url": "https://github.com/William-Fox-Cantera"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/acbart/educational-phaser-game-template.git"
+    "url": "https://github.com/UD-CISC374/educational-game-project-team-20-will-cantera-ben-testani.git"
   },
   "scripts": {
     "start": "webpack-dev-server --config config/webpack.dev.js",
@@ -40,8 +40,8 @@
   ],
   "template": {
     "name": "educational-phaser-game-template",
-    "url": "https://github.com/acbart/educational-phaser-game-template",
-    "author": "Austin Cory Bart (https://github.com/acbart)"
+    "url": "https://github.com/UD-CISC374/educational-game-project-team-20-will-cantera-ben-testani.git",
+    "author": "William Cantera (https://github.com/william-fox-cantera)"
   },
   "engines": {
     "node": ">=8.0.0"
