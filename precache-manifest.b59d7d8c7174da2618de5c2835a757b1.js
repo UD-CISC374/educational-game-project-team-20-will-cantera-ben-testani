@@ -4,7 +4,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/audio/magicCave.mp3"
   },
   {
-    "revision": "9f93d00c91e303812c59d25494d5b60f",
+    "revision": "f9174b126a4d4ba55f23c1c086df2bb1",
     "url": "assets/citations.md"
   },
   {
@@ -40,19 +40,19 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "favicon.ico"
   },
   {
-    "revision": "6d7c971ce2dd369ad4cdcc867f000854",
+    "revision": "90f5ef988ebf2dacf8bb217094e124f8",
     "url": "index.html"
   },
   {
-    "revision": "f12df6859dcc7c16ed23",
-    "url": "main.d3248c380df55912734e.bundle.js"
+    "revision": "a8fbb9618951e18d24d7",
+    "url": "main.02a363359bf8b1f3e54f.bundle.js"
   },
   {
-    "revision": "003187cab0ecf7a20e343e2ba6db4a34",
+    "revision": "601680b9d7c735e2dac776c6e564a81b",
     "url": "manifest.json"
   },
   {
-    "revision": "a8029749c7edd38204cf67287cb14139",
+    "revision": "701445d8817f73e3da17e450b69faa36",
     "url": "sw.js"
   },
   {
