@@ -2,10 +2,10 @@
   "name": "time-commander",
   "version": "0.0.2",
   "description": "Phaser 3 starter template for educational games, using TypeScript, webpack, and Github Pages.",
-  "homepage": "https://github.com/UD-CISC374/educational-game-project-team-20-will-cantera-ben-testani.git",
+  "homepage": "https://github.com/UD-CISC374/educational-game-project-team-20-will-cantera-ben-testani",
   "main": "index.js",
   "game": {
-    "url": "https://github.com/UD-CISC374/educational-game-project-team-20-will-cantera-ben-testani.git",
+    "url": "https://github.com/UD-CISC374/educational-game-project-team-20-will-cantera-ben-testani",
     "shortName": "EdGame",
     "name": "time-commander"
   },
@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/UD-CISC374/educational-game-project-team-20-will-cantera-ben-testani.git"
+    "url": "https://github.com/UD-CISC374/educational-game-project-team-20-will-cantera-ben-testani"
   },
   "scripts": {
     "start": "webpack-dev-server --config config/webpack.dev.js",
@@ -40,7 +40,7 @@
   ],
   "template": {
     "name": "educational-phaser-game-template",
-    "url": "https://github.com/UD-CISC374/educational-game-project-team-20-will-cantera-ben-testani.git",
+    "url": "https://github.com/UD-CISC374/educational-game-project-team-20-will-cantera-ben-testani",
     "author": "William Cantera (https://github.com/william-fox-cantera)"
   },
   "engines": {
