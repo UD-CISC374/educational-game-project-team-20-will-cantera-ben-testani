@@ -4,10 +4,12 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("party_parrot", "assets/images/party_parrot.gif");
+    this.load.audio("magic_cave", "assets/audio/magicCave.mp3");
+
+    this.load.image("start_screen", "assets/images/neonClock.png");
   }
 
   create() {
-    this.scene.start('MainScene');
+    this.scene.start('StartScene');
   }
 }
