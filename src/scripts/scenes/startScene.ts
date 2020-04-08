@@ -1,6 +1,5 @@
 import ExampleObject from '../objects/exampleObject';
 
-// Test 
 export default class StartScene extends Phaser.Scene {
   private exampleObject: ExampleObject;
   private introTrack: Phaser.Sound.BaseSound;
