@@ -2,6 +2,7 @@ import 'phaser';
 import MainScene from './scenes/mainScene';
 import StartScene from './scenes/startScene';
 import PreloadScene from './scenes/preloadScene';
+import ChestScene from './scenes/chestScene';
 import GameConfig = Phaser.Types.Core.GameConfig;
 
 const DEFAULT_WIDTH = 1000;
@@ -17,12 +18,12 @@ const config: GameConfig = {
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT
     },
-    scene: [PreloadScene, StartScene, MainScene],
+    scene: [PreloadScene, StartScene, MainScene, ChestScene],
     physics: {
         default: 'arcade',
         arcade: {
             debug: false,
-            gravity: { y: 400 }
+            //gravity: { y: 400 }
         }
     }
 };
