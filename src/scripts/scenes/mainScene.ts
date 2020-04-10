@@ -80,39 +80,41 @@ export default class MainScene extends Phaser.Scene {
   pickRandomTime(): Array<number> {
     let randomHour: number = Math.floor(Math.random() * 12) + 1; // Gets random number between 1 and 12
     let coords: Array<number> = [0, 0];
+    let offsetX: number = 300;
+    let offsetY: number = 300;
     switch(randomHour) {
       case 1:
-        coords = [this.scale.width/2, 0];
+        coords = [(this.scale.width/2)+offsetX, 0];
         break;
       case 2:
-        coords = [this.scale.width/2, 0];
+        coords = [this.scale.width, (this.scale.height/2)-offsetY];
         break;
       case 3:
-        coords = [this.scale.width/2, 0];
+        coords = [this.scale.width, this.scale.height/2];
         break;
       case 4:
-        coords = [this.scale.width/2, 0];
+        coords = [this.scale.width, (this.scale.height/2)+offsetY];
         break;
       case 5:
-        coords = [this.scale.width/2, 0];
+        coords = [(this.scale.width/2)+offsetX, this.scale.height];
         break;
       case 6:
-        coords = [this.scale.width/2, 0];
+        coords = [this.scale.width/2, this.scale.height];
         break;
       case 7:
-        coords = [this.scale.width/2, 0];
+        coords = [(this.scale.width/2)-offsetX, this.scale.height];
         break;
       case 8:
-        coords = [this.scale.width/2, 0];
+        coords = [0, (this.scale.height/2)+offsetY];
         break;
       case 9:
-        coords = [this.scale.width/2, 0];
+        coords = [0, this.scale.height/2];
         break;
       case 10:
-        coords = [this.scale.width/2, 0];
+        coords = [0, (this.scale.height/2)-offsetY];
         break;
       case 11:
-        coords = [this.scale.width/2, 0];
+        coords = [(this.scale.width/2)-offsetX, 0];
         break;
       case 12:
         coords = [this.scale.width/2, 0];
