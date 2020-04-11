@@ -3,6 +3,7 @@ import MainScene from './scenes/mainScene';
 import StartScene from './scenes/startScene';
 import PreloadScene from './scenes/preloadScene';
 import ChestScene from './scenes/chestScene';
+import LoseScene from './scenes/loseScene';
 import GameConfig = Phaser.Types.Core.GameConfig;
 
 const DEFAULT_WIDTH = 1000;
@@ -18,7 +19,7 @@ const config: GameConfig = {
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT
     },
-    scene: [PreloadScene, StartScene, MainScene, ChestScene],
+    scene: [PreloadScene, StartScene, MainScene, ChestScene, LoseScene],
     physics: {
         default: 'arcade',
         arcade: {

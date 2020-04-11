@@ -3,6 +3,7 @@ import ExampleObject from '../objects/exampleObject';
 export default class StartScene extends Phaser.Scene {
   private exampleObject: ExampleObject;
   private introTrack: Phaser.Sound.BaseSound;
+  spacebar: Phaser.Input.Keyboard.Key;
 
   constructor() {
     super({ key: 'StartScene' });
@@ -44,7 +45,7 @@ export default class StartScene extends Phaser.Scene {
     this.scene.switch("MainScene"); // Move onto main scene for the game
   }
 
-
+  
   update() {
   }
 }
