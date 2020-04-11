@@ -1,32 +1,134 @@
 import ExampleObject from '../objects/exampleObject';
-import ArmorGoblin from '../objects/armorGoblin';
-import TimeGoblin from '../objects/timeGoblin';
-import SpeedGoblin from '../objects/speedGoblin';
-import ThePunisher from '../objects/thePunisher';
+import { GameObjects } from 'phaser';
 
 
 export default class MainScene extends Phaser.Scene {
+  // Constants
+  private readonly numEnemies: number = 4;
+  private readonly modeList: Array<String> = ["defend", "prep"];
+
   private exampleObject: ExampleObject;
   private timeCrystal: Phaser.GameObjects.Sprite;
-  private readonly numEnemies: number = 4;
   private chestButton: Phaser.GameObjects.Text;
+  private mainTrack: Phaser.Sound.BaseSound;
+  private cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
+  private spacebar: Phaser.Input.Keyboard.Key;
+  private enemies: Phaser.Physics.Arcade.Group;
+  private waveStartButton: GameObjects.Text;
+  private healthBar: GameObjects.Image;
+
+  private mode: String = this.modeList[1];
+  private healthPercentage: number = 100; 
+
 
   constructor() {
     super({ key: 'MainScene' });
   }
 
   create() {
+    console.log("hello");
     // Analog clock in the background
     this.add.image(this.scale.width/2, this.scale.height/2, "main_clock");
 
+    // Health bar for the time crystal
+    this.healthBar = this.add.image(this.scale.width/2, (this.scale.height/2)-80, "health_bar");
 
-    for (let i = 0; i < 8; i++) { // Spawns 8 enemies 
-      let randomHour: Array<number> = this.pickRandomTime();
-      this.spawnEnemy(randomHour);
-    }
+    // Make a physics enabled group for the enemies
+    this.enemies = this.physics.add.group();
 
+    this.announceTime(8);
+
+
+    // Enable spacebar
+    this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+    // Draws the button onscreen for starting the wave
+    this.makeWaveStartButton();
+    
+    // Plays the background song for this scene
+    this.handleMusic();
+
+    // Making some things to be drawn on screen
     this.makeTimeCrystal();
     this.makeChestButton();
+
+    // Adding collision for the time crystal and enemies
+    this.physics.add.overlap(this.timeCrystal, this.enemies, this.hurtCrystal, this.giveTrue, this);
+  }
+
+
+  /**
+   * giveTrue, for some reason, the Phaser overlap function needs a callback that returns true?
+   * 
+   * Consumes: Nothing
+   * Produces: A boolean
+   */
+  giveTrue(): boolean {
+    return true;
+  }
+
+  /**
+   * hurtCrystal, if an enemy collides with the crystal, it is hurt and loses some health. This method crops 
+   *              a percentage of the healthbar to indicate the crystal is losing life. 
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  hurtCrystal(crystal, enemy): void {
+    if (this.healthPercentage - 45 < 0) {
+      this.scene.switch("LoseScene");
+    } else {
+      this.healthPercentage -= 45;
+      this.healthBar.setCrop(0, 0, this.healthPercentage, 97); 
+      enemy.destroy();
+    }
+  }
+
+
+  /**
+   * getHour, returns a random number between 1 and 12
+   * 
+   * Consumes: Nothing
+   * Produces: A number
+   */
+  gethour(): number {
+    return Math.floor(Math.random() * 12) + 1; // Gets random number between 1 and 12
+  }
+
+  /**
+   * announceTime, displays a warning onscreen telling the player which time the enemies will come from.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  announceTime(time: number): void {
+    let text = this.add.text(0, 10, "Enemies coming from: " + time.toString(10) + ":00", {
+      font: "60px Arial",
+      bold: true,
+      fill:"black"});
+      text.setX((this.scale.width/2)-(text.width/2));
+  }
+
+
+  /**
+   * handleMusic, plays the song for this scene. It is meant to be background music sou it should'nt be to
+   *              loud. A config is set up for this.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  handleMusic(): void {
+    this.mainTrack = this.sound.add("warsaw_song");
+    let mainTrackConfig = {
+      mute: false,
+      volume: 2,
+      rate: 1,
+      detune: 0,
+      seek: 0,
+      loop: true,
+      delay: 0
+    };
+    this.mainTrack.play(mainTrackConfig);
   }
 
 
@@ -48,9 +150,42 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing 
    */
   makeTimeCrystal(): void {
-    this.timeCrystal = this.add.sprite(this.scale.width/2, this.scale.height/2, "time_crystal");
+    this.timeCrystal = this.physics.add.sprite(this.scale.width/2, this.scale.height/2, "time_crystal");
     this.timeCrystal.play("time_crystal_anim");
-    this.exampleObject = new ExampleObject(this, 0, 0);
+  }
+
+  endWave(): void {
+    /*
+    for(let i = 0; i < this.enemies.getChildren().length; i++) {
+      if (this.enemies.getChildren()[i].)
+    }
+    */
+  }
+
+
+  /**
+   * startWave, starts the wave of enemies. Spawns in enemies based on the time at which they are supposed to spawn.
+   * 
+   * Cpnsumes: Nothing
+   * Produces: Nothing
+   */
+  startWave(): void {
+    this.waveStartButton.setVisible(false);
+    this.mode = this.modeList[0]; // Defend mode
+  }
+
+
+  /**
+   * makeWaveStartButton, makes a button which when pressed, brings forth the wave of enemies.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  makeWaveStartButton(): void {
+    this.waveStartButton = this.add.text(0, 100, "Start-Wave", {fill: "red", font: "bold 40px Serif"});
+    this.waveStartButton.setX((this.scale.width/2)-(this.waveStartButton.width/2));
+    this.waveStartButton.setInteractive();
+    this.waveStartButton.on("pointerdown", () => this.startWave());
   }
 
 
@@ -71,13 +206,12 @@ export default class MainScene extends Phaser.Scene {
 
 
    /**
-   * pickRandomTime, gets a random time for the enemies to come from. Returns a range of pixels for the enemy to spawn
-   *                 based on the random hour chosen.
+   * getEnemyCoords, Returns a range of pixels for the enemy to spawn based on the random hour chosen.
    * 
-   * Consumes: Nothing
+   * Consumes: hour(number)
    * Produces: Coordinates(number array)
    */
-  pickRandomTime(): Array<number> {
+  getEnemyCoords(hour: number): Array<number> {
     let randomHour: number = Math.floor(Math.random() * 12) + 1; // Gets random number between 1 and 12
     let coords: Array<number> = [0, 0];
     let offsetX: number = 300;
@@ -128,7 +262,7 @@ export default class MainScene extends Phaser.Scene {
    * spawnEnemy, spawns an enemy on an edge of the map based on the time the enemy is supposed to come out from.
    * 
    * Consumes: Coordinates(number array)
-   * Produces: Nothing
+   * Produces: An Object
    */
   spawnEnemy(coords: Array<number>): void {
     let enemyNumber: number = Math.floor(Math.random() * this.numEnemies) +1; // Gets random number between 1 and numEnemies
@@ -136,21 +270,42 @@ export default class MainScene extends Phaser.Scene {
     let y: number = coords[1];
     switch(enemyNumber) {
       case 1:
-        let armorGoblin: ArmorGoblin = new ArmorGoblin(this, x, y);
+        let armorGoblin = this.add.sprite(x, y, "armor_goblin");
+        this.enemies.add(armorGoblin);
         break;
       case 2:
-        let speedGoblin: SpeedGoblin = new SpeedGoblin(this, x, y);
+        let speedGoblin = this.add.sprite(x, y, "speed_goblin");
+        this.enemies.add(speedGoblin);
         break;
       case 3:
-        let timeGoblin: TimeGoblin = new TimeGoblin(this, x, y);
+        let timeGoblin = this.add.sprite(x, y, "time_goblin");
+        this.enemies.add(timeGoblin);
         break;
       case 4: 
-        let thePunisher: ThePunisher = new ThePunisher(this, x, y);
+        let thePunisher = this.add.sprite(x, y, "the_punisher");
+        this.enemies.add(thePunisher);
         break;
     }
   }
 
 
-  update() {
+  /**
+   * moveEnemy, updates the x and y position of the enemy based on the enemies speed attribute.
+   * 
+   * Consumes: enemy(Object)
+   * Produces: Nothing
+   */
+  moveEnemy(enemy): void {
+    this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2);
+  }
+
+
+  update(): void {
+    let currentHour: number = this.gethour();
+    if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
+      this.spawnEnemy(this.getEnemyCoords(currentHour));
+    }
+    for(let i = 0; i < this.enemies.getChildren().length; i++)
+      this.moveEnemy(this.enemies.getChildren()[i]);
   }
 }
