@@ -16,6 +16,14 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/alphaassets/citations.md"
   },
   {
+    "revision": "9d79a2ec01455afa082d23e42f457801",
+    "url": "/educational-game-project-team-20-will-cantera-ben-testani/alphaassets/font/font.png"
+  },
+  {
+    "revision": "872f41e77eae3bfc4fba291b0145b12a",
+    "url": "/educational-game-project-team-20-will-cantera-ben-testani/alphaassets/font/font.xml"
+  },
+  {
     "revision": "53cefca2a0f75654486b180949686165",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/alphaassets/icons/favicon.ico"
   },
@@ -100,15 +108,15 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/alphafavicon.ico"
   },
   {
-    "revision": "8dc0f898522e042c9586",
-    "url": "/educational-game-project-team-20-will-cantera-ben-testani/alphagen.main.2c6928ac220e0c360f8e.bundle.js"
+    "revision": "c667c8f6bcd7e6ae663e",
+    "url": "/educational-game-project-team-20-will-cantera-ben-testani/alphagen.main.45e034d92ac42153f13a.bundle.js"
   },
   {
     "revision": "5e69403aa42e950fedff",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/alphagen.vendors.0805bb80903235d40eaf.bundle.js"
   },
   {
-    "revision": "daa784fe1307e780877c4e3d94cc06ce",
+    "revision": "3af942327adc48fb98048053522f92f2",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/alphaindex.html"
   },
   {
