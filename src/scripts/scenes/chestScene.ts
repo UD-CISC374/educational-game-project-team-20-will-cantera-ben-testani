@@ -34,9 +34,8 @@ export default class ChestScene extends Phaser.Scene {
 
       console.log("X: " + dragX + " " + " Y: " + dragY);
       
-  });
+    });
   }
-
   update() {
   }
 }
