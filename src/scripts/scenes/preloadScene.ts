@@ -46,6 +46,12 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image("hoursDot", "assets/images/hoursDot.png");
     this.load.image("minutesDot", "assets/images/minutesDot.png");
 
+
+//-----------------------------------------------------------------------------------------------------------
+    // For lose scene
+    this.load.audio("lose_song", "assets/audio/endSong.mp3");
+    
+//-----------------------------------------------------------------------------------------------------------
   }
 
   create() {

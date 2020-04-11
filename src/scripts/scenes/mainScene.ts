@@ -18,7 +18,7 @@ export default class MainScene extends Phaser.Scene {
   private healthBar: GameObjects.Image;
 
   private mode: String = this.modeList[1];
-  private healthPercentage: number = 100; 
+  private healthPercentage: number = 225; // Width in pixels of the health bar
 
 
   constructor() {
@@ -76,10 +76,11 @@ export default class MainScene extends Phaser.Scene {
    */
   hurtCrystal(crystal, enemy): void {
     if (this.healthPercentage - 45 < 0) {
+      this.mainTrack.stop();
       this.scene.switch("LoseScene");
     } else {
       this.healthPercentage -= 45;
-      this.healthBar.setCrop(0, 0, this.healthPercentage, 97); 
+      this.healthBar.setCrop(0, 0, this.healthPercentage, 97); // Height in pixels of the health bar is 97
       enemy.destroy();
     }
   }

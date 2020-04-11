@@ -7,3 +7,6 @@ https://www.youtube.com/watch?v=n9bFQrH3RRg
 
 Warsaw - By Pilot Red Sun
 https://www.youtube.com/watch?v=_0PQicdTfO8
+
+Earthbound: 53 - Sanctuary Guardian
+https://www.youtube.com/watch?v=TKvjEQXKeec&t=61s
