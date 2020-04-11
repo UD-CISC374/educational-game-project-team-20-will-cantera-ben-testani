@@ -5,7 +5,7 @@
   "homepage": "https://github.com/UD-CISC374/educational-game-project-team-20-will-cantera-ben-testani",
   "main": "index.js",
   "game": {
-    "url": "https://github.com/UD-CISC374/educational-game-project-team-20-will-cantera-ben-testani",
+    "url": "educational-game-project-team-20-will-cantera-ben-testani",
     "shortName": "EdGame",
     "name": "time-commander"
   },
