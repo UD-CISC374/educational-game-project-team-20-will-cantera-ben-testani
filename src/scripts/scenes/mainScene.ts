@@ -26,7 +26,6 @@ export default class MainScene extends Phaser.Scene {
   }
 
   create() {
-    console.log("hello");
     // Analog clock in the background
     this.add.image(this.scale.width/2, this.scale.height/2, "main_clock");
 
@@ -134,17 +133,6 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * onClick, for switching scenes when a button is pressed.
-   * 
-   * Consumes: Nothing
-   * Produces: Nothing
-   */
-  onClick(): void {
-    this.scene.switch("ChestScene"); // Move onto main scene for the game
-  }
-
-
-  /**
    * makeTimeCrystal, displays the time crystal spritesheet in the center of the screen.
    * 
    * Consumes: Nothing
@@ -202,7 +190,7 @@ export default class MainScene extends Phaser.Scene {
     this.chestButton.setX(this.scale.width/2 - this.chestButton.width/2);
     this.chestButton.setY(this.scale.height/2 + 300);
     this.chestButton.setInteractive();
-    this.chestButton.on("pointerdown", () => this.onClick());
+    this.chestButton.on("pointerdown", () => this.scene.switch("ChestScene"));
   }
 
 
