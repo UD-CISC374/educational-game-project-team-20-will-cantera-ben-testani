@@ -40,11 +40,16 @@ export default class PreloadScene extends Phaser.Scene {
     
 //----------------------------------------------------------------------------------------------------------
     // For chest scene
+
+    // Images
     this.load.image("openChest", "assets/images/openedChest.png");
     this.load.image("closeChest", "assets/images/closedChest.v1.png");
     this.load.image("clock", "assets/images/clock.png");
     this.load.image("hoursDot", "assets/images/hoursDot.png");
     this.load.image("minutesDot", "assets/images/minutesDot.png");
+
+    // Fonts
+    this.load.bitmapFont("pixelFont", "assets/font/font.png", "assets/font/font.xml");
 
 
 //-----------------------------------------------------------------------------------------------------------
@@ -52,6 +57,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.audio("lose_song", "assets/audio/endSong.mp3");
     
 //-----------------------------------------------------------------------------------------------------------
+
   }
 
   create() {
