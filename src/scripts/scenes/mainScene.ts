@@ -30,6 +30,7 @@ export default class MainScene extends Phaser.Scene {
   private waveNumber: string = "wave1"; // Keep track of what wave the player is on 
   private spawnTimes: Array<number> = []; // Will be filled in with random numbers between 1 and 12
   private isWaveStarted: boolean = false; // True if the wave is ongoing, false otherwise
+  private isTimesDone: boolean = false; // True if the spawn times aare done displaying, false otherwise
 
 
   /**
@@ -68,6 +69,7 @@ export default class MainScene extends Phaser.Scene {
 
     // Gets the times enemies will spawn, stores them in array
     this.prepWave(); // Takes a varying amount of time
+    this.isTimesDone = false; // Don't touch it works
     
     // Plays the background song for this scene
     this.handleMusic();
@@ -103,7 +105,7 @@ export default class MainScene extends Phaser.Scene {
       this.mainTrack.stop();
       this.scene.switch("LoseScene");
     } else {
-      this.healthPercentage -= 15;
+      this.healthPercentage -= 45;
       this.healthBar.setCrop(0, 0, this.healthPercentage, 97); // Height in pixels of the health bar is 97
       enemy.destroy();
     }
@@ -177,7 +179,6 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   async prepWave() {
-    this.waveStartButton.setVisible(true); // Bring back the start wave button
     let numEnemies = this.waveInfo[this.waveNumber];
     for (let i = 0; i < parseInt(numEnemies); i++) // Addwing the times that enemies will sapawn from to an array
       this.spawnTimes.push(this.gethour());
@@ -185,7 +186,8 @@ export default class MainScene extends Phaser.Scene {
       this.announceTime(this.spawnTimes[i]);
       await sleep(3000); // In milliseconds
       this.enemySpawnText.destroy();
-    }    
+    } 
+    this.isTimesDone = true;
   }
 
 
@@ -196,13 +198,16 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   async startWave() {
-    console.log(this.spawnTimes);
-    this.waveStartButton.setVisible(false);
-    let numEnemies = this.waveInfo[this.waveNumber];
-    for (let i = 0; i < parseInt(numEnemies); i++) { // Spawn the enemies, let the fun begin
-      await sleep(3000); // Wait between enemy spawns
-      this.spawnEnemy(this.getEnemyCoords(this.spawnTimes[i])); // Converts the time to coordinates, spawns a Phaser sprite
-      this.isWaveStarted = true; // Defend mode
+    if (this.isTimesDone) { // Only start the wave if all of the time have been displayed to the player
+      console.log(this.spawnTimes);
+      this.waveStartButton.setVisible(false);
+      this.chestButton.setVisible(false);
+      let numEnemies = this.waveInfo[this.waveNumber];
+      for (let i = 0; i < parseInt(numEnemies); i++) { // Spawn the enemies, let the fun begin
+        await sleep(3000); // Wait between enemy spawns
+        this.spawnEnemy(this.getEnemyCoords(this.spawnTimes[i])); // Converts the time to coordinates, spawns a Phaser sprite
+        this.isWaveStarted = true; // Defend mode
+      }
     }
   }
 
@@ -214,14 +219,18 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   endWave(): void {
+    this.waveStartButton.setVisible(true); // Bring back the start wave button
+    this.chestButton.setVisible(true); // Bring back the chest button after wave
     this.spawnTimes = []; // Reset the spawn times for the next wave
     let waveIndex: number = parseInt(this.waveNumber[this.waveNumber.length-1]); // Get last character as number
     waveIndex++; // Go to next wave
     this.waveNumber = this.waveNumber.substr(0, this.waveNumber.length-1); // Delete last character
     this.waveNumber += waveIndex; // Concatenate
     this.isWaveStarted = false; // Wave over, Prep mode
+    this.isTimesDone = false;
   }
 
+  
   /**
    * makeWaveStartButton, makes a button which when pressed, brings forth the wave of enemies.
    * 
@@ -229,7 +238,8 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   makeWaveStartButton(): void {
-    this.waveStartButton = this.add.text(0, 100, "Start-Wave", {fill: "red", font: "bold 40px Serif"});
+    this.waveStartButton = this.add.text(0, 200, "Start-Wave", {fill: "red", font: "bold 40px Serif"});
+    this.waveStartButton.setBackgroundColor("black");
     this.waveStartButton.setX((this.scale.width/2)-(this.waveStartButton.width/2));
     this.waveStartButton.setInteractive();
     this.waveStartButton.on("pointerdown", () => this.startWave());
@@ -244,9 +254,10 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   makeChestButton(): void {
-    this.chestButton = this.add.text(0, 0, "Chest", {fill: "red", font: "bold 80px Serif"});
-    this.chestButton.setX(this.scale.width/2 - this.chestButton.width/2);
-    this.chestButton.setY(this.scale.height/2 + 300);
+    this.chestButton = this.add.text(0, 0, "Open Chests", {fill: "red", font: "bold 50px Serif"});
+    this.chestButton.setBackgroundColor("black");
+    this.chestButton.setX((this.scale.width/2) - (this.chestButton.width/2) + 350);
+    this.chestButton.setY((this.scale.height/2) - (this.chestButton.height/2) + 400);
     this.chestButton.setInteractive();
     this.chestButton.on("pointerdown", () => this.scene.switch("ChestScene"));
   }

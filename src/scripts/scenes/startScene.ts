@@ -28,6 +28,7 @@ export default class StartScene extends Phaser.Scene {
 
     // Button for starting game
     const startButton = this.add.text(0, 0, "Start Game", {fill: "red", font: "bold 80px Serif"});
+    startButton.setBackgroundColor("black");
     startButton.setX(this.scale.width/2 - startButton.width/2);
     startButton.setY(this.scale.height/2 + 300);
     startButton.setInteractive();
