@@ -9,6 +9,8 @@ export default class ChestScene extends Phaser.Scene {
   hoursLabel: Phaser.GameObjects.BitmapText;
   minLabel: Phaser.GameObjects.BitmapText;
   mainLabel: Phaser.GameObjects.BitmapText;
+  hoursQuestion: Phaser.GameObjects.BitmapText;
+  minutesQuestion: Phaser.GameObjects.BitmapText;
 
 
   constructor() {
@@ -26,6 +28,8 @@ export default class ChestScene extends Phaser.Scene {
     this.mainLabel=this.add.bitmapText(150, 150, "pixelFont", "TIME TO DISPLAY ON CLOCK: ", 75);
     this.hoursDot.setInteractive({draggable:true});
     this.minuetsDot.setInteractive({draggable:true});
+
+    this.questionTime();
     // http://labs.phaser.io/index.html?dir=input/dragging/&q=
     this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
 
@@ -35,6 +39,17 @@ export default class ChestScene extends Phaser.Scene {
       console.log("X: " + dragX + " " + " Y: " + dragY);
       
     });
+  }
+
+  questionTime(){
+    let hour = Math.floor(Math.random() * 12)+1;
+    let min = Math.round(Math.floor(Math.random() * 59)/5)*5;
+    if(min==60){
+      min=0;
+    }
+    this.hoursQuestion=this.add.bitmapText(this.scale.width/2 - 60, 200, "pixelFont", hour+":"+min, 75);
+    //console.log(hour +" " + min);
+    return;
   }
   update() {
   }
