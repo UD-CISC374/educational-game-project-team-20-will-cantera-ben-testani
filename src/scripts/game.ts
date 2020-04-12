@@ -21,7 +21,7 @@ const config: GameConfig = {
     },
     scene: [PreloadScene, StartScene, MainScene, ChestScene, LoseScene],
     physics: {
-        default: 'arcade',
+        default: "arcade",
         arcade: {
             debug: false,
             //gravity: { y: 400 }

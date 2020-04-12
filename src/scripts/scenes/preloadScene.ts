@@ -18,6 +18,7 @@ export default class PreloadScene extends Phaser.Scene {
 
     // Audio
     this.load.audio("warsaw_song", "assets/audio/warsaw.mp3");
+    this.load.audio("laser_sound", "assets/audio/beam.mp3");
 
     // Images 
 
@@ -27,6 +28,12 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image("armor_goblin", "assets/images/ArmoredGoblin.png");
     this.load.image("speed_goblin", "assets/images/SpeedGoblin.png");
     this.load.image("the_punisher", "assets/images/ThePunisher.png");
+
+    // Defensive Structures
+    this.load.image("chrome_turret", "assets/images/chromeTurret.png");
+
+    // Projectiles
+    this.load.image("laser_beam", "assets/images/laser.png");
 
     // Health bar
     this.load.image("health_bar", "assets/images/healthbar.png");

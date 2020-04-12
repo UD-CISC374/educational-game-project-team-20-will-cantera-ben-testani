@@ -1,4 +1,9 @@
 import ExampleObject from '../objects/exampleObject';
+import LaserBeam from '../objects/laserBeam';
+import ArmorGoblin from '../objects/armorGoblin';
+import TimeGoblin from '../objects/timeGoblin';
+import SpeedGoblin from '../objects/speedGoblin';
+import ThePunisher from '../objects/thePunisher';
 import { GameObjects } from 'phaser';
 
 function sleep (milliseconds) { // Making the program wait for the given time
@@ -15,10 +20,14 @@ export default class MainScene extends Phaser.Scene {
   private mainTrack: Phaser.Sound.BaseSound;
   private cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
   private spacebar: Phaser.Input.Keyboard.Key;
-  private enemies: Phaser.Physics.Arcade.Group;
+  private enemies: any;
   private waveStartButton: GameObjects.Text;
   private healthBar: GameObjects.Image;
   private enemySpawnText: GameObjects.Text;
+  public chromeTurret: Phaser.Physics.Arcade.Sprite;
+  public turretProjectiles: GameObjects.Group;
+  private beamSound: Phaser.Sound.BaseSound;
+
 
   // Variables with set values
   private healthPercentage: number = 225; // Width in pixels of the health bar
@@ -31,6 +40,10 @@ export default class MainScene extends Phaser.Scene {
   private spawnTimes: Array<number> = []; // Will be filled in with random numbers between 1 and 12
   private isWaveStarted: boolean = false; // True if the wave is ongoing, false otherwise
   private isTimesDone: boolean = false; // True if the spawn times aare done displaying, false otherwise
+  private boxList: Array<any> = [];
+  private defenseInventory: Array<any> = [];
+  private defensiveInventoryCoords: Array<any> = [];
+  private isWaveDone: boolean = false;
 
 
   /**
@@ -55,6 +68,14 @@ export default class MainScene extends Phaser.Scene {
     // Analog clock in the background
     this.add.image(this.scale.width/2, this.scale.height/2, "main_clock");
 
+    this.beamSound = this.sound.add("laser_sound");
+
+    // Draw the players defensive strucutre inventory on screen
+    this.handleBoxes();
+
+    // Add starting defensive structure to inventory 
+    this.addDefenses();
+    
     // Health bar for the time crystal
     this.healthBar = this.add.image(this.scale.width/2, (this.scale.height/2)-80, "health_bar");
 
@@ -78,6 +99,14 @@ export default class MainScene extends Phaser.Scene {
     this.makeTimeCrystal();
     this.makeChestButton();
 
+
+    this.turretProjectiles = this.add.group();
+    // Adds collision between players shots and powerups, causing them to bounce
+    this.physics.add.collider(this.turretProjectiles, this.enemies, function(projectile, enemy) {
+      projectile.destroy();
+      enemy.destroy();
+    });
+
     // Adding collision for the time crystal and enemies
     this.physics.add.overlap(this.timeCrystal, this.enemies, this.hurtCrystal, this.giveTrue, this);
   }
@@ -91,6 +120,56 @@ export default class MainScene extends Phaser.Scene {
    */
   giveTrue(): boolean {
     return true;
+  }
+
+  /**
+   * makeDefenses, adds sprites to the game for the defensive structures when they are recieved.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  addDefenses(): void {
+    // Starting Defense
+    this.chromeTurret = this.physics.add.sprite(this.defensiveInventoryCoords[0][0], this.defensiveInventoryCoords[0][1], "chrome_turret");
+    this.chromeTurret.setInteractive({draggable: true});
+    this.input.on('drag', function (pointer, gameObject, dragX, dragY) { // Update turrets position on drag
+      let spriteRotation: number = Phaser.Math.Angle.Between(500, 500, gameObject.x, gameObject.y); 
+      gameObject.setRotation(spriteRotation-80.1);
+      gameObject.x = dragX;
+      gameObject.y = dragY;      
+    });
+  }
+
+
+  /**
+   * handleBoxes, handles setting up the coordinates for the boxes thatr will be drawn on screen to represent
+   *              the players inventory space for defensive structures. Calls the makeBoxes method to draw them.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  handleBoxes(): void {
+    this.defensiveInventoryCoords = [[75, this.scale.height-150], [75, this.scale.height-50], 
+                                    [175, this.scale.height-150], [175, this.scale.height-50]];
+    for (let i = 0; i < this.defensiveInventoryCoords.length; i++) {
+      let coord: Array<number> = this.defensiveInventoryCoords[i];
+      this.makeBoxes(coord[0], coord[1]); // indices 0, 1 for x, y
+    }
+  }
+
+
+  /**
+   * makeBoxes, draws a rectanglke on the screen with the given x and y coordinates.
+   * 
+   * Consumes: x(number), y(number)
+   * Produces: Nothing
+   */
+  makeBoxes(x: number, y: number): void {
+    let width: number = 100
+    let height: number = 100;
+    let rect = this.add.rectangle(x, y, width, height, 0x9966ff);
+    rect.setStrokeStyle(4, 0xefc53f); // Makes an outline of the box
+    this.boxList.push(rect);
   }
 
   /**
@@ -199,15 +278,14 @@ export default class MainScene extends Phaser.Scene {
    */
   async startWave() {
     if (this.isTimesDone) { // Only start the wave if all of the time have been displayed to the player
-      console.log(this.spawnTimes);
-      this.waveStartButton.setVisible(false);
-      this.chestButton.setVisible(false);
+      this.setInvisibleHandler(); // Clears things off the screen 
       let numEnemies = this.waveInfo[this.waveNumber];
       for (let i = 0; i < parseInt(numEnemies); i++) { // Spawn the enemies, let the fun begin
         await sleep(3000); // Wait between enemy spawns
         this.spawnEnemy(this.getEnemyCoords(this.spawnTimes[i])); // Converts the time to coordinates, spawns a Phaser sprite
         this.isWaveStarted = true; // Defend mode
       }
+      this.isWaveDone = true;
     }
   }
 
@@ -219,15 +297,47 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   endWave(): void {
-    this.waveStartButton.setVisible(true); // Bring back the start wave button
-    this.chestButton.setVisible(true); // Bring back the chest button after wave
-    this.spawnTimes = []; // Reset the spawn times for the next wave
+    for (let i = 0; i < this.turretProjectiles.getChildren().length; i++)
+      this.turretProjectiles.getChildren()[i].destroy();
+    this.setVisibleHandler(); // Bring back invisible objects
+    this.spawnTimes.splice(0, this.spawnTimes.length); // Reset the spawn times for the next wave
     let waveIndex: number = parseInt(this.waveNumber[this.waveNumber.length-1]); // Get last character as number
     waveIndex++; // Go to next wave
     this.waveNumber = this.waveNumber.substr(0, this.waveNumber.length-1); // Delete last character
     this.waveNumber += waveIndex; // Concatenate
     this.isWaveStarted = false; // Wave over, Prep mode
     this.isTimesDone = false;
+    this.isWaveDone = false;
+  }
+
+  
+  /**
+   * setVisibleHandler, takes all of the objects that were set to invisible during the wave and sets
+   *                    them back to being visible again.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  setVisibleHandler(): void {
+    this.waveStartButton.setVisible(true); // Bring back the start wave button
+    this.chestButton.setVisible(true); // Bring back the chest button after wave
+    for (let i = 0; i < this.boxList.length; i++) // Bring backw the inventory boxes
+      this.boxList[i].setVisible(true);
+  }
+
+
+  /**
+   * setInvisibleHandler, takes objects that are only meant to be displayed on the prep phase and makes them invisble for
+   *                      the defend phase.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  setInvisibleHandler(): void {
+    this.waveStartButton.setVisible(false);
+      this.chestButton.setVisible(false);
+      for (let i = 0; i < this.boxList.length; i++)
+        this.boxList[i].setVisible(false);
   }
 
   
@@ -270,57 +380,45 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Coordinates(number array)
    */
   getEnemyCoords(hour: number): Array<number> {
-    let coords: Array<number> = [0, 0];
+    let coords: Array<number> = [0, 0, 0];
     let offsetX: number = 300;
     let offsetY: number = 300;
     switch(hour) {
       case 1:
-        console.log("1:00");
-        coords = [(this.scale.width/2)+offsetX, 0];
+        coords = [(this.scale.width/2)+offsetX, 0, 1];
         break;
       case 2:
-        console.log("2:00");
-        coords = [this.scale.width, (this.scale.height/2)-offsetY];
+        coords = [this.scale.width, (this.scale.height/2)-offsetY, 2];
         break;
       case 3:
-        console.log("3:00");
-        coords = [this.scale.width, this.scale.height/2];
+        coords = [this.scale.width, this.scale.height/2, 3];
         break;
       case 4:
-        console.log("4:00");
-        coords = [this.scale.width, (this.scale.height/2)+offsetY];
+        coords = [this.scale.width, (this.scale.height/2)+offsetY, 4];
         break;
       case 5:
-        console.log("5:00");
-        coords = [(this.scale.width/2)+offsetX, this.scale.height];
+        coords = [(this.scale.width/2)+offsetX, this.scale.height, 5];
         break;
       case 6:
-        console.log("6:00");
-        coords = [this.scale.width/2, this.scale.height];
+        coords = [this.scale.width/2, this.scale.height, 6];
         break;
-      case 7:
-        console.log("7:00");
-        coords = [(this.scale.width/2)-offsetX, this.scale.height];
+      case 7: 
+        coords = [(this.scale.width/2)-offsetX, this.scale.height, 7];
         break;
       case 8:
-        console.log("8:00");
-        coords = [0, (this.scale.height/2)+offsetY];
+        coords = [0, (this.scale.height/2)+offsetY, 8];
         break;
       case 9:
-        console.log("9:00");
-        coords = [0, this.scale.height/2];
+        coords = [0, this.scale.height/2, 9];
         break;
       case 10:
-        console.log("10:00");
-        coords = [0, (this.scale.height/2)-offsetY];
+        coords = [0, (this.scale.height/2)-offsetY, 10];
         break;
       case 11:
-        console.log("11:00");
-        coords = [(this.scale.width/2)-offsetX, 0];
+        coords = [(this.scale.width/2)-offsetX, 0, 11];
         break;
       case 12:
-        console.log("12:00");
-        coords = [this.scale.width/2, 0];
+        coords = [this.scale.width/2, 0, 12];
         break;
     }
     return coords;
@@ -337,23 +435,91 @@ export default class MainScene extends Phaser.Scene {
     let enemyNumber: number = Math.floor(Math.random() * this.numEnemies) +1; // Gets random number between 1 and numEnemies
     let x: number = coords[0];
     let y: number = coords[1];
+    let spawnPosition = coords[2];
     switch(enemyNumber) {
       case 1:
-        let armorGoblin = this.add.sprite(x, y, "armor_goblin");
+        let armorGoblin: ArmorGoblin = new ArmorGoblin(this, x, y, spawnPosition);
         this.enemies.add(armorGoblin);
         break;
       case 2:
-        let speedGoblin = this.add.sprite(x, y, "speed_goblin");
+        let speedGoblin: SpeedGoblin = new SpeedGoblin(this, x, y, spawnPosition);
         this.enemies.add(speedGoblin);
         break;
       case 3:
-        let timeGoblin = this.add.sprite(x, y, "time_goblin");
+        let timeGoblin: TimeGoblin = new TimeGoblin(this, x, y, spawnPosition);
         this.enemies.add(timeGoblin);
         break;
       case 4: 
-        let thePunisher = this.add.sprite(x, y, "the_punisher");
+        let thePunisher: ThePunisher = new ThePunisher(this, x, y, spawnPosition);
         this.enemies.add(thePunisher);
         break;
+    }
+  }
+
+
+  /**
+   * getTurretPosition, defines a range in pixels iun which a turret can be placed in order to be in the right time
+   *                    (hour) to be able to shoot at incoming enemies. Returns a number indicating the hour the
+   *                     player put the turret at.
+   * 
+   * Consumes: Nothing
+   * Produces: A number
+   */
+  getTurretPosition(): number {
+    let position: number = 0;
+    let rotation: number = this.chromeTurret.rotation*(180/Math.PI); // Convert radians to degrees
+    if (((rotation > -13) && (rotation < 0)) || ((rotation > 0) && (rotation < 11))) { // Range for 12:00, special case, signs switch
+      position = 12;
+    } else if (rotation > 19.69134377126048 && rotation < 39.99554037468087) {
+      position = 1;
+    } else if (rotation > 48.0614155170337 && rotation < 70.04563644592203) {
+      position = 2;
+    } else if (rotation > 80.32192165246756 && rotation < 101.3710007513927) {
+      position = 3;
+    } else if (rotation > 110.9259923779076 && rotation < 130.79472524869615) {
+      position = 4;
+    } else if (rotation > 138.24039917971746 && rotation < 159.47851711784577) {
+      position = 5;
+    } else if (((rotation > 168.2) && (rotation < 180)) || ((rotation > -180) && (rotation < -168.65868323804432))) { // Special case, degrees switch signs
+      position = 6;
+    } else if (rotation > -161.66294952200155 && rotation < -139.4393900240417) {
+      position = 7;
+    } else if (rotation > -129.250459164445 && rotation < -108.00933800945111) {
+      position = 8;
+    } else if (rotation > -99.85640683018694 && rotation < -80.7420033682108) {
+      position = 9;
+    } else if (rotation > -71.24635682830013 && rotation < -51.2913427210587) {
+      position = 10;
+    } else if (rotation > -41.02696598387933 && rotation < -20.08122146251615) {
+      position = 11;
+    }
+    return position;
+  }
+
+
+  /**
+   * shootAtEnemy, make defenses fire if an enemy is within their range.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  shootAtEnemy(): void {
+    const turretPlacement: number = this.getTurretPosition();
+    this.chromeTurret.rotation*(180/Math.PI);
+    for (let i = 0; i < this.spawnTimes.length; i++) {
+      if (this.spawnTimes[i] == turretPlacement) {
+          let milliseconds: number = new Date().getMilliseconds();
+          for (let i = 0; i < this.enemies.getChildren().length; i++) {
+            let enemy = this.enemies.getChildren()[i];
+            if ((enemy.spawnPosition == turretPlacement) && milliseconds % 3 == 0) { // My attempt at staggering the projectile spawn rate
+              this.beamSound.play();
+              let laserBeam = new LaserBeam(this);
+              laserBeam.setRotation(this.chromeTurret.rotation-80.1);
+              this.physics.moveTo(laserBeam, enemy.x, enemy.y, 400); // Last arg is projectile speed
+          }
+        }
+        break;
+      }
     }
   }
 
@@ -371,17 +537,18 @@ export default class MainScene extends Phaser.Scene {
 
   update(): void {
     let length = this.enemies.getChildren().length;
+    if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
+      console.log("LENGTH: " + length.toString());
+    }
     if (this.isWaveStarted) {
       let currentHour: number = this.gethour();
-      if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
-        this.spawnEnemy(this.getEnemyCoords(currentHour));
-      }
       for(let i = 0; i < length; i++)
         this.moveEnemy(this.enemies.getChildren()[i]);
-      if (!length) { // If all the enemies are gone, go back to prep mode
+      if (length == 0 && this.isWaveDone) { // If all the enemies are gone, go back to prep mode
         this.endWave();
         this.prepWave();
       }
+      this.shootAtEnemy();
     }
   }
 }

@@ -10,3 +10,6 @@ https://www.youtube.com/watch?v=_0PQicdTfO8
 
 Earthbound: 53 - Sanctuary Guardian
 https://www.youtube.com/watch?v=TKvjEQXKeec&t=61s
+
+Turret Gun image
+https://www.deviantart.com/ultimaodin/art/Turret-001x3-500578422 
