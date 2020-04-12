@@ -1,12 +1,14 @@
 import ExampleObject from '../objects/exampleObject';
 import { GameObjects } from 'phaser';
 
-
+function sleep (milliseconds) { // Making the program wait for the given time
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
 export default class MainScene extends Phaser.Scene {
   // Constants
   private readonly numEnemies: number = 4;
-  private readonly modeList: Array<String> = ["defend", "prep"];
-
+  
+  // Phaser objects
   private exampleObject: ExampleObject;
   private timeCrystal: Phaser.GameObjects.Sprite;
   private chestButton: Phaser.GameObjects.Text;
@@ -16,15 +18,38 @@ export default class MainScene extends Phaser.Scene {
   private enemies: Phaser.Physics.Arcade.Group;
   private waveStartButton: GameObjects.Text;
   private healthBar: GameObjects.Image;
+  private enemySpawnText: GameObjects.Text;
 
-  private mode: String = this.modeList[1];
+  // Variables with set values
   private healthPercentage: number = 225; // Width in pixels of the health bar
+  private waveInfo: Object = { // Three waves per level, key is the number of enemies per wave
+    "wave1": 1,
+    "wave2": 3,
+    "wave3": 5
+  };
+  private waveNumber: string = "wave1"; // Keep track of what wave the player is on 
+  private spawnTimes: Array<number> = []; // Will be filled in with random numbers between 1 and 12
+  private isWaveStarted: boolean = false; // True if the wave is ongoing, false otherwise
 
 
+  /**
+   * constructor, provides a reference to this scene
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   constructor() {
     super({ key: 'MainScene' });
   }
 
+  
+  /**
+   * create, most of the code is moved to their own functions, that code is called in create to 
+   *         setup this screen.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   create() {
     // Analog clock in the background
     this.add.image(this.scale.width/2, this.scale.height/2, "main_clock");
@@ -35,14 +60,14 @@ export default class MainScene extends Phaser.Scene {
     // Make a physics enabled group for the enemies
     this.enemies = this.physics.add.group();
 
-    this.announceTime(8);
-
-
     // Enable spacebar
     this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
     // Draws the button onscreen for starting the wave
     this.makeWaveStartButton();
+
+    // Gets the times enemies will spawn, stores them in array
+    this.prepWave(); // Takes a varying amount of time
     
     // Plays the background song for this scene
     this.handleMusic();
@@ -78,7 +103,7 @@ export default class MainScene extends Phaser.Scene {
       this.mainTrack.stop();
       this.scene.switch("LoseScene");
     } else {
-      this.healthPercentage -= 45;
+      this.healthPercentage -= 15;
       this.healthBar.setCrop(0, 0, this.healthPercentage, 97); // Height in pixels of the health bar is 97
       enemy.destroy();
     }
@@ -102,11 +127,11 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   announceTime(time: number): void {
-    let text = this.add.text(0, 10, "Enemies coming from: " + time.toString(10) + ":00", {
+    this.enemySpawnText = this.add.text(0, 10, "Enemies coming from: " + time.toString(10) + ":00", {
       font: "60px Arial",
       bold: true,
       fill:"black"});
-      text.setX((this.scale.width/2)-(text.width/2));
+      this.enemySpawnText.setX((this.scale.width/2)-(this.enemySpawnText.width/2));
   }
 
 
@@ -143,26 +168,59 @@ export default class MainScene extends Phaser.Scene {
     this.timeCrystal.play("time_crystal_anim");
   }
 
-  endWave(): void {
-    /*
-    for(let i = 0; i < this.enemies.getChildren().length; i++) {
-      if (this.enemies.getChildren()[i].)
-    }
-    */
+  
+  /**
+   * prepWave, displays the times enemies will spawn from and returns those times as an array to be used 
+   *           in other parts of the program.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  async prepWave() {
+    this.waveStartButton.setVisible(true); // Bring back the start wave button
+    let numEnemies = this.waveInfo[this.waveNumber];
+    for (let i = 0; i < parseInt(numEnemies); i++) // Addwing the times that enemies will sapawn from to an array
+      this.spawnTimes.push(this.gethour());
+    for (let i = 0; i < parseInt(numEnemies); i++) {  // Display the times enemies will come from on screen
+      this.announceTime(this.spawnTimes[i]);
+      await sleep(3000); // In milliseconds
+      this.enemySpawnText.destroy();
+    }    
   }
 
 
   /**
    * startWave, starts the wave of enemies. Spawns in enemies based on the time at which they are supposed to spawn.
    * 
-   * Cpnsumes: Nothing
+   * Consumes: Nothing
    * Produces: Nothing
    */
-  startWave(): void {
+  async startWave() {
+    console.log(this.spawnTimes);
     this.waveStartButton.setVisible(false);
-    this.mode = this.modeList[0]; // Defend mode
+    let numEnemies = this.waveInfo[this.waveNumber];
+    for (let i = 0; i < parseInt(numEnemies); i++) { // Spawn the enemies, let the fun begin
+      await sleep(3000); // Wait between enemy spawns
+      this.spawnEnemy(this.getEnemyCoords(this.spawnTimes[i])); // Converts the time to coordinates, spawns a Phaser sprite
+      this.isWaveStarted = true; // Defend mode
+    }
   }
 
+
+  /**
+   * endWave, handles incrementing some key values after the wave is over and getting ready for the next wave.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  endWave(): void {
+    this.spawnTimes = []; // Reset the spawn times for the next wave
+    let waveIndex: number = parseInt(this.waveNumber[this.waveNumber.length-1]); // Get last character as number
+    waveIndex++; // Go to next wave
+    this.waveNumber = this.waveNumber.substr(0, this.waveNumber.length-1); // Delete last character
+    this.waveNumber += waveIndex; // Concatenate
+    this.isWaveStarted = false; // Wave over, Prep mode
+  }
 
   /**
    * makeWaveStartButton, makes a button which when pressed, brings forth the wave of enemies.
@@ -201,45 +259,56 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Coordinates(number array)
    */
   getEnemyCoords(hour: number): Array<number> {
-    let randomHour: number = Math.floor(Math.random() * 12) + 1; // Gets random number between 1 and 12
     let coords: Array<number> = [0, 0];
     let offsetX: number = 300;
     let offsetY: number = 300;
-    switch(randomHour) {
+    switch(hour) {
       case 1:
+        console.log("1:00");
         coords = [(this.scale.width/2)+offsetX, 0];
         break;
       case 2:
+        console.log("2:00");
         coords = [this.scale.width, (this.scale.height/2)-offsetY];
         break;
       case 3:
+        console.log("3:00");
         coords = [this.scale.width, this.scale.height/2];
         break;
       case 4:
+        console.log("4:00");
         coords = [this.scale.width, (this.scale.height/2)+offsetY];
         break;
       case 5:
+        console.log("5:00");
         coords = [(this.scale.width/2)+offsetX, this.scale.height];
         break;
       case 6:
+        console.log("6:00");
         coords = [this.scale.width/2, this.scale.height];
         break;
       case 7:
+        console.log("7:00");
         coords = [(this.scale.width/2)-offsetX, this.scale.height];
         break;
       case 8:
+        console.log("8:00");
         coords = [0, (this.scale.height/2)+offsetY];
         break;
       case 9:
+        console.log("9:00");
         coords = [0, this.scale.height/2];
         break;
       case 10:
+        console.log("10:00");
         coords = [0, (this.scale.height/2)-offsetY];
         break;
       case 11:
+        console.log("11:00");
         coords = [(this.scale.width/2)-offsetX, 0];
         break;
       case 12:
+        console.log("12:00");
         coords = [this.scale.width/2, 0];
         break;
     }
@@ -290,11 +359,18 @@ export default class MainScene extends Phaser.Scene {
 
 
   update(): void {
-    let currentHour: number = this.gethour();
-    if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
-      this.spawnEnemy(this.getEnemyCoords(currentHour));
+    let length = this.enemies.getChildren().length;
+    if (this.isWaveStarted) {
+      let currentHour: number = this.gethour();
+      if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
+        this.spawnEnemy(this.getEnemyCoords(currentHour));
+      }
+      for(let i = 0; i < length; i++)
+        this.moveEnemy(this.enemies.getChildren()[i]);
+      if (!length) { // If all the enemies are gone, go back to prep mode
+        this.endWave();
+        this.prepWave();
+      }
     }
-    for(let i = 0; i < this.enemies.getChildren().length; i++)
-      this.moveEnemy(this.enemies.getChildren()[i]);
   }
 }
