@@ -11,9 +11,12 @@ export default class ChestScene extends Phaser.Scene {
   mainLabel: Phaser.GameObjects.BitmapText;
   hoursQuestion: Phaser.GameObjects.BitmapText;
   minutesQuestion: Phaser.GameObjects.BitmapText;
+<<<<<<< HEAD
   submitButton;
   hour;
   min;
+=======
+>>>>>>> chestScene
 
 
   constructor() {
@@ -207,6 +210,17 @@ export default class ChestScene extends Phaser.Scene {
       default: break;
     }
     return h;
+  }
+
+  questionTime(){
+    let hour = Math.floor(Math.random() * 12)+1;
+    let min = Math.round(Math.floor(Math.random() * 59)/5)*5;
+    if(min==60){
+      min=0;
+    }
+    this.hoursQuestion=this.add.bitmapText(this.scale.width/2 - 60, 200, "pixelFont", hour+":"+min, 75);
+    //console.log(hour +" " + min);
+    return;
   }
   update() {
   }
