@@ -16,11 +16,23 @@ export default class ChestScene extends Phaser.Scene {
   hour;
   min;
 
-
+  /**
+   * constructor, provides a reference to this scene
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   constructor() {
     super({ key: 'ChestScene' });
   }
 
+  /**
+   * create, most of the code is moved to their own functions, that code is called in create to 
+   *         setup this screen.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   create() {
     this.exampleObject = new ExampleObject(this, 0, 0);
     this.closedChest=this.add.image(this.scale.width/2, this.scale.height/2, "closeChest");
@@ -59,6 +71,12 @@ export default class ChestScene extends Phaser.Scene {
     this.submitButton.on("pointerdown", () => this.onClickCheck());
   }
 
+  /**
+   * questionTime, generates a random time to ask the user to display on the clock
+   *         
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   questionTime(){
     this.hour = Math.floor(Math.random() * 12)+1;
     this.min = Math.round(Math.floor(Math.random() * 59)/5)*5;
@@ -70,6 +88,12 @@ export default class ChestScene extends Phaser.Scene {
     return;
   }
 
+  /**
+   * onClickCheck, calls helper functions to decide if the player correctly displayed the time on the clock
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   onClickCheck(){
     let h = this.checkHour();
     let m = this.checkMin();
@@ -78,6 +102,12 @@ export default class ChestScene extends Phaser.Scene {
     console.log(this.minuetsDot.x + " " + this.minuetsDot.y);
   }
 
+  /**
+   * checkMin, checks if the minute dot is within the bounds for the minute part of the time question
+   * 
+   * Consumes: Nothing
+   * Produces: Boolean
+   */
   checkMin(): boolean{
     let m = false;
     switch(this.min){
@@ -145,6 +175,12 @@ export default class ChestScene extends Phaser.Scene {
     return m;
   }
 
+  /**
+   * checkHour, checks if the hour dot is within the bounds for the minute part of the time question
+   * 
+   * Consumes: Nothing
+   * Produces: Boolean
+   */
   checkHour(): boolean{
     let h = false;
     switch(this.hour){
