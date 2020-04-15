@@ -30,13 +30,13 @@ export default class MainScene extends Phaser.Scene {
 
 
   // Variables with set values
-  public levelNumber: number = 1;
+  private levelNumber: number = 1;
   private healthPercentage: number = 225; // Width in pixels of the health bar
   private levelInfo: Object = { // Three waves per level, key is the number of enemies per wave
     "level1": {
       "wave1": 1
       //"wave2": 3,
-      //"wave3": 5,
+     //"wave3": 5,
       //"wave4": 12
     }, 
     "level2": {
@@ -99,6 +99,7 @@ export default class MainScene extends Phaser.Scene {
 
     // Gets the times enemies will spawn, stores them in array
     this.prepWave(); // Takes a varying amount of time
+    console.log("PREPPED");
     
     // Plays the background song for this scene
     this.handleMusic();
@@ -285,7 +286,7 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   prepWave(): void {
-    console.log(this.levelNumber);
+    console.log(this.levelNumber)
     let levelWaves = this.levelInfo["level" + this.levelNumber.toString()];
     let numEnemies = levelWaves[this.waveNumber];
     for (let i = 0; i < parseInt(numEnemies); i++) // Addwing the times that enemies will sapawn from to an array
@@ -326,8 +327,9 @@ export default class MainScene extends Phaser.Scene {
     let waveIndex: number = parseInt(this.waveNumber[this.waveNumber.length-1]); // Get last character as number
     waveIndex++; // Go to next wave
     if (waveIndex > Object.keys(this.levelInfo["level" + this.levelNumber.toString()]).length) {// Go to level complete scene if the end of the final wave is reached.
-      this.waveNumber = "wave1"; // 
-      this.enemySpawnText.destroy();
+      this.endWaveHelper(waveIndex);
+      this.waveNumber = "wave1"; // Go to next level
+      this.levelNumber++; // Go to next level
       this.scene.switch("LevelComplete");
     } else {
       this.endWaveHelper(waveIndex); // Just prepares for the next wave
