@@ -227,7 +227,7 @@ export default class MainScene extends Phaser.Scene {
     this.mainTrack = this.sound.add("warsaw_song");
     let mainTrackConfig = {
       mute: false,
-      volume: 2,
+      volume: 1,
       rate: 1,
       detune: 0,
       seek: 0,
