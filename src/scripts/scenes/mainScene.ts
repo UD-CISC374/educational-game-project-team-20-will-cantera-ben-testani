@@ -30,16 +30,25 @@ export default class MainScene extends Phaser.Scene {
 
 
   // Variables with set values
+  public levelNumber: number = 1;
   private healthPercentage: number = 225; // Width in pixels of the health bar
-  private waveInfo: Object = { // Three waves per level, key is the number of enemies per wave
-    "wave1": 1,
-    "wave2": 3,
-    "wave3": 5
+  private levelInfo: Object = { // Three waves per level, key is the number of enemies per wave
+    "level1": {
+      "wave1": 1
+      //"wave2": 3,
+      //"wave3": 5,
+      //"wave4": 12
+    }, 
+    "level2": {
+      "wave1": 10,
+      "wave2": 18,
+      "wave3": 30,
+      "wave4": 45
+    }
   };
   private waveNumber: string = "wave1"; // Keep track of what wave the player is on 
   private spawnTimes: Array<number> = []; // Will be filled in with random numbers between 1 and 12
   private isWaveStarted: boolean = false; // True if the wave is ongoing, false otherwise
-  private isTimesDone: boolean = false; // True if the spawn times aare done displaying, false otherwise
   private boxList: Array<any> = [];
   private defenseInventory: Array<any> = [];
   private defensiveInventoryCoords: Array<any> = [];
@@ -90,7 +99,6 @@ export default class MainScene extends Phaser.Scene {
 
     // Gets the times enemies will spawn, stores them in array
     this.prepWave(); // Takes a varying amount of time
-    this.isTimesDone = false; // Don't touch it works
     
     // Plays the background song for this scene
     this.handleMusic();
@@ -98,7 +106,6 @@ export default class MainScene extends Phaser.Scene {
     // Making some things to be drawn on screen
     this.makeTimeCrystal();
     this.makeChestButton();
-
 
     this.turretProjectiles = this.add.group();
     // Adds collision between players shots and powerups, causing them to bounce
@@ -121,6 +128,7 @@ export default class MainScene extends Phaser.Scene {
   giveTrue(): boolean {
     return true;
   }
+
 
   /**
    * makeDefenses, adds sprites to the game for the defensive structures when they are recieved.
@@ -172,6 +180,7 @@ export default class MainScene extends Phaser.Scene {
     this.boxList.push(rect);
   }
 
+
   /**
    * hurtCrystal, if an enemy collides with the crystal, it is hurt and loses some health. This method crops 
    *              a percentage of the healthbar to indicate the crystal is losing life. 
@@ -207,9 +216,27 @@ export default class MainScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  announceTime(time: number): void {
-    this.enemySpawnText = this.add.text(0, 10, "Enemies coming from: " + time.toString(10) + ":00", {
-      font: "60px Arial",
+  announceTime(): void {
+    let times: String = "";
+    let numWords: number = 0;
+    let wasAdded: boolean = false;
+    for (let i = 0; i < this.spawnTimes.length; i++) {
+      if (!times.includes(this.spawnTimes[i].toString(10) + ":00"))
+        wasAdded = true
+      if (numWords % 3 == 0 && numWords != 0 && wasAdded) // Seperate by newline and spaces every three times
+        times += "\n                                     ";
+      // Seperate by newline every three times, else sepeate on same line by comma
+      if (wasAdded) { // Don't re-add times already displayed
+        if (i == this.spawnTimes.length-1) // If it is at the last word, con't include space and comma
+          times += this.spawnTimes[i].toString(10) + ":00"; // Base 10
+        else
+          times += this.spawnTimes[i].toString(10) + ":00, ";
+        numWords++;
+      }
+      wasAdded = false;
+    }
+    this.enemySpawnText = this.add.text(0, 10, "Enemies coming from: " + times, {
+      font: "30px Arial",
       bold: true,
       fill:"black"});
       this.enemySpawnText.setX((this.scale.width/2)-(this.enemySpawnText.width/2));
@@ -257,17 +284,16 @@ export default class MainScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  async prepWave() {
-    let numEnemies = this.waveInfo[this.waveNumber];
+  prepWave(): void {
+    console.log(this.levelNumber);
+    let levelWaves = this.levelInfo["level" + this.levelNumber.toString()];
+    let numEnemies = levelWaves[this.waveNumber];
     for (let i = 0; i < parseInt(numEnemies); i++) // Addwing the times that enemies will sapawn from to an array
       this.spawnTimes.push(this.gethour());
-    for (let i = 0; i < parseInt(numEnemies); i++) {  // Display the times enemies will come from on screen
-      this.announceTime(this.spawnTimes[i]);
-      await sleep(3000); // In milliseconds
-      this.enemySpawnText.destroy();
-    } 
-    this.isTimesDone = true;
-  }
+    // Display the times enemies will come from on screen
+    this.announceTime();
+  } 
+
 
 
   /**
@@ -277,16 +303,16 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   async startWave() {
-    if (this.isTimesDone) { // Only start the wave if all of the time have been displayed to the player
-      this.setInvisibleHandler(); // Clears things off the screen 
-      let numEnemies = this.waveInfo[this.waveNumber];
-      for (let i = 0; i < parseInt(numEnemies); i++) { // Spawn the enemies, let the fun begin
-        await sleep(3000); // Wait between enemy spawns
-        this.spawnEnemy(this.getEnemyCoords(this.spawnTimes[i])); // Converts the time to coordinates, spawns a Phaser sprite
-        this.isWaveStarted = true; // Defend mode
-      }
-      this.isWaveDone = true;
+    this.enemySpawnText.destroy();
+    this.setInvisibleHandler(); // Clears things off the screen 
+    let levelWaves = this.levelInfo["level" + this.levelNumber.toString()];
+    let numEnemies = levelWaves[this.waveNumber];
+    for (let i = 0; i < parseInt(numEnemies); i++) { // Spawn the enemies, let the fun begin
+      await sleep(1000); // Wait between enemy spawns
+      this.spawnEnemy(this.getEnemyCoords(this.spawnTimes[i])); // Converts the time to coordinates, spawns a Phaser sprite
+      this.isWaveStarted = true; // Defend mode
     }
+    this.isWaveDone = true;
   }
 
 
@@ -297,16 +323,33 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   endWave(): void {
+    let waveIndex: number = parseInt(this.waveNumber[this.waveNumber.length-1]); // Get last character as number
+    waveIndex++; // Go to next wave
+    if (waveIndex > Object.keys(this.levelInfo["level" + this.levelNumber.toString()]).length) {// Go to level complete scene if the end of the final wave is reached.
+      this.waveNumber = "wave1"; // 
+      this.enemySpawnText.destroy();
+      this.scene.switch("LevelComplete");
+    } else {
+      this.endWaveHelper(waveIndex); // Just prepares for the next wave
+    }
+  }
+
+
+  /**
+   * endWaveHelper, deletes all of the turret projectiles, sets certain objects back to being visible, updates the
+   *                wave number, and updates the booleans isWaveStarted and isWWaveDone.
+   * 
+   * Consumes: waveIndex(number)
+   * Produces: Nothing
+   */
+  endWaveHelper(waveIndex: number): void {
     for (let i = 0; i < this.turretProjectiles.getChildren().length; i++)
       this.turretProjectiles.getChildren()[i].destroy();
     this.setVisibleHandler(); // Bring back invisible objects
     this.spawnTimes.splice(0, this.spawnTimes.length); // Reset the spawn times for the next wave
-    let waveIndex: number = parseInt(this.waveNumber[this.waveNumber.length-1]); // Get last character as number
-    waveIndex++; // Go to next wave
     this.waveNumber = this.waveNumber.substr(0, this.waveNumber.length-1); // Delete last character
     this.waveNumber += waveIndex; // Concatenate
     this.isWaveStarted = false; // Wave over, Prep mode
-    this.isTimesDone = false;
     this.isWaveDone = false;
   }
 
