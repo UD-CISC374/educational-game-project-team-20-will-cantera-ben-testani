@@ -3,6 +3,7 @@ import ExampleObject from '../objects/exampleObject';
 export default class ChestScene extends Phaser.Scene {
   private exampleObject: ExampleObject;
   closedChest: Phaser.GameObjects.Image;
+  openedChest: Phaser.GameObjects.Image;
   clock: Phaser.GameObjects.Image;
   hoursDot: Phaser.GameObjects.Image;
   minuetsDot: Phaser.GameObjects.Image;
@@ -15,15 +16,32 @@ export default class ChestScene extends Phaser.Scene {
   backButton;
   hour;
   min;
+  isClosedChestShowing;
+  isClockShowing;
+  isOpenedChestShowing;
 
-
+  /**
+   * constructor, provides a reference to this scene
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   constructor() {
     super({ key: 'ChestScene' });
   }
 
+  /**
+   * create, most of the code is moved to their own functions, that code is called in create to 
+   *         setup this screen.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   create() {
     this.exampleObject = new ExampleObject(this, 0, 0);
     this.closedChest=this.add.image(this.scale.width/2, this.scale.height/2, "closeChest");
+    this.openedChest=this.add.image(this.scale.width/2, this.scale.height/2, "openChest");
+    this.hideOpenedChest();
     this.clock=this.add.image(this.scale.width/2, this.scale.height/2, "clock");
     this.hoursDot=this.add.image(this.scale.width/4 + this.scale.width/2, this.scale.width/4 + this.scale.width/2, "hoursDot");
     this.minuetsDot=this.add.image(this.scale.width/4, this.scale.height/4 + this.scale.height/2, "minutesDot");
@@ -32,6 +50,9 @@ export default class ChestScene extends Phaser.Scene {
     this.mainLabel=this.add.bitmapText(150, 150, "pixelFont", "TIME TO DISPLAY ON CLOCK: ", 75);
     this.hoursDot.setInteractive({draggable:true});
     this.minuetsDot.setInteractive({draggable:true});
+    this.isClockShowing = true;
+    this.isClosedChestShowing = true;
+    this.isOpenedChestShowing = false;
 
     this.questionTime();
     // http://labs.phaser.io/index.html?dir=input/dragging/&q=
@@ -59,25 +80,188 @@ export default class ChestScene extends Phaser.Scene {
     this.submitButton.on("pointerdown", () => this.onClickCheck());
   }
 
+  /**
+   * questionTime, generates a random time to ask the user to display on the clock
+   *         
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   questionTime(){
     this.hour = Math.floor(Math.random() * 12)+1;
     this.min = Math.round(Math.floor(Math.random() * 59)/5)*5;
     if(this.min==60){
       this.min=0;
     }
-    this.hoursQuestion=this.add.bitmapText(this.scale.width/2 - 60, 200, "pixelFont", this.hour+":"+this.min, 75);
+    if(this.min<10){
+      this.hoursQuestion=this.add.bitmapText(this.scale.width/2 - 60, 200, "pixelFont", this.hour+":0"+this.min, 75);
+    }
+    else{
+      this.hoursQuestion=this.add.bitmapText(this.scale.width/2 - 60, 200, "pixelFont", this.hour+":"+this.min, 75);
+    }
     //console.log(hour +" " + min);
     return;
   }
 
+  /**
+   * onClickCheck, calls helper functions to decide if the player correctly displayed the time on the clock
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   onClickCheck(){
     let h = this.checkHour();
     let m = this.checkMin();
-    console.log(h + " " + m);
-    console.log(this.hoursDot.x + " " + this.hoursDot.y);
-    console.log(this.minuetsDot.x + " " + this.minuetsDot.y);
+    //console.log(h + " " + m);
+    //console.log(this.hoursDot.x + " " + this.hoursDot.y);
+    //console.log(this.minuetsDot.x + " " + this.minuetsDot.y);
+    if(h && m){
+      this.hideClosedChest();
+      this.hideClock();
+      this.hideDots();
+      this.showOpenedChest();
+      this.hideText();
+      this.hideSubmit();
+    }
+
   }
 
+  /**
+   * hideClosedChest, sets the closedChest image to invisible
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  hideClosedChest(){
+    this.closedChest.setVisible(false);
+  }
+
+  /**
+   * hideClock, sets the clock image to invisible
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  hideClock(){
+    this.clock.setVisible(false);
+  }
+
+  /**
+   * hideOpenedChest, sets the openedChest image to invisible
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  hideOpenedChest(){
+    this.openedChest.setVisible(false);
+  }
+
+  /**
+   * showClosedChest, sets the closedChest image to visible
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  showClosedChest(){
+    this.closedChest.setVisible(true);
+  }
+
+  /**
+   * showClock, sets the clock image to visible
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  showClock(){
+    this.clock.setVisible(true);
+  }
+
+  /**
+   * showOpenedChest, sets the openedChest image to visible
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  showOpenedChest(){
+    this.openedChest.setVisible(true);
+  }
+
+  /**
+   * hideDots, sets the dots images to invisible
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  hideDots(){
+    this.hoursDot.setVisible(false);
+    this.minuetsDot.setVisible(false);
+  }
+
+  /**
+   * showDots, sets the dots images to visible
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  showDots(){
+    this.hoursDot.setVisible(true);
+    this.minuetsDot.setVisible(true);
+  }
+
+  /**
+   * hideText, sets the text on the screen to invisible
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  hideText(){
+    this.hoursLabel.setVisible(false);
+    this.minLabel.setVisible(false);
+    this.mainLabel.setVisible(false);
+    this.hoursQuestion.setVisible(false);
+  }
+
+  /**
+   * showText, sets the text on the screen to visible
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  showText(){
+    this.hoursLabel.setVisible(true);
+    this.minLabel.setVisible(true);
+    this.mainLabel.setVisible(true);
+    this.hoursQuestion.setVisible(false);
+  }
+
+  /**
+   * hideSubmit, sets the submit button on the screen to invisible
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  hideSubmit(){
+    this.submitButton.setVisible(false);
+  }
+
+  /**
+   * showSubmit, sets the submit button on the screen to visible
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  showSubmit(){
+    this.submitButton.setVisible(true);
+  }
+
+  reset(){
+
+  }
+  /**
+   * checkMin, checks if the minute dot is within the bounds for the minute part of the time question
+   * 
+   * Consumes: Nothing
+   * Produces: Boolean
+   */
   checkMin(): boolean{
     let m = false;
     switch(this.min){
@@ -145,6 +329,12 @@ export default class ChestScene extends Phaser.Scene {
     return m;
   }
 
+  /**
+   * checkHour, checks if the hour dot is within the bounds for the minute part of the time question
+   * 
+   * Consumes: Nothing
+   * Produces: Boolean
+   */
   checkHour(): boolean{
     let h = false;
     switch(this.hour){
