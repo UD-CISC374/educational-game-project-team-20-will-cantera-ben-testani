@@ -5,6 +5,7 @@ import TimeGoblin from '../objects/timeGoblin';
 import SpeedGoblin from '../objects/speedGoblin';
 import ThePunisher from '../objects/thePunisher';
 import { GameObjects } from 'phaser';
+import LevelComplete from './levelComplete';
 
 function sleep (milliseconds) { // Making the program wait for the given time
   return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -53,6 +54,7 @@ export default class MainScene extends Phaser.Scene {
   private defenseInventory: Array<any> = [];
   private defensiveInventoryCoords: Array<any> = [];
   private isWaveDone: boolean = false;
+  private timeOfDay: number = new Date().getTime();
 
 
   /**
@@ -65,7 +67,7 @@ export default class MainScene extends Phaser.Scene {
     super({ key: 'MainScene' });
   }
 
-  
+
   /**
    * create, most of the code is moved to their own functions, that code is called in create to 
    *         setup this screen.
@@ -102,7 +104,8 @@ export default class MainScene extends Phaser.Scene {
     console.log("PREPPED");
     
     // Plays the background song for this scene
-    this.handleMusic();
+    this.mainTrack = this.sound.add("warsaw_song");
+    this.handleMusic(false);
 
     // Making some things to be drawn on screen
     this.makeTimeCrystal();
@@ -248,21 +251,26 @@ export default class MainScene extends Phaser.Scene {
    * handleMusic, plays the song for this scene. It is meant to be background music sou it should'nt be to
    *              loud. A config is set up for this.
    * 
-   * Consumes: Nothing
+   * Consumes: shouldResume(boolean)
    * Produces: Nothing
    */
-  handleMusic(): void {
-    this.mainTrack = this.sound.add("warsaw_song");
-    let mainTrackConfig = {
-      mute: false,
-      volume: 1,
-      rate: 1,
-      detune: 0,
-      seek: 0,
-      loop: true,
-      delay: 0
-    };
-    this.mainTrack.play(mainTrackConfig);
+  async handleMusic(shouldResume: boolean) {
+    sleep(2000); // 2 seconds
+    if (!this.mainTrack.isPlaying) {
+      let mainTrackConfig = {
+        mute: false,
+        volume: 1,
+        rate: 1,
+        detune: 0,
+        seek: 0,
+        loop: true,
+        delay: 0
+      };
+      if (shouldResume)
+        this.mainTrack.resume();
+      else 
+        this.mainTrack.play(mainTrackConfig);
+   }
   }
 
 
@@ -414,7 +422,10 @@ export default class MainScene extends Phaser.Scene {
     this.chestButton.setX((this.scale.width/2) - (this.chestButton.width/2) + 350);
     this.chestButton.setY((this.scale.height/2) - (this.chestButton.height/2) + 400);
     this.chestButton.setInteractive();
-    this.chestButton.on("pointerdown", () => this.scene.switch("ChestScene"));
+    this.chestButton.on("pointerdown", () => {
+      this.mainTrack.pause(); // Pausing so it can resume later
+      this.scene.switch("ChestScene");
+    });
   }
 
 
@@ -553,10 +564,11 @@ export default class MainScene extends Phaser.Scene {
     this.chromeTurret.rotation*(180/Math.PI);
     for (let i = 0; i < this.spawnTimes.length; i++) {
       if (this.spawnTimes[i] == turretPlacement) {
-          let milliseconds: number = new Date().getMilliseconds();
+          let time: number = new Date().getTime(); // Returns milliseconds
           for (let i = 0; i < this.enemies.getChildren().length; i++) {
             let enemy = this.enemies.getChildren()[i];
-            if ((enemy.spawnPosition == turretPlacement) && milliseconds % 3 == 0) { // My attempt at staggering the projectile spawn rate
+            if ((enemy.spawnPosition == turretPlacement) && (time - this.timeOfDay > 500)) { // My attempt at staggering the projectile spawn rate
+              this.timeOfDay = new Date().getTime(); // Get new current time of day
               this.beamSound.play();
               let laserBeam = new LaserBeam(this);
               laserBeam.setRotation(this.chromeTurret.rotation-80.1);
@@ -595,5 +607,6 @@ export default class MainScene extends Phaser.Scene {
       }
       this.shootAtEnemy();
     }
+    this.handleMusic(true);
   }
 }
