@@ -5,6 +5,7 @@ import TimeGoblin from '../objects/timeGoblin';
 import SpeedGoblin from '../objects/speedGoblin';
 import ThePunisher from '../objects/thePunisher';
 import { GameObjects } from 'phaser';
+import LevelComplete from './levelComplete';
 
 function sleep (milliseconds) { // Making the program wait for the given time
   return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -53,6 +54,7 @@ export default class MainScene extends Phaser.Scene {
   private defenseInventory: Array<any> = [];
   private defensiveInventoryCoords: Array<any> = [];
   private isWaveDone: boolean = false;
+  private bulletDelay: number = new Date().getTime();
 
 
   /**
@@ -65,7 +67,7 @@ export default class MainScene extends Phaser.Scene {
     super({ key: 'MainScene' });
   }
 
-  
+
   /**
    * create, most of the code is moved to their own functions, that code is called in create to 
    *         setup this screen.
@@ -99,10 +101,10 @@ export default class MainScene extends Phaser.Scene {
 
     // Gets the times enemies will spawn, stores them in array
     this.prepWave(); // Takes a varying amount of time
-    console.log("PREPPED");
     
     // Plays the background song for this scene
-    this.handleMusic();
+    this.mainTrack = this.sound.add("warsaw_song");
+    this.handleMusic(false);
 
     // Making some things to be drawn on screen
     this.makeTimeCrystal();
@@ -202,13 +204,16 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * getHour, returns a random number between 1 and 12
+   * getPossibleHours, generates an array of four number each is randomly chosen between 1 and 12.
    * 
    * Consumes: Nothing
-   * Produces: A number
+   * Produces: randomHours(number array)
    */
-  gethour(): number {
-    return Math.floor(Math.random() * 12) + 1; // Gets random number between 1 and 12
+  getPossibleHours(): Array<number> {
+    let randomHours: Array<number> = [];
+    for (let i = 0; i < 4; i++)
+      randomHours.push(Math.floor(Math.random() * 12) + 1); // Gets random number between 1 and 12
+    return randomHours;
   }
 
   /**
@@ -248,21 +253,26 @@ export default class MainScene extends Phaser.Scene {
    * handleMusic, plays the song for this scene. It is meant to be background music sou it should'nt be to
    *              loud. A config is set up for this.
    * 
-   * Consumes: Nothing
+   * Consumes: shouldResume(boolean)
    * Produces: Nothing
    */
-  handleMusic(): void {
-    this.mainTrack = this.sound.add("warsaw_song");
-    let mainTrackConfig = {
-      mute: false,
-      volume: 1,
-      rate: 1,
-      detune: 0,
-      seek: 0,
-      loop: true,
-      delay: 0
-    };
-    this.mainTrack.play(mainTrackConfig);
+  async handleMusic(shouldResume: boolean) {
+    sleep(2000); // 2 seconds, makes it so update can't play the music when the scene switches
+    if (!this.mainTrack.isPlaying) {
+      let mainTrackConfig = {
+        mute: false,
+        volume: 1,
+        rate: 1,
+        detune: 0,
+        seek: 0,
+        loop: true,
+        delay: 0
+      };
+      if (shouldResume)
+        this.mainTrack.resume();
+      else 
+        this.mainTrack.play(mainTrackConfig);
+   }
   }
 
 
@@ -280,19 +290,21 @@ export default class MainScene extends Phaser.Scene {
   
   /**
    * prepWave, displays the times enemies will spawn from and returns those times as an array to be used 
-   *           in other parts of the program.
+   *           in other parts of the program. This method also pushes hours from an array of four random hours
+   *           into the spawn times array. Right now the most positions enemies can come from is 4, what is the
+   *           point of having the spawn anywhere, the player wouldn't lern anything. 
    * 
    * Consumes: Nothing
    * Produces: Nothing
    */
   prepWave(): void {
-    console.log(this.levelNumber)
     let levelWaves = this.levelInfo["level" + this.levelNumber.toString()];
     let numEnemies = levelWaves[this.waveNumber];
-    for (let i = 0; i < parseInt(numEnemies); i++) // Addwing the times that enemies will sapawn from to an array
-      this.spawnTimes.push(this.gethour());
-    // Display the times enemies will come from on screen
-    this.announceTime();
+    let randomHours: Array<number> = this.getPossibleHours();
+    
+    for (let i = 0; i < parseInt(numEnemies); i++)  // Addwing the times that enemies will sapawn from to an array
+      this.spawnTimes.push(randomHours[Math.floor(Math.random() * randomHours.length)]); // Choose one of the four random hours to push
+    this.announceTime(); // Display the times enemies will come from on screen
   } 
 
 
@@ -309,7 +321,7 @@ export default class MainScene extends Phaser.Scene {
     let levelWaves = this.levelInfo["level" + this.levelNumber.toString()];
     let numEnemies = levelWaves[this.waveNumber];
     for (let i = 0; i < parseInt(numEnemies); i++) { // Spawn the enemies, let the fun begin
-      await sleep(1000); // Wait between enemy spawns
+      await sleep(2000); // Milliseconds
       this.spawnEnemy(this.getEnemyCoords(this.spawnTimes[i])); // Converts the time to coordinates, spawns a Phaser sprite
       this.isWaveStarted = true; // Defend mode
     }
@@ -414,7 +426,10 @@ export default class MainScene extends Phaser.Scene {
     this.chestButton.setX((this.scale.width/2) - (this.chestButton.width/2) + 350);
     this.chestButton.setY((this.scale.height/2) - (this.chestButton.height/2) + 400);
     this.chestButton.setInteractive();
-    this.chestButton.on("pointerdown", () => this.scene.switch("ChestScene"));
+    this.chestButton.on("pointerdown", () => {
+      this.mainTrack.pause(); // Pausing so it can resume later
+      this.scene.switch("ChestScene");
+    });
   }
 
 
@@ -477,10 +492,11 @@ export default class MainScene extends Phaser.Scene {
    * Produces: An Object
    */
   spawnEnemy(coords: Array<number>): void {
-    let enemyNumber: number = Math.floor(Math.random() * this.numEnemies) +1; // Gets random number between 1 and numEnemies
+    let enemyNumber: number = Math.floor(Math.random() * this.numEnemies) + 1; // Gets random number between 1 and numEnemies
     let x: number = coords[0];
     let y: number = coords[1];
     let spawnPosition = coords[2];
+    console.log("SPAWNED");
     switch(enemyNumber) {
       case 1:
         let armorGoblin: ArmorGoblin = new ArmorGoblin(this, x, y, spawnPosition);
@@ -553,10 +569,11 @@ export default class MainScene extends Phaser.Scene {
     this.chromeTurret.rotation*(180/Math.PI);
     for (let i = 0; i < this.spawnTimes.length; i++) {
       if (this.spawnTimes[i] == turretPlacement) {
-          let milliseconds: number = new Date().getMilliseconds();
+          let time: number = new Date().getTime(); // Returns milliseconds
           for (let i = 0; i < this.enemies.getChildren().length; i++) {
             let enemy = this.enemies.getChildren()[i];
-            if ((enemy.spawnPosition == turretPlacement) && milliseconds % 3 == 0) { // My attempt at staggering the projectile spawn rate
+            if ((enemy.spawnPosition == turretPlacement) && (time - this.bulletDelay > 200)) { // My attempt at staggering the projectile spawn rate
+              this.bulletDelay = new Date().getTime(); // Get new current time of day
               this.beamSound.play();
               let laserBeam = new LaserBeam(this);
               laserBeam.setRotation(this.chromeTurret.rotation-80.1);
@@ -586,7 +603,6 @@ export default class MainScene extends Phaser.Scene {
       console.log("LENGTH: " + length.toString());
     }
     if (this.isWaveStarted) {
-      let currentHour: number = this.gethour();
       for(let i = 0; i < length; i++)
         this.moveEnemy(this.enemies.getChildren()[i]);
       if (length == 0 && this.isWaveDone) { // If all the enemies are gone, go back to prep mode
@@ -595,5 +611,6 @@ export default class MainScene extends Phaser.Scene {
       }
       this.shootAtEnemy();
     }
+    this.handleMusic(true);
   }
 }
