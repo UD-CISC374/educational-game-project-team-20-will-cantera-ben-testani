@@ -14,6 +14,7 @@ export default class ChestScene extends Phaser.Scene {
   hoursQuestion: Phaser.GameObjects.BitmapText;
   minutesQuestion: Phaser.GameObjects.BitmapText;
   response: Phaser.GameObjects.BitmapText;
+  powerupNum: number; //number to return to mainScene
   rewardGroup;
   submitButton;
   backButton;
@@ -165,24 +166,43 @@ export default class ChestScene extends Phaser.Scene {
     this.hidePowerup();
   }
 
+  /**
+   * hidePowerup, hides the powerup
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   hidePowerup(){
     for(let i = 0; i < this.rewardGroup.getChildren().length; i++){
       this.rewardGroup.getChildren()[i].setVisible(false);
     }
   }
 
+  /**
+   * showPowerup, shows the powerup the player won
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   showPowerup(){
-    for(let i = 0; i < this.rewardGroup.getChildren().length; i++){
-      this.rewardGroup.getChildren()[i].setVisible(true);
-    }
+    let x = Math.round(Math.floor(Math.random() * this.rewardGroup.getChildren().length));
+    this.rewardGroup.getChildren()[x].setVisible(true);
+    this.powerupNum = x;
   }
 
+  /**
+   * setDots, resets the dots locations
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   setDots(){
     this.hoursDot.setX(this.scale.width/4 + this.scale.width/2);
     this.hoursDot.setY(this.scale.width/4 + this.scale.width/2);
     this.minuetsDot.setX(this.scale.width/4);
     this.minuetsDot.setY(this.scale.height/4 + this.scale.height/2);
   }
+
   /**
    * showResponse, shows if the users response was correct or incorrect
    * 
