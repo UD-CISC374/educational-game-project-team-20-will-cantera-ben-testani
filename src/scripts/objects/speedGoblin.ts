@@ -10,6 +10,5 @@ export default class SpeedGoblin extends Phaser.GameObjects.Sprite {
         scene.add.existing(this);
 
         scene.physics.world.enableBody(this);
-        scene.turretProjectiles.add(this); 
     }
 }
