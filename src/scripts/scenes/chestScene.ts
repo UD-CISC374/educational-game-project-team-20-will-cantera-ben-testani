@@ -12,13 +12,13 @@ export default class ChestScene extends Phaser.Scene {
   mainLabel: Phaser.GameObjects.BitmapText;
   hoursQuestion: Phaser.GameObjects.BitmapText;
   minutesQuestion: Phaser.GameObjects.BitmapText;
+  response: Phaser.GameObjects.BitmapText;
   submitButton;
   backButton;
   hour;
   min;
-  isClosedChestShowing;
-  isClockShowing;
-  isOpenedChestShowing;
+  backGroup;
+  textGroup;
 
   /**
    * constructor, provides a reference to this scene
@@ -39,6 +39,9 @@ export default class ChestScene extends Phaser.Scene {
    */
   create() {
     this.exampleObject = new ExampleObject(this, 0, 0);
+    this.backGroup = this.add.group();
+    this.textGroup = this.add.group();
+    this.response = this.add.bitmapText(0,0,"pixelFont"," ", 75);
     this.closedChest=this.add.image(this.scale.width/2, this.scale.height/2, "closeChest");
     this.openedChest=this.add.image(this.scale.width/2, this.scale.height/2, "openChest");
     this.hideOpenedChest();
@@ -48,11 +51,12 @@ export default class ChestScene extends Phaser.Scene {
     this.hoursLabel=this.add.bitmapText(this.scale.width/4 + this.scale.width/2 - 45, this.scale.width/4 + this.scale.width/2 + 40, "pixelFont", "HOURS", 50);
     this.minLabel=this.add.bitmapText(this.scale.width/4 - 65, this.scale.height/4 + this.scale.height/2 + 40, "pixelFont", "MINUTES", 50);
     this.mainLabel=this.add.bitmapText(150, 150, "pixelFont", "TIME TO DISPLAY ON CLOCK: ", 75);
+    this.hoursQuestion = this.add.bitmapText(0,0,"pixelFont", " ", 75);
     this.hoursDot.setInteractive({draggable:true});
     this.minuetsDot.setInteractive({draggable:true});
-    this.isClockShowing = true;
-    this.isClosedChestShowing = true;
-    this.isOpenedChestShowing = false;
+    this.backGroup.add(this.closedChest);
+    this.textGroup.add(this.hoursQuestion);
+    
 
     this.questionTime();
     // http://labs.phaser.io/index.html?dir=input/dragging/&q=
@@ -70,7 +74,10 @@ export default class ChestScene extends Phaser.Scene {
     //this.backButton.setX(this.scale.width/2 - this.submitButton.width/2);
     //this.backButton.setY(this.scale.height/2 + 350);
     this.backButton.setInteractive();
-    this.backButton.on("pointerdown", () => this.scene.switch("MainScene"));
+    this.backButton.on("pointerdown", () => {
+      this.resetScene();
+      this.scene.switch("MainScene");
+    });
 
     this.submitButton = this.add.text(0, 0, "Submit", {fill: "red", font: "bold 80px Serif"});
     this.submitButton.setBackgroundColor("black");
@@ -93,13 +100,22 @@ export default class ChestScene extends Phaser.Scene {
       this.min=0;
     }
     if(this.min<10){
-      this.hoursQuestion=this.add.bitmapText(this.scale.width/2 - 60, 200, "pixelFont", this.hour+":0"+this.min, 75);
+      //this.hoursQuestion=this.add.bitmapText(this.scale.width/2 - 60, 200, "pixelFont", this.hour+":0"+this.min, 75);
+      this.hoursQuestion.setText(this.hour+":0"+this.min);
     }
     else{
-      this.hoursQuestion=this.add.bitmapText(this.scale.width/2 - 60, 200, "pixelFont", this.hour+":"+this.min, 75);
+      //this.hoursQuestion=this.add.bitmapText(this.scale.width/2 - 60, 200, "pixelFont", this.hour+":"+this.min, 75);
+      this.hoursQuestion.setText(this.hour+":"+this.min);
     }
     //console.log(hour +" " + min);
-    return;
+    //this.hideClosedChest()
+    // UPDATED TIME NOT SHOWING
+    this.textGroup.add(this.hoursQuestion);
+    this.hoursQuestion.setX(this.scale.width/2 - 60);
+    this.hoursQuestion.setY(200);
+    this.hoursQuestion.setTint(0x00FF06)
+    console.log("hour: " + this.hour + "x: " + this.hoursQuestion.x + "y: " + this.hoursQuestion.y);
+    console.log("min: " + this.min);
   }
 
   /**
@@ -109,6 +125,7 @@ export default class ChestScene extends Phaser.Scene {
    * Produces: Nothing
    */
   onClickCheck(){
+    this.hideResponse();
     let h = this.checkHour();
     let m = this.checkMin();
     //console.log(h + " " + m);
@@ -121,8 +138,59 @@ export default class ChestScene extends Phaser.Scene {
       this.showOpenedChest();
       this.hideText();
       this.hideSubmit();
+      this.showResponse(1);
     }
+    else this.showResponse(0);
+  }
 
+  resetScene(){
+    this.questionTime();
+    this.hideResponse();
+    this.showSubmit()
+    this.hideOpenedChest();
+    this.showClosedChest();
+    this.showDots();
+    this.showText();
+    this.showClock();
+    this.setDots();
+  }
+
+  setDots(){
+    this.hoursDot.setX(this.scale.width/4 + this.scale.width/2);
+    this.hoursDot.setY(this.scale.width/4 + this.scale.width/2);
+    this.minuetsDot.setX(this.scale.width/4);
+    this.minuetsDot.setY(this.scale.height/4 + this.scale.height/2);
+  }
+  /**
+   * showResponse, shows if the users response was correct or incorrect
+   * 
+   * Consumes: A number representing if the answer is right or wrong
+   * Produces: Nothing
+   */
+  showResponse(num: number){
+    if(num==1){
+      this.response = this.add.bitmapText(0, 0, "pixelFont", "CORRECT ", 75);
+      this.response.setX(this.scale.width/2 - this.response.width/2);
+      this.response.setY(10);
+      this.response.setTint(0x00FF06);
+    }
+    if(num==0){
+      this.response = this.add.bitmapText(0, 0, "pixelFont", "INCORRECT ", 75);
+      this.response.setX(this.scale.width/2 - this.response.width/2);
+      this.response.setY(10);
+      this.response.setTint(0xFF2D00);
+    }
+    this.response.setVisible(true);
+  }
+
+  /**
+   * hideResponse, hides if the users response was correct or incorrect
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  hideResponse(){
+    this.response.setVisible(false);
   }
 
   /**
@@ -230,7 +298,7 @@ export default class ChestScene extends Phaser.Scene {
     this.hoursLabel.setVisible(true);
     this.minLabel.setVisible(true);
     this.mainLabel.setVisible(true);
-    this.hoursQuestion.setVisible(false);
+    this.hoursQuestion.setVisible(true);
   }
 
   /**
@@ -338,16 +406,11 @@ export default class ChestScene extends Phaser.Scene {
   checkHour(): boolean{
     let h = false;
     switch(this.hour){
-      case 0:
-        if(this.hoursDot.x >= 475 && this.hoursDot.x <= 520 && this.hoursDot.y >= 340 && this.hoursDot.y <= 380){
-          h = true;
-        }
-        break;
-      case 12:
-        if(this.hoursDot.x >= 475 && this.hoursDot.x <= 520 && this.hoursDot.y >= 340 && this.hoursDot.y <= 380){
-          h = true;
-        }
-        break;
+      // case 0:
+      //   if(this.hoursDot.x >= 475 && this.hoursDot.x <= 520 && this.hoursDot.y >= 340 && this.hoursDot.y <= 380){
+      //     h = true;
+      //   }
+      //   break;
       case 1:
         if(this.hoursDot.x >= 555 && this.hoursDot.x <= 596 && this.hoursDot.y >= 355 && this.hoursDot.y <= 398){
           h = true;
@@ -400,6 +463,11 @@ export default class ChestScene extends Phaser.Scene {
         break;
       case 11:
         if(this.hoursDot.x >= 418 && this.hoursDot.x <= 445 && this.hoursDot.y >= 355 && this.hoursDot.y <= 410){
+          h = true;
+        }
+        break;
+      case 12:
+        if(this.hoursDot.x >= 475 && this.hoursDot.x <= 520 && this.hoursDot.y >= 340 && this.hoursDot.y <= 380){
           h = true;
         }
         break;
