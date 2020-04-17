@@ -54,6 +54,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image("clock", "assets/images/clock.png");
     this.load.image("hoursDot", "assets/images/hoursDot.png");
     this.load.image("minutesDot", "assets/images/minutesDot.png");
+    this.load.image("bombPowerup", "assets/images/bombPowerup.png")
 
     // Fonts
     this.load.bitmapFont("pixelFont", "assets/font/font.png", "assets/font/font.xml");

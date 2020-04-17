@@ -7,12 +7,14 @@ export default class ChestScene extends Phaser.Scene {
   clock: Phaser.GameObjects.Image;
   hoursDot: Phaser.GameObjects.Image;
   minuetsDot: Phaser.GameObjects.Image;
+  bombPowerup: Phaser.GameObjects.Image;
   hoursLabel: Phaser.GameObjects.BitmapText;
   minLabel: Phaser.GameObjects.BitmapText;
   mainLabel: Phaser.GameObjects.BitmapText;
   hoursQuestion: Phaser.GameObjects.BitmapText;
   minutesQuestion: Phaser.GameObjects.BitmapText;
   response: Phaser.GameObjects.BitmapText;
+  rewardGroup;
   submitButton;
   backButton;
   hour;
@@ -41,10 +43,15 @@ export default class ChestScene extends Phaser.Scene {
     this.exampleObject = new ExampleObject(this, 0, 0);
     this.backGroup = this.add.group();
     this.textGroup = this.add.group();
+    this.rewardGroup = this.physics.add.group({
+      immovable: false,
+      allowGravity: false
+    });
     this.response = this.add.bitmapText(0,0,"pixelFont"," ", 75);
     this.closedChest=this.add.image(this.scale.width/2, this.scale.height/2, "closeChest");
     this.openedChest=this.add.image(this.scale.width/2, this.scale.height/2, "openChest");
     this.hideOpenedChest();
+    this.bombPowerup=this.add.image(this.scale.width/2, this.scale.height/2, "bombPowerup");
     this.clock=this.add.image(this.scale.width/2, this.scale.height/2, "clock");
     this.hoursDot=this.add.image(this.scale.width/4 + this.scale.width/2, this.scale.width/4 + this.scale.width/2, "hoursDot");
     this.minuetsDot=this.add.image(this.scale.width/4, this.scale.height/4 + this.scale.height/2, "minutesDot");
@@ -56,7 +63,8 @@ export default class ChestScene extends Phaser.Scene {
     this.minuetsDot.setInteractive({draggable:true});
     this.backGroup.add(this.closedChest);
     this.textGroup.add(this.hoursQuestion);
-    
+    this.rewardGroup.add(this.bombPowerup);
+    this.hidePowerup();
 
     this.questionTime();
     // http://labs.phaser.io/index.html?dir=input/dragging/&q=
@@ -113,7 +121,7 @@ export default class ChestScene extends Phaser.Scene {
     this.textGroup.add(this.hoursQuestion);
     this.hoursQuestion.setX(this.scale.width/2 - 60);
     this.hoursQuestion.setY(200);
-    this.hoursQuestion.setTint(0x00FF06)
+    //this.hoursQuestion.setTint(0x00FF06)
     console.log("hour: " + this.hour + "x: " + this.hoursQuestion.x + "y: " + this.hoursQuestion.y);
     console.log("min: " + this.min);
   }
@@ -139,6 +147,7 @@ export default class ChestScene extends Phaser.Scene {
       this.hideText();
       this.hideSubmit();
       this.showResponse(1);
+      this.showPowerup();
     }
     else this.showResponse(0);
   }
@@ -153,6 +162,19 @@ export default class ChestScene extends Phaser.Scene {
     this.showText();
     this.showClock();
     this.setDots();
+    this.hidePowerup();
+  }
+
+  hidePowerup(){
+    for(let i = 0; i < this.rewardGroup.getChildren().length; i++){
+      this.rewardGroup.getChildren()[i].setVisible(false);
+    }
+  }
+
+  showPowerup(){
+    for(let i = 0; i < this.rewardGroup.getChildren().length; i++){
+      this.rewardGroup.getChildren()[i].setVisible(true);
+    }
   }
 
   setDots(){
