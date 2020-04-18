@@ -12,6 +12,15 @@ https://www.youtube.com/watch?v=_0PQicdTfO8
 Earthbound: 53 - Sanctuary Guardian
 https://www.youtube.com/watch?v=TKvjEQXKeec&t=61s
 
+Doom 2016 - Intro Music by Mick Gordon
+https://www.youtube.com/watch?v=VZ4fJBFM4FY
+
+Doom Eternal - Rip and Tear, Until is it Done by Mick Gordon
+https://www.youtube.com/watch?v=5KysfO9l87g
+
+Peace Reigns In The Land - by Shiru Sagisu
+https://www.youtube.com/watch?v=RGUOG3lnwVg
+
 
 Images:
 Turret Gun image
