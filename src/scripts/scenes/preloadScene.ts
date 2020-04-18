@@ -18,7 +18,10 @@ export default class PreloadScene extends Phaser.Scene {
 
     // Audio
     this.load.audio("warsaw_song", "assets/audio/warsaw.mp3");
+    this.load.audio("peace_reigns", "assets/audio/PeaceReigns.mp3");
     this.load.audio("laser_sound", "assets/audio/beam.mp3");
+    this.load.audio("level_one_victory", "assets/audio/level1victory.mp3");
+    this.load.audio("level_two_victory", "assets/audio/level2victory.mp3");
 
     // Images 
 
@@ -64,6 +67,7 @@ export default class PreloadScene extends Phaser.Scene {
     // For lose scene
     this.load.audio("lose_song", "assets/audio/endSong.mp3");
     
+  
 //-----------------------------------------------------------------------------------------------------------
 
   }
