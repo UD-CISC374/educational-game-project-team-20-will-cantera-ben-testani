@@ -38,21 +38,21 @@ export default class MainScene extends Phaser.Scene {
   private healthPercentage: number = 225; // Width in pixels of the health bar
   private levelInfo: Object = { // Three waves per level, key is the number of enemies per wave
     "level1": {
-      "wave1": 1
-      //"wave2": 3,
-      //"wave3": 5,
+      "wave1": 1,
+      "wave2": 3,
+      "wave3": 5
       //"wave4": 12
     }, 
     "level2": {
-      "wave1": 1
-      //"wave2": 18,
-      //"wave3": 30,
+      "wave1": 1,
+      "wave2": 18,
+      "wave3": 30
       //"wave4": 45
     },
     "level3": {
-      "wave1": 1
-      //"wave2": 10,
-      //"wave3": 10,
+      "wave1": 1,
+      "wave2": 10,
+      "wave3": 40
       //"wave4": 10
     }
   };
@@ -320,7 +320,6 @@ export default class MainScene extends Phaser.Scene {
         song.play(trackConfig);
       } 
     }
-    
     if (action == 3) {
       song.pause();
     }
@@ -372,7 +371,7 @@ export default class MainScene extends Phaser.Scene {
     let levelWaves = this.levelInfo["level" + this.levelNumber.toString()];
     let numEnemies = levelWaves[this.waveNumber];
     for (let i = 0; i < parseInt(numEnemies); i++) { // Spawn the enemies, let the fun begin
-      await sleep(2000); // Milliseconds
+      await sleep(200); // Milliseconds
       this.spawnEnemy(this.getEnemyCoords(this.spawnTimes[i])); // Converts the time to coordinates, spawns a Phaser sprite
       this.isWaveStarted = true; // Defend mode
     }
