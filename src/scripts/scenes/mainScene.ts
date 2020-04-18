@@ -29,6 +29,8 @@ export default class MainScene extends Phaser.Scene {
   public turretProjectiles: GameObjects.Group;
   private beamSound: Phaser.Sound.BaseSound;
   private levelTwoTrack: Phaser.Sound.BaseSound;
+  private levelThreeTrack: Phaser.Sound.BaseSound;
+
 
 
   // Variables with set values
@@ -113,6 +115,7 @@ export default class MainScene extends Phaser.Scene {
     // Load all the main songs for each level
     this.levelOneTrack = this.sound.add("warsaw_song");
     this.levelTwoTrack = this.sound.add("peace_reigns");
+    this.levelThreeTrack = this.sound.add("shadow");
 
     // Plays the background song for this scene
     this.levelOneTrack.play(); // 2 for playing the song
@@ -276,7 +279,10 @@ export default class MainScene extends Phaser.Scene {
       case 2: 
         song = this.levelTwoTrack;
         break;
+      case 3:
+        song = this.levelThreeTrack;
       default:
+        console.log("No Song");
         break;
     }
     return song;
