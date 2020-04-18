@@ -18,7 +18,7 @@ export default class MainScene extends Phaser.Scene {
   private exampleObject: ExampleObject;
   private timeCrystal: Phaser.GameObjects.Sprite;
   private chestButton: Phaser.GameObjects.Text;
-  private mainTrack: Phaser.Sound.BaseSound;
+  private levelOneTrack: Phaser.Sound.BaseSound;
   private cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
   private spacebar: Phaser.Input.Keyboard.Key;
   private enemies: any;
@@ -28,6 +28,7 @@ export default class MainScene extends Phaser.Scene {
   public chromeTurret: Phaser.Physics.Arcade.Sprite;
   public turretProjectiles: GameObjects.Group;
   private beamSound: Phaser.Sound.BaseSound;
+  private levelTwoTrack: Phaser.Sound.BaseSound;
 
 
   // Variables with set values
@@ -37,14 +38,20 @@ export default class MainScene extends Phaser.Scene {
     "level1": {
       "wave1": 1
       //"wave2": 3,
-     //"wave3": 5,
+      //"wave3": 5,
       //"wave4": 12
     }, 
     "level2": {
-      "wave1": 10,
-      "wave2": 18,
-      "wave3": 30,
-      "wave4": 45
+      "wave1": 1
+      //"wave2": 18,
+      //"wave3": 30,
+      //"wave4": 45
+    },
+    "level3": {
+      "wave1": 1
+      //"wave2": 10,
+      //"wave3": 10,
+      //"wave4": 10
     }
   };
   private waveNumber: string = "wave1"; // Keep track of what wave the player is on 
@@ -55,6 +62,7 @@ export default class MainScene extends Phaser.Scene {
   private defensiveInventoryCoords: Array<any> = [];
   private isWaveDone: boolean = false;
   private bulletDelay: number = new Date().getTime();
+  private hasLevelChanged: boolean = false;
 
 
   /**
@@ -102,9 +110,12 @@ export default class MainScene extends Phaser.Scene {
     // Gets the times enemies will spawn, stores them in array
     this.prepWave(); // Takes a varying amount of time
     
+    // Load all the main songs for each level
+    this.levelOneTrack = this.sound.add("warsaw_song");
+    this.levelTwoTrack = this.sound.add("peace_reigns");
+
     // Plays the background song for this scene
-    this.mainTrack = this.sound.add("warsaw_song");
-    this.handleMusic(false);
+    this.levelOneTrack.play(); // 2 for playing the song
 
     // Making some things to be drawn on screen
     this.makeTimeCrystal();
@@ -193,7 +204,7 @@ export default class MainScene extends Phaser.Scene {
    */
   hurtCrystal(crystal, enemy): void {
     if (this.healthPercentage - 45 < 0) {
-      this.mainTrack.stop();
+      this.levelOneTrack.stop();
       this.scene.switch("LoseScene");
     } else {
       this.healthPercentage -= 45;
@@ -250,29 +261,63 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * handleMusic, plays the song for this scene. It is meant to be background music sou it should'nt be to
-   *              loud. A config is set up for this.
+   * getCurrentSong, gets the song currently playing in the game.
    * 
-   * Consumes: shouldResume(boolean)
+   * Consumes: Nothing
+   * Produces: song(Phaser Sound)
+   */
+  getCurrentSong(): Phaser.Sound.BaseSound {
+    let song: Phaser.Sound.BaseSound = this.levelOneTrack;
+
+    switch(this.levelNumber) {
+      case 1:
+        song = this.levelOneTrack;
+        break;
+      case 2: 
+        song = this.levelTwoTrack;
+        break;
+      default:
+        break;
+    }
+    return song;
+  }
+
+
+  /**
+   * handleMusic, plays the song for this scene. It is meant to be background music sou it should'nt be to
+   *              loud. A config is set up for this. Handles whether the song should be stopped, started, or resumed.
+   * 
+   *              action -> 1: resume the song
+   *              action -> 2: play the song
+   *              action -> 3: stop the song
+   * 
+   * Consumes: action(number)
    * Produces: Nothing
    */
-  async handleMusic(shouldResume: boolean) {
-    sleep(2000); // 2 seconds, makes it so update can't play the music when the scene switches
-    if (!this.mainTrack.isPlaying) {
-      let mainTrackConfig = {
-        mute: false,
-        volume: 1,
-        rate: 1,
-        detune: 0,
-        seek: 0,
-        loop: true,
-        delay: 0
-      };
-      if (shouldResume)
-        this.mainTrack.resume();
-      else 
-        this.mainTrack.play(mainTrackConfig);
-   }
+  handleMusic(action: number) {
+    console.log("music");
+    let song: Phaser.Sound.BaseSound = this.getCurrentSong();
+    let trackConfig = {
+      mute: false,
+      volume: 1,
+      rate: 1,
+      detune: 0,
+      seek: 0,
+      loop: true,
+      delay: 0
+    };
+    if (!song.isPlaying) {
+      if (action == 1) {
+        song.resume();
+      } 
+      if (action == 2) {
+        song.play(trackConfig);
+      } 
+    }
+    
+    if (action == 3) {
+      song.pause();
+    }
   }
 
 
@@ -301,7 +346,7 @@ export default class MainScene extends Phaser.Scene {
     let levelWaves = this.levelInfo["level" + this.levelNumber.toString()];
     let numEnemies = levelWaves[this.waveNumber];
     let randomHours: Array<number> = this.getPossibleHours();
-    
+
     for (let i = 0; i < parseInt(numEnemies); i++)  // Addwing the times that enemies will sapawn from to an array
       this.spawnTimes.push(randomHours[Math.floor(Math.random() * randomHours.length)]); // Choose one of the four random hours to push
     this.announceTime(); // Display the times enemies will come from on screen
@@ -339,9 +384,16 @@ export default class MainScene extends Phaser.Scene {
     let waveIndex: number = parseInt(this.waveNumber[this.waveNumber.length-1]); // Get last character as number
     waveIndex++; // Go to next wave
     if (waveIndex > Object.keys(this.levelInfo["level" + this.levelNumber.toString()]).length) {// Go to level complete scene if the end of the final wave is reached.
+      if (this.levelNumber+1 > 3) {
+        this.scene.switch("VictoryScene"); // End of the game
+        return;
+      }
       this.endWaveHelper(waveIndex);
       this.waveNumber = "wave1"; // Go to next level
+      this.handleMusic(3); // 3 for stopping the song
+      this.hasLevelChanged = true;
       this.levelNumber++; // Go to next level
+      this.scene.setVisible(false);
       this.scene.switch("LevelComplete");
     } else {
       this.endWaveHelper(waveIndex); // Just prepares for the next wave
@@ -427,7 +479,8 @@ export default class MainScene extends Phaser.Scene {
     this.chestButton.setY((this.scale.height/2) - (this.chestButton.height/2) + 400);
     this.chestButton.setInteractive();
     this.chestButton.on("pointerdown", () => {
-      this.mainTrack.pause(); // Pausing so it can resume later
+      let song: Phaser.Sound.BaseSound = this.getCurrentSong();
+      song.pause();
       this.scene.switch("ChestScene");
     });
   }
@@ -496,7 +549,6 @@ export default class MainScene extends Phaser.Scene {
     let x: number = coords[0];
     let y: number = coords[1];
     let spawnPosition = coords[2];
-    console.log("SPAWNED");
     switch(enemyNumber) {
       case 1:
         let armorGoblin: ArmorGoblin = new ArmorGoblin(this, x, y, spawnPosition);
@@ -611,6 +663,9 @@ export default class MainScene extends Phaser.Scene {
       }
       this.shootAtEnemy();
     }
-    this.handleMusic(true);
+    if (this.scene.isVisible("MainScene")) {
+      this.handleMusic(1); // Unpause music
+      this.handleMusic(2); // Start the next song
+    }
   }
 }
