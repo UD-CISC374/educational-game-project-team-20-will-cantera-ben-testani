@@ -225,6 +225,9 @@ export default class MainScene extends Phaser.Scene {
    */
   resetGameProtocol(): void {
     this.resetGame = true;
+    this.chromeTurret.x = this.defensiveInventoryCoords[0][0];
+    this.chromeTurret.y = this.defensiveInventoryCoords[0][1];
+    this.chromeTurret.setRotation(0);
     let children = this.enemies.getChildren();
     let length: number = this.enemies.getChildren().length
     for (let i = 0; i < length; i++) {
@@ -441,7 +444,15 @@ export default class MainScene extends Phaser.Scene {
     let levelWaves = this.levelInfo["level" + LevelComplete.levelNumber.toString()];
     let numEnemies = levelWaves[this.waveNumber];
     for (let i = 0; i < parseInt(numEnemies); i++) { // Spawn the enemies, let the fun begin
+      if (this.resetGame) {
+        this.isWaveDone = true;
+        return; // Stop spawing enemies if the game ends
+      }
       await sleep(200); // Milliseconds
+      if (this.resetGame) { // Using async causes weird problems, this is the only way I could fix it
+        this.isWaveDone = true;
+        return; // Stop spawing enemies if the game ends
+      }
       this.spawnEnemy(this.getEnemyCoords(this.spawnTimes[i])); // Converts the time to coordinates, spawns a Phaser sprite
       this.isWaveStarted = true; // Defend mode
     }
