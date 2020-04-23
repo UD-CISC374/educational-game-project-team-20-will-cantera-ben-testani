@@ -5,7 +5,6 @@ import TimeGoblin from '../objects/timeGoblin';
 import SpeedGoblin from '../objects/speedGoblin';
 import ThePunisher from '../objects/thePunisher';
 import { GameObjects } from 'phaser';
-import LevelComplete from './levelComplete';
 
 function sleep (milliseconds) { // Making the program wait for the given time
   return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -13,20 +12,19 @@ function sleep (milliseconds) { // Making the program wait for the given time
 export default class MainScene extends Phaser.Scene {
   // Constants
   private readonly numEnemies: number = 4;
+  private readonly MAXHEALTH: number = 225;
   
   // Phaser objects
-  private exampleObject: ExampleObject;
+  public chromeTurret: Phaser.Physics.Arcade.Sprite;
+  public turretProjectiles: GameObjects.Group;
   private timeCrystal: Phaser.GameObjects.Sprite;
   private chestButton: Phaser.GameObjects.Text;
   private levelOneTrack: Phaser.Sound.BaseSound;
-  private cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
   private spacebar: Phaser.Input.Keyboard.Key;
   private enemies: any;
   private waveStartButton: GameObjects.Text;
   private healthBar: GameObjects.Image;
   private enemySpawnText: GameObjects.Text;
-  public chromeTurret: Phaser.Physics.Arcade.Sprite;
-  public turretProjectiles: GameObjects.Group;
   private beamSound: Phaser.Sound.BaseSound;
   private levelTwoTrack: Phaser.Sound.BaseSound;
   private levelThreeTrack: Phaser.Sound.BaseSound;
@@ -35,7 +33,7 @@ export default class MainScene extends Phaser.Scene {
 
   // Variables with set values
   private levelNumber: number = 1;
-  private healthPercentage: number = 225; // Width in pixels of the health bar
+  private health: number = this.MAXHEALTH; // Width in pixels of the health bar
   private levelInfo: Object = { // Three waves per level, key is the number of enemies per wave
     "level1": {
       "wave1": 1,
@@ -64,7 +62,9 @@ export default class MainScene extends Phaser.Scene {
   private defensiveInventoryCoords: Array<any> = [];
   private isWaveDone: boolean = false;
   private bulletDelay: number = new Date().getTime();
-  private hasLevelChanged: boolean = false;
+  private tutorialTextArray: Array<GameObjects.Text> = [];
+  private tutorialMessageNumber: number = 0;
+  private resetGame: boolean = false;
 
 
   /**
@@ -89,6 +89,7 @@ export default class MainScene extends Phaser.Scene {
     // Analog clock in the background
     this.add.image(this.scale.width/2, this.scale.height/2, "main_clock");
 
+    // Projectile Sounds
     this.beamSound = this.sound.add("laser_sound");
 
     // Draw the players defensive strucutre inventory on screen
@@ -206,14 +207,36 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   hurtCrystal(crystal, enemy): void {
-    if (this.healthPercentage - 45 < 0) {
-      this.levelOneTrack.stop();
-      this.scene.switch("LoseScene");
+    if (this.health - 45 < 0) {
+      this.resetGameProtocol(); // Reset the game to level 1 so it is ready if the player hitrs play again in the lose scene
     } else {
-      this.healthPercentage -= 45;
-      this.healthBar.setCrop(0, 0, this.healthPercentage, 97); // Height in pixels of the health bar is 97
+      this.health -= 45;
+      this.healthBar.setCrop(0, 0, this.health, 97); // Height in pixels of the health bar is 97
       enemy.destroy();
     }
+  }
+
+
+  /**
+   * resetGameProtocol, resets the game if the crystal health goes below 0. 
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  resetGameProtocol(): void {
+    this.resetGame = true;
+    let children = this.enemies.getChildren();
+    let length: number = this.enemies.getChildren().length
+    for (let i = 0; i < length; i++) {
+      children[0].destroy(); // As children are killed, they are popped off the group, must keep killing children at index 0
+    }
+    this.waveNumber = "wave1";
+    this.enemySpawnText.destroy(); // Reset the text for new game
+    this.health = this.MAXHEALTH;
+    this.getCurrentSong().stop(); // Stop song from playing in lose scene
+    this.levelNumber = 1; // Back to level 1
+    this.scene.setVisible(false); // For audio handling
+    this.scene.switch("LoseScene"); // Use start to reset main scene
   }
 
 
@@ -229,6 +252,7 @@ export default class MainScene extends Phaser.Scene {
       randomHours.push(Math.floor(Math.random() * 12) + 1); // Gets random number between 1 and 12
     return randomHours;
   }
+
 
   /**
    * announceTime, displays a warning onscreen telling the player which time the enemies will come from.
@@ -301,7 +325,6 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   handleMusic(action: number) {
-    console.log("music");
     let song: Phaser.Sound.BaseSound = this.getCurrentSong();
     let trackConfig = {
       mute: false,
@@ -337,17 +360,62 @@ export default class MainScene extends Phaser.Scene {
     this.timeCrystal.play("time_crystal_anim");
   }
 
+
+  /**
+   * makeText, makes interactive text onscreen with the specified text and x, y values. The text is destroyed when clicked.
+   *           This method appends the text to the tutorialTextArray class attribute.
+   * 
+   * Consumes: text(String), x(number), y(number)
+   * Produces: Nothing
+   */
+  makeText(text: string, x: number, y: number) {
+    let textDisplay = this.add.text(0, 0, text, {fill: "red", font: "bold 24px Serif"});
+    textDisplay.setBackgroundColor("black");
+    textDisplay.setX((this.scale.width/2) - (textDisplay.width/2) + x);
+    textDisplay.setY((this.scale.height/2) - (textDisplay.height/2) + y);
+    textDisplay.setInteractive();
+    textDisplay.on("pointerdown", () => {
+      textDisplay.destroy();
+      this.tutorialTextArray.pop();
+    });
+    this.tutorialTextArray.push(textDisplay);
+  }
+
+  /**
+   * runTutorial, displays some text boxes for the player tro see a tthe start of the game. They are displayed one
+   *              afte the other after being destroyed by the  player by a mouse click
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  runTutorial(messageNumber: number): void {
+    let turretText: string = "These are your defenses,\ndrag them to the correct\ntimes up top to\ndefend your crystal!\nCLICK TO DELETE";
+    let startWaveText: string = "This is the start wave\nbutton, click it when you\n have set up your defenses\nto start defending."
+    let stringList: Array<string> = [turretText, startWaveText];
+    if (messageNumber > stringList.length-1)
+      return;
+    switch(messageNumber) {
+      case 0: // Turret Text
+        this.makeText(stringList[messageNumber], -350, 200); // Display it above the turrets
+        break;
+      case 1: // Start Button Text
+        this.makeText(stringList[messageNumber], -250, -250); // Display it above the turrets
+        break;
+    }
+  }
   
+
   /**
    * prepWave, displays the times enemies will spawn from and returns those times as an array to be used 
    *           in other parts of the program. This method also pushes hours from an array of four random hours
    *           into the spawn times array. Right now the most positions enemies can come from is 4, what is the
-   *           point of having the spawn anywhere, the player wouldn't lern anything. 
+   *           point of having the spawn anywhere, the player wouldn't learn anything. 
    * 
    * Consumes: Nothing
    * Produces: Nothing
    */
   prepWave(): void {
+    this.resetGame = false;
     let levelWaves = this.levelInfo["level" + this.levelNumber.toString()];
     let numEnemies = levelWaves[this.waveNumber];
     let randomHours: Array<number> = this.getPossibleHours();
@@ -390,13 +458,14 @@ export default class MainScene extends Phaser.Scene {
     waveIndex++; // Go to next wave
     if (waveIndex > Object.keys(this.levelInfo["level" + this.levelNumber.toString()]).length) {// Go to level complete scene if the end of the final wave is reached.
       if (this.levelNumber+1 > 3) {
+        this.scene.setVisible(false);
+        this.getCurrentSong().stop();
         this.scene.switch("VictoryScene"); // End of the game
         return;
       }
       this.endWaveHelper(waveIndex);
       this.waveNumber = "wave1"; // Go to next level
       this.handleMusic(3); // 3 for stopping the song
-      this.hasLevelChanged = true;
       this.levelNumber++; // Go to next level
       this.scene.setVisible(false);
       this.scene.switch("LevelComplete");
@@ -417,11 +486,13 @@ export default class MainScene extends Phaser.Scene {
     for (let i = 0; i < this.turretProjectiles.getChildren().length; i++)
       this.turretProjectiles.getChildren()[i].destroy();
     this.setVisibleHandler(); // Bring back invisible objects
-    this.spawnTimes.splice(0, this.spawnTimes.length); // Reset the spawn times for the next wave
-    this.waveNumber = this.waveNumber.substr(0, this.waveNumber.length-1); // Delete last character
-    this.waveNumber += waveIndex; // Concatenate
     this.isWaveStarted = false; // Wave over, Prep mode
     this.isWaveDone = false;
+    this.spawnTimes.splice(0, this.spawnTimes.length); // Reset the spawn times for the next wave
+    if (!this.resetGame) {
+      this.waveNumber = this.waveNumber.substr(0, this.waveNumber.length-1); // Delete last character
+      this.waveNumber += waveIndex; // Concatenate    
+    }  
   }
 
   
@@ -650,7 +721,7 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   moveEnemy(enemy): void {
-    this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2);
+    this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2); // Add 4rth paramter for speed
   }
 
 
@@ -671,6 +742,10 @@ export default class MainScene extends Phaser.Scene {
     if (this.scene.isVisible("MainScene")) {
       this.handleMusic(1); // Unpause music
       this.handleMusic(2); // Start the next song
+    }
+    if (!this.tutorialTextArray.length) {
+      this.runTutorial(this.tutorialMessageNumber);
+      this.tutorialMessageNumber++;
     }
   }
 }

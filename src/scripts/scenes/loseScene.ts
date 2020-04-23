@@ -16,6 +16,14 @@ export default class LoseScene extends Phaser.Scene {
             text.setX((this.scale.width/2)-(text.width/2));
             text.setY((this.scale.height/2)-(text.height/2));
 
+        // Button for restartng the game after a loss
+        let resetButton = this.add.text(0, 0, "Try Again?", {fill: "red", font: "bold 80px Serif"});
+        resetButton.setBackgroundColor("black");
+        resetButton.setX(this.scale.width/2 - resetButton.width/2);
+        resetButton.setY(this.scale.height/2 + 300); // Put the text towards the top 
+        resetButton.setInteractive();
+        resetButton.on("pointerdown", () => this.onClick());
+
         this.mainTrack = this.sound.add("lose_song");
         let mainTrackConfig = {
             mute: false,
@@ -27,5 +35,17 @@ export default class LoseScene extends Phaser.Scene {
             delay: 0
         };
         this.mainTrack.play(mainTrackConfig);
+    }
+
+
+    /**
+     * onClick, switches back to the main scene, but restarts it to reset the game state.
+     * 
+     * Consumes: Nothing
+     * Produces: Nothing
+     */
+    onClick(): void {
+        this.mainTrack.stop();
+        this.scene.switch("MainScene"); // The start method resets the main scene as if you were just starting the game for the first time.
     }
 }
