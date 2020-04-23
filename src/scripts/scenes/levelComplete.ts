@@ -1,8 +1,6 @@
-import MainScene from "./mainScene";
-import ThePunisher from "../objects/thePunisher";
-
 export default class LevelComplete extends Phaser.Scene {
-    private levelCount: number = 0;
+    public static levelNumber: number = 1; // Global
+    private levelCount: number = LevelComplete.levelNumber;
     private levelOneVictoryMusic: Phaser.Sound.BaseSound;
     private levelTwoVictoryMusic: Phaser.Sound.BaseSound;
     levelCompleteText: Phaser.GameObjects.Text;
@@ -81,13 +79,14 @@ export default class LevelComplete extends Phaser.Scene {
                 this.levelTwoVictoryMusic.stop();
           }
         this.shouldRun = true;
+        LevelComplete.levelNumber++; // This should be the only spot this variable is ever incremented
         this.scene.switch("MainScene");
     }
 
     update(): void {
         if (this.shouldRun) {
             this.shouldRun = false;
-            this.levelCount++;
+            this.levelCount = LevelComplete.levelNumber;
             this.drawText();
             this.handleMusic();
         }

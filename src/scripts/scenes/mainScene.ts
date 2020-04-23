@@ -1,10 +1,11 @@
-import ExampleObject from '../objects/exampleObject';
 import LaserBeam from '../objects/laserBeam';
 import ArmorGoblin from '../objects/armorGoblin';
 import TimeGoblin from '../objects/timeGoblin';
 import SpeedGoblin from '../objects/speedGoblin';
 import ThePunisher from '../objects/thePunisher';
 import { GameObjects } from 'phaser';
+import LevelComplete from './levelComplete';
+
 
 function sleep (milliseconds) { // Making the program wait for the given time
   return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -32,7 +33,6 @@ export default class MainScene extends Phaser.Scene {
 
 
   // Variables with set values
-  private levelNumber: number = 1;
   private health: number = this.MAXHEALTH; // Width in pixels of the health bar
   private levelInfo: Object = { // Three waves per level, key is the number of enemies per wave
     "level1": {
@@ -233,8 +233,10 @@ export default class MainScene extends Phaser.Scene {
     this.waveNumber = "wave1";
     this.enemySpawnText.destroy(); // Reset the text for new game
     this.health = this.MAXHEALTH;
+    this.healthBar.setCrop(0, 0, this.health, 97);
     this.getCurrentSong().stop(); // Stop song from playing in lose scene
-    this.levelNumber = 1; // Back to level 1
+    LevelComplete.levelNumber = 1; // Back to level 1
+
     this.scene.setVisible(false); // For audio handling
     this.scene.switch("LoseScene"); // Use start to reset main scene
   }
@@ -296,7 +298,7 @@ export default class MainScene extends Phaser.Scene {
   getCurrentSong(): Phaser.Sound.BaseSound {
     let song: Phaser.Sound.BaseSound = this.levelOneTrack;
 
-    switch(this.levelNumber) {
+    switch(LevelComplete.levelNumber) {
       case 1:
         song = this.levelOneTrack;
         break;
@@ -416,7 +418,7 @@ export default class MainScene extends Phaser.Scene {
    */
   prepWave(): void {
     this.resetGame = false;
-    let levelWaves = this.levelInfo["level" + this.levelNumber.toString()];
+    let levelWaves = this.levelInfo["level" + LevelComplete.levelNumber.toString()];
     let numEnemies = levelWaves[this.waveNumber];
     let randomHours: Array<number> = this.getPossibleHours();
 
@@ -436,7 +438,7 @@ export default class MainScene extends Phaser.Scene {
   async startWave() {
     this.enemySpawnText.destroy();
     this.setInvisibleHandler(); // Clears things off the screen 
-    let levelWaves = this.levelInfo["level" + this.levelNumber.toString()];
+    let levelWaves = this.levelInfo["level" + LevelComplete.levelNumber.toString()];
     let numEnemies = levelWaves[this.waveNumber];
     for (let i = 0; i < parseInt(numEnemies); i++) { // Spawn the enemies, let the fun begin
       await sleep(200); // Milliseconds
@@ -456,8 +458,8 @@ export default class MainScene extends Phaser.Scene {
   endWave(): void {
     let waveIndex: number = parseInt(this.waveNumber[this.waveNumber.length-1]); // Get last character as number
     waveIndex++; // Go to next wave
-    if (waveIndex > Object.keys(this.levelInfo["level" + this.levelNumber.toString()]).length) {// Go to level complete scene if the end of the final wave is reached.
-      if (this.levelNumber+1 > 3) {
+    if (waveIndex > Object.keys(this.levelInfo["level" + LevelComplete.levelNumber.toString()]).length) {// Go to level complete scene if the end of the final wave is reached.
+      if (LevelComplete.levelNumber+1 > 3) {
         this.scene.setVisible(false);
         this.getCurrentSong().stop();
         this.scene.switch("VictoryScene"); // End of the game
@@ -466,7 +468,6 @@ export default class MainScene extends Phaser.Scene {
       this.endWaveHelper(waveIndex);
       this.waveNumber = "wave1"; // Go to next level
       this.handleMusic(3); // 3 for stopping the song
-      this.levelNumber++; // Go to next level
       this.scene.setVisible(false);
       this.scene.switch("LevelComplete");
     } else {
