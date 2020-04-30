@@ -78,6 +78,12 @@ export default class ChestScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * setUpScreen, sets up most of the labels and images for the scene
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   setUpScreen(){
     this.response = this.add.bitmapText(0,0,"pixelFont"," ", 75);
     this.closedChest=this.add.image(this.scale.width/2, this.scale.height/2, "closeChest");
@@ -102,6 +108,12 @@ export default class ChestScene extends Phaser.Scene {
     this.hidePowerup();
   }
 
+  /**
+   * makeHelpButton, makes the help button for the scene
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   makeHelpButton(){
     this.helpButton = this.add.text(0, 0, "Help", {fill: "red", font: "bold 80px Serif"});
     this.helpButton.setBackgroundColor("black");
@@ -113,6 +125,12 @@ export default class ChestScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * makeSubmitButton, makes the submit button for the scene
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   makeSubmitButton(){
     this.submitButton = this.add.text(0, 0, "Submit", {fill: "red", font: "bold 80px Serif"});
     this.submitButton.setBackgroundColor("black");
@@ -122,6 +140,12 @@ export default class ChestScene extends Phaser.Scene {
     this.submitButton.on("pointerdown", () => this.onClickCheck());
   }
 
+  /**
+   * makeBackButton, makes the back button for the scene
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   makeBackButton(){
     this.backButton = this.add.text(0, 0, "Back", {fill: "red", font: "bold 80px Serif"});
     this.backButton.setBackgroundColor("black");
@@ -135,9 +159,20 @@ export default class ChestScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * makeNoChestScene, makes the mostly empty scene when the player has no available chests to open
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   makeNoChestScene(){
     this.makeBackButton();
-
+    this.chestNumLabel = this.add.text(0, 0, "Chests: " + this.chestNum, {fill: "red", font: "bold 80px Serif"});
+    this.chestNumLabel.setBackgroundColor("black");
+    this.chestNumLabel.setX(this.scale.width/2 - this.chestNumLabel.width/2)
+    let noChests = this.add.text(0,0, "You have no chests", {fill: "red", font: "bold 80px Serif"});
+    noChests.setX(this.scale.width/2-noChests.width/2);
+    noChests.setY(this.scale.height/2-noChests.height/2);
   }
 
   /**

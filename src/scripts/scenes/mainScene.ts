@@ -510,8 +510,8 @@ export default class MainScene extends Phaser.Scene {
     this.powerUpButton.setY((this.scale.height/2) - (this.chestButton.height/2) + 460);
     this.powerUpButton.setInteractive();
     this.powerUpButton.on("pointerdown", () => {
-      this.scene.start("ChestScene", {powerup: this.powerUpNum, chest: this.chestNum});
-      this.scene.switch("ChestScene");
+      //this.scene.start("ChestScene", {powerup: this.powerUpNum, chest: this.chestNum});
+      this.scene.switch("PowerUp");
     });
   }
 
