@@ -25,12 +25,12 @@ export default class ChestHelp extends Phaser.Scene {
         this.helpText.setX(this.scale.width/2 - this.helpText.width/2);
         this.helpText.setY(this.scale.height/2 - 300); // Put the text towards the top 
 
-        let nextLevelButton = this.add.text(0, 0, "Next Level", {fill: "red", font: "bold 80px Serif"});
-        nextLevelButton.setBackgroundColor("black");
-        nextLevelButton.setX(this.scale.width/2 - nextLevelButton.width/2);
-        nextLevelButton.setY(this.scale.height/2 + 300); // Put the text towards the top 
-        nextLevelButton.setInteractive();
-        nextLevelButton.on("pointerdown", () => this.onClick());
+        // let nextLevelButton = this.add.text(0, 0, "Next Level", {fill: "red", font: "bold 80px Serif"});
+        // nextLevelButton.setBackgroundColor("black");
+        // nextLevelButton.setX(this.scale.width/2 - nextLevelButton.width/2);
+        // nextLevelButton.setY(this.scale.height/2 + 300); // Put the text towards the top 
+        // nextLevelButton.setInteractive();
+        // nextLevelButton.on("pointerdown", () => this.onClick());
     }
 
     /**

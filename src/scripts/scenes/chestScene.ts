@@ -95,7 +95,7 @@ export default class ChestScene extends Phaser.Scene {
     this.helpButton.setInteractive();
     this.helpButton.on("pointerdown", () => {
       console.log("hlp button");
-      this.scene.switch("MainScene");
+      this.scene.switch("ChestHelp");
     })
 
     this.submitButton = this.add.text(0, 0, "Submit", {fill: "red", font: "bold 80px Serif"});
