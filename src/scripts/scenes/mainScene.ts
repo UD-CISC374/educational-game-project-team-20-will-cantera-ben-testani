@@ -10,6 +10,7 @@ import LevelComplete from './levelComplete';
 function sleep (milliseconds) { // Making the program wait for the given time
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
+
 export default class MainScene extends Phaser.Scene {
   // Constants
   private readonly numEnemies: number = 4;
@@ -18,6 +19,7 @@ export default class MainScene extends Phaser.Scene {
   private exampleObject: ExampleObject;
   private timeCrystal: Phaser.GameObjects.Sprite;
   private chestButton: Phaser.GameObjects.Text;
+  private powerUpButton: Phaser.GameObjects.Text;
   private levelOneTrack: Phaser.Sound.BaseSound;
   private cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
   private spacebar: Phaser.Input.Keyboard.Key;
@@ -29,6 +31,8 @@ export default class MainScene extends Phaser.Scene {
   public turretProjectiles: GameObjects.Group;
   private beamSound: Phaser.Sound.BaseSound;
   private levelTwoTrack: Phaser.Sound.BaseSound;
+  private powerUpNum=1;
+  private chestNum=1;
 
 
   // Variables with set values
@@ -76,6 +80,10 @@ export default class MainScene extends Phaser.Scene {
   }
 
 
+  init(data){
+    this.powerUpNum = data.powerup;
+    this.chestNum = data.chest;
+  }
   /**
    * create, most of the code is moved to their own functions, that code is called in create to 
    *         setup this screen.
@@ -120,6 +128,7 @@ export default class MainScene extends Phaser.Scene {
     // Making some things to be drawn on screen
     this.makeTimeCrystal();
     this.makeChestButton();
+    this.makePowerUpButton();
 
     this.turretProjectiles = this.add.group();
     // Adds collision between players shots and powerups, causing them to bounce
@@ -481,10 +490,30 @@ export default class MainScene extends Phaser.Scene {
     this.chestButton.on("pointerdown", () => {
       let song: Phaser.Sound.BaseSound = this.getCurrentSong();
       song.pause();
+      this.scene.start("ChestScene", {powerup: this.powerUpNum, chest: this.chestNum});
       this.scene.switch("ChestScene");
     });
   }
 
+
+  /**
+   * makePowerUpButton, handles displaying the button to switch to the chest scene on the screen when the wave of enemies 
+   *                  is over.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  makePowerUpButton(): void {
+    this.powerUpButton = this.add.text(0, 0, "Power-Ups", {fill: "red", font: "bold 50px Serif"});
+    this.powerUpButton.setBackgroundColor("black");
+    this.powerUpButton.setX((this.scale.width/2) - (this.powerUpButton.width/2) + 350);
+    this.powerUpButton.setY((this.scale.height/2) - (this.chestButton.height/2) + 460);
+    this.powerUpButton.setInteractive();
+    this.powerUpButton.on("pointerdown", () => {
+      this.scene.start("ChestScene", {powerup: this.powerUpNum, chest: this.chestNum});
+      this.scene.switch("ChestScene");
+    });
+  }
 
    /**
    * getEnemyCoords, Returns a range of pixels for the enemy to spawn based on the random hour chosen.

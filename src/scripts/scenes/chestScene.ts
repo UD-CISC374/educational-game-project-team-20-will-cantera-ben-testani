@@ -17,12 +17,14 @@ export default class ChestScene extends Phaser.Scene {
   powerupNum: number; //number to return to mainScene
   rewardGroup;
   submitButton;
+  chestNumLabel;
   backButton;
   helpButton;
   hour;
   min;
   backGroup;
-  textGroup;
+  textGroup
+  chestNum;
 
   /**
    * constructor, provides a reference to this scene
@@ -30,8 +32,15 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  constructor() {
+  constructor(powerup: number) {
     super({ key: 'ChestScene' });
+  }
+
+
+  init(data){
+    this.powerupNum = data.powerup;
+    this.chestNum = data.chest;
+    //console.log(this.powerupNum);
   }
 
   /**
@@ -49,6 +58,27 @@ export default class ChestScene extends Phaser.Scene {
       immovable: false,
       allowGravity: false
     });
+    if(this.chestNum > 0){
+      this.setUpScreen();
+      this.makeHelpButton();
+      this.makeBackButton();
+      this.makeSubmitButton();
+      this.questionTime();
+      // http://labs.phaser.io/index.html?dir=input/dragging/&q=
+      this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
+
+        gameObject.x = dragX;
+        gameObject.y = dragY;
+
+        console.log("X: " + dragX + " " + " Y: " + dragY);
+        
+      });
+    } else {
+        this.makeNoChestScene();
+    }
+  }
+
+  setUpScreen(){
     this.response = this.add.bitmapText(0,0,"pixelFont"," ", 75);
     this.closedChest=this.add.image(this.scale.width/2, this.scale.height/2, "closeChest");
     this.openedChest=this.add.image(this.scale.width/2, this.scale.height/2, "openChest");
@@ -61,34 +91,18 @@ export default class ChestScene extends Phaser.Scene {
     this.minLabel=this.add.bitmapText(this.scale.width/4 - 65, this.scale.height/4 + this.scale.height/2 + 40, "pixelFont", "MINUTES", 50);
     this.mainLabel=this.add.bitmapText(150, 150, "pixelFont", "TIME TO DISPLAY ON CLOCK: ", 75);
     this.hoursQuestion = this.add.bitmapText(0,0,"pixelFont", " ", 75);
+    this.chestNumLabel = this.add.text(0, 0, "Chests: " + this.chestNum, {fill: "red", font: "bold 80px Serif"});
+    this.chestNumLabel.setBackgroundColor("black");
+    this.chestNumLabel.setX(this.scale.width/2 - this.chestNumLabel.width/2);
     this.hoursDot.setInteractive({draggable:true});
     this.minuetsDot.setInteractive({draggable:true});
     this.backGroup.add(this.closedChest);
     this.textGroup.add(this.hoursQuestion);
     this.rewardGroup.add(this.bombPowerup);
     this.hidePowerup();
+  }
 
-    this.questionTime();
-    // http://labs.phaser.io/index.html?dir=input/dragging/&q=
-    this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
-
-      gameObject.x = dragX;
-      gameObject.y = dragY;
-
-      console.log("X: " + dragX + " " + " Y: " + dragY);
-      
-    });
-
-    this.backButton = this.add.text(0, 0, "Back", {fill: "red", font: "bold 80px Serif"});
-    this.backButton.setBackgroundColor("black");
-    //this.backButton.setX(this.scale.width/2 - this.submitButton.width/2);
-    //this.backButton.setY(this.scale.height/2 + 350);
-    this.backButton.setInteractive();
-    this.backButton.on("pointerdown", () => {
-      this.resetScene();
-      this.scene.switch("MainScene");
-    });
-
+  makeHelpButton(){
     this.helpButton = this.add.text(0, 0, "Help", {fill: "red", font: "bold 80px Serif"});
     this.helpButton.setBackgroundColor("black");
     this.helpButton.setX(this.scale.width-this.helpButton.width);
@@ -96,14 +110,34 @@ export default class ChestScene extends Phaser.Scene {
     this.helpButton.on("pointerdown", () => {
       console.log("hlp button");
       this.scene.switch("ChestHelp");
-    })
+    });
+  }
 
+  makeSubmitButton(){
     this.submitButton = this.add.text(0, 0, "Submit", {fill: "red", font: "bold 80px Serif"});
     this.submitButton.setBackgroundColor("black");
     this.submitButton.setX(this.scale.width/2 - this.submitButton.width/2);
     this.submitButton.setY(this.scale.height/2 + 350);
     this.submitButton.setInteractive();
     this.submitButton.on("pointerdown", () => this.onClickCheck());
+  }
+
+  makeBackButton(){
+    this.backButton = this.add.text(0, 0, "Back", {fill: "red", font: "bold 80px Serif"});
+    this.backButton.setBackgroundColor("black");
+    //this.backButton.setX(this.scale.width/2 - this.submitButton.width/2);
+    //this.backButton.setY(this.scale.height/2 + 350);
+    this.backButton.setInteractive();
+    this.backButton.on("pointerdown", () => {
+      this.resetScene();
+      this.scene.start("MainScene", {powerup: this.powerupNum, chest: this.chestNum});
+      this.scene.switch("MainScene");
+    });
+  }
+
+  makeNoChestScene(){
+    this.makeBackButton();
+
   }
 
   /**
@@ -223,13 +257,15 @@ export default class ChestScene extends Phaser.Scene {
     if(num==1){
       this.response = this.add.bitmapText(0, 0, "pixelFont", "CORRECT ", 75);
       this.response.setX(this.scale.width/2 - this.response.width/2);
-      this.response.setY(10);
+      this.response.setY(this.chestNumLabel.height + 10);
       this.response.setTint(0x00FF06);
+      this.powerupNum++;
+      this.chestNum--;
     }
     if(num==0){
       this.response = this.add.bitmapText(0, 0, "pixelFont", "INCORRECT ", 75);
       this.response.setX(this.scale.width/2 - this.response.width/2);
-      this.response.setY(10);
+      this.response.setY(this.chestNumLabel.height + 10);
       this.response.setTint(0xFF2D00);
     }
     this.response.setVisible(true);
