@@ -5,6 +5,10 @@ import SpeedGoblin from '../objects/speedGoblin';
 import ThePunisher from '../objects/thePunisher';
 import { GameObjects } from 'phaser';
 import LevelComplete from './levelComplete';
+import ChromeTurret from '../objects/chromeTurret';
+import PurpleShip from '../objects/purpleShip';
+import BarrelGun from '../objects/barrelTurret';
+import WizardGuy from '../objects/wizardGuy';
 
 
 function sleep (milliseconds) { // Making the program wait for the given time
@@ -15,21 +19,30 @@ export default class MainScene extends Phaser.Scene {
   private readonly numEnemies: number = 4;
   private readonly MAXHEALTH: number = 225;
   
+  // Turrets and enemies, must be any to accept custom attributes
+  public chromeTurret: any;
+  private purpleShip: any;
+  private wizardGuy: any;
+  private barrelTurret: any;
+  private testEnemy: any;
+
+  // Phaser groups
+  private enemies: any;
+  private turrets: any;
+
   // Phaser objects
-  public chromeTurret: Phaser.Physics.Arcade.Sprite;
   public turretProjectiles: GameObjects.Group;
   private timeCrystal: Phaser.GameObjects.Sprite;
   private chestButton: Phaser.GameObjects.Text;
   private levelOneTrack: Phaser.Sound.BaseSound;
   private spacebar: Phaser.Input.Keyboard.Key;
-  private enemies: any;
   private waveStartButton: GameObjects.Text;
   private healthBar: GameObjects.Image;
   private enemySpawnText: GameObjects.Text;
   private beamSound: Phaser.Sound.BaseSound;
   private levelTwoTrack: Phaser.Sound.BaseSound;
   private levelThreeTrack: Phaser.Sound.BaseSound;
-
+ 
 
 
   // Variables with set values
@@ -58,7 +71,7 @@ export default class MainScene extends Phaser.Scene {
   private spawnTimes: Array<number> = []; // Will be filled in with random numbers between 1 and 12
   private isWaveStarted: boolean = false; // True if the wave is ongoing, false otherwise
   private boxList: Array<any> = [];
-  private defenseInventory: Array<any> = [];
+  private lockImageList: Array<any> = [];
   private defensiveInventoryCoords: Array<any> = [];
   private isWaveDone: boolean = false;
   private bulletDelay: number = new Date().getTime();
@@ -104,6 +117,13 @@ export default class MainScene extends Phaser.Scene {
     // Make a physics enabled group for the enemies
     this.enemies = this.physics.add.group();
 
+    // Make a physics enabled group for the turrets
+    this.turrets = this.physics.add.group();
+    this.turrets.add(this.chromeTurret);
+    this.turrets.add(this.purpleShip);
+    this.turrets.add(this.barrelTurret);
+    this.turrets.add(this.wizardGuy);
+
     // Enable spacebar
     this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
@@ -125,7 +145,9 @@ export default class MainScene extends Phaser.Scene {
     this.makeTimeCrystal();
     this.makeChestButton();
 
+    // Group for projectiles
     this.turretProjectiles = this.add.group();
+
     // Adds collision between players shots and powerups, causing them to bounce
     this.physics.add.collider(this.turretProjectiles, this.enemies, function(projectile, enemy) {
       projectile.destroy();
@@ -147,7 +169,23 @@ export default class MainScene extends Phaser.Scene {
     return true;
   }
 
+  /**
+   * onDrag, defines the behaviour for the turrets when they are dragged. THe turrets get rotated to match the angle of the clock.
+   * 
+   * Consumes: Nothing 
+   * Produces: Nothing
+   */
+  onDrag(): void {
+    // Defining drag behaviour
+    this.input.on('drag', function (pointer, gameObject, dragX, dragY) { // Update turrets position on drag
+      let spriteRotation: number = Phaser.Math.Angle.Between(500, 500, gameObject.x, gameObject.y); 
+      gameObject.setRotation(spriteRotation-80.1); // Don't touch this number
+      gameObject.x = dragX;
+      gameObject.y = dragY;      
+    });
 
+
+  }
   /**
    * makeDefenses, adds sprites to the game for the defensive structures when they are recieved.
    * 
@@ -156,14 +194,18 @@ export default class MainScene extends Phaser.Scene {
    */
   addDefenses(): void {
     // Starting Defense
-    this.chromeTurret = this.physics.add.sprite(this.defensiveInventoryCoords[0][0], this.defensiveInventoryCoords[0][1], "chrome_turret");
-    this.chromeTurret.setInteractive({draggable: true});
-    this.input.on('drag', function (pointer, gameObject, dragX, dragY) { // Update turrets position on drag
-      let spriteRotation: number = Phaser.Math.Angle.Between(500, 500, gameObject.x, gameObject.y); 
-      gameObject.setRotation(spriteRotation-80.1);
-      gameObject.x = dragX;
-      gameObject.y = dragY;      
-    });
+    this.chromeTurret = new ChromeTurret(this, this.defensiveInventoryCoords[0][0], this.defensiveInventoryCoords[0][1]);
+    this.purpleShip = new PurpleShip(this, this.defensiveInventoryCoords[1][0], this.defensiveInventoryCoords[1][1]);
+    this.barrelTurret = new BarrelGun(this, this.defensiveInventoryCoords[2][0], this.defensiveInventoryCoords[2][1]);
+    this.wizardGuy = new WizardGuy(this, this.defensiveInventoryCoords[3][0], this.defensiveInventoryCoords[3][1]);
+
+    this.chromeTurret.setInteractive({draggable: true}); // Chrome Turret is the only available turret at first
+    this.onDrag();
+    
+    for (let i = 1; i < 4; i++) { // Add locks on the other three turrets
+      let ironBarLock = this.add.image(this.defensiveInventoryCoords[i][0], this.defensiveInventoryCoords[i][1], "iron_bar");
+      this.lockImageList.push(ironBarLock);
+    }
   }
 
 
@@ -209,6 +251,7 @@ export default class MainScene extends Phaser.Scene {
   hurtCrystal(crystal, enemy): void {
     if (this.health - 45 < 0) {
       this.resetGameProtocol(); // Reset the game to level 1 so it is ready if the player hitrs play again in the lose scene
+      this.scene.switch("LoseScene"); // Use start to reset main scene
     } else {
       this.health -= 45;
       this.healthBar.setCrop(0, 0, this.health, 97); // Height in pixels of the health bar is 97
@@ -225,11 +268,24 @@ export default class MainScene extends Phaser.Scene {
    */
   resetGameProtocol(): void {
     this.resetGame = true;
-    this.chromeTurret.x = this.defensiveInventoryCoords[0][0];
-    this.chromeTurret.y = this.defensiveInventoryCoords[0][1];
-    this.chromeTurret.setRotation(0);
+    let turretGroup = this.turrets.getChildren();
+    for (let i = 0; i < turretGroup.length; i++) {
+      let turret = turretGroup[i];
+      turret.x = this.defensiveInventoryCoords[i][0];
+      turret.y = this.defensiveInventoryCoords[i][1];
+      turret.setRotation(0);
+      if (!(turret === this.chromeTurret)) {
+        turret.disableInteractive();
+        turret.isUnlocked = false;
+      }
+    }
+    this.lockImageList.splice(0, this.lockImageList.length); // Reset and clean array
+    for (let i = 1; i < 4; i++) { // Reset the iron bars locking turrets
+      let ironBarLock = this.add.image(this.defensiveInventoryCoords[i][0], this.defensiveInventoryCoords[i][1], "iron_bar");
+      this.lockImageList.push(ironBarLock);
+    }
     let children = this.enemies.getChildren();
-    let length: number = this.enemies.getChildren().length
+    let length: number = children.length
     for (let i = 0; i < length; i++) {
       children[0].destroy(); // As children are killed, they are popped off the group, must keep killing children at index 0
     }
@@ -239,9 +295,7 @@ export default class MainScene extends Phaser.Scene {
     this.healthBar.setCrop(0, 0, this.health, 97);
     this.getCurrentSong().stop(); // Stop song from playing in lose scene
     LevelComplete.levelNumber = 1; // Back to level 1
-
     this.scene.setVisible(false); // For audio handling
-    this.scene.switch("LoseScene"); // Use start to reset main scene
   }
 
 
@@ -473,6 +527,7 @@ export default class MainScene extends Phaser.Scene {
       if (LevelComplete.levelNumber+1 > 3) {
         this.scene.setVisible(false);
         this.getCurrentSong().stop();
+        this.resetGameProtocol();
         this.scene.switch("VictoryScene"); // End of the game
         return;
       }
@@ -483,6 +538,7 @@ export default class MainScene extends Phaser.Scene {
       this.scene.switch("LevelComplete");
     } else {
       this.endWaveHelper(waveIndex); // Just prepares for the next wave
+      this.unlockTurret();
     }
   }
 
@@ -507,6 +563,52 @@ export default class MainScene extends Phaser.Scene {
     }  
   }
 
+
+  /**
+   * unlockTurret, chooses a random number between 1 and 3 which represents one of the three turrets the player has not unlocked yet.
+   *               This turret is then unlocked and the player is free to use it. Happens once at the end of each wave, so everey turret
+   *               will be available to the player after the first level. 
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  unlockTurret(): void {
+    let randomUnlock: number = Math.floor(Math.random() * 3) + 1; // Get random number between 1 and 3
+    let notUnlocked: boolean = true;
+    if (!this.barrelTurret.isUnlocked || !this.wizardGuy.isUnlocked || !this.purpleShip.isUnlocked) {
+      while (notUnlocked) { // Keep re rolling random number until a turret is unlocked
+        if (randomUnlock == 1) { // Wizard Guy
+          if (!this.wizardGuy.isUnlocked) {
+            notUnlocked = false;
+            this.wizardGuy.isUnlocked = true;
+            this.lockImageList[2].setVisible(false);
+            this.lockImageList[2] = -1; // Remove this image from the array
+            this.wizardGuy.setInteractive({draggable: true});
+          }
+        } 
+        if (randomUnlock == 2) { // Barrel Turret
+          if (!this.barrelTurret.isUnlocked) {
+            notUnlocked = false;
+            this.barrelTurret.isUnlocked = true;
+            this.lockImageList[1].setVisible(false);
+            this.lockImageList[1] = -1;
+            this.barrelTurret.setInteractive({draggable: true});
+          }
+        } 
+        if (randomUnlock == 3) { // Purple Ship
+          if (!this.purpleShip.isUnlocked) {
+            notUnlocked = false;
+            this.purpleShip.isUnlocked = true;
+            this.lockImageList[0].setVisible(false);
+            this.lockImageList[0] = -1;
+            this.purpleShip.setInteractive({draggable: true});
+          }
+        }
+        randomUnlock = Math.floor(Math.random() * 3) + 1; // Re-Roll
+      }
+    }
+  }
+
   
   /**
    * setVisibleHandler, takes all of the objects that were set to invisible during the wave and sets
@@ -520,6 +622,11 @@ export default class MainScene extends Phaser.Scene {
     this.chestButton.setVisible(true); // Bring back the chest button after wave
     for (let i = 0; i < this.boxList.length; i++) // Bring backw the inventory boxes
       this.boxList[i].setVisible(true);
+    for (let i = 0; i < this.turrets.getChildren().length; i++)
+      this.turrets.getChildren()[i].setVisible(true);
+    for (let i = 0; i < this.lockImageList.length; i++)
+      if (this.lockImageList[i] != -1) // Fillinf in with -1 to indicate the image is gone
+        this.lockImageList[i].setVisible(true);
   }
 
 
@@ -535,6 +642,12 @@ export default class MainScene extends Phaser.Scene {
       this.chestButton.setVisible(false);
       for (let i = 0; i < this.boxList.length; i++)
         this.boxList[i].setVisible(false);
+      for (let i = 0; i < this.turrets.getChildren().length; i++)
+        if (!this.turrets.getChildren()[i].isUnlocked)
+          this.turrets.getChildren()[i].setVisible(false);
+      for (let i = 0; i < this.lockImageList.length; i++)
+        if (this.lockImageList[i] != -1)
+          this.lockImageList[i].setVisible(false);
   }
 
   
