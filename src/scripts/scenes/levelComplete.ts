@@ -34,14 +34,14 @@ export default class LevelComplete extends Phaser.Scene {
             seek: 0,
             loop: false, // Just play it once
             delay: 0
-          };
-          switch(this.levelCount) {
+        };
+        switch(this.levelCount) {
             case 1:
                 this.levelOneVictoryMusic.play(victoryMusicConfig);
                 break;
             case 2:
                 this.levelTwoVictoryMusic.play(victoryMusicConfig);
-          }
+        }
     }
 
     /**
@@ -77,7 +77,7 @@ export default class LevelComplete extends Phaser.Scene {
                 break;
             case 2:
                 this.levelTwoVictoryMusic.stop();
-          }
+        }
         this.shouldRun = true;
         LevelComplete.levelNumber++; // This should be the only spot this variable is ever incremented
         this.scene.switch("MainScene");

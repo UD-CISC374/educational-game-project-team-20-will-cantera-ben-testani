@@ -6,6 +6,7 @@ import ChestScene from './scenes/chestScene';
 import LoseScene from './scenes/loseScene';
 import LevelComplete from './scenes/levelComplete';
 import VictoryScene from './scenes/victoryScene';
+import ChestHelp from './scenes/chestHelp';
 import GameConfig = Phaser.Types.Core.GameConfig;
 
 
@@ -22,7 +23,7 @@ const config: GameConfig = {
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT
     },
-    scene: [PreloadScene, StartScene, MainScene, ChestScene, LevelComplete, LoseScene, VictoryScene],
+    scene: [PreloadScene, StartScene, MainScene, ChestScene, ChestHelp, LevelComplete, LoseScene, VictoryScene],
     physics: {
         default: "arcade",
         arcade: {
