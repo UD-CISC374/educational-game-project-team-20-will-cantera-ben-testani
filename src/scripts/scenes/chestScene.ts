@@ -18,6 +18,7 @@ export default class ChestScene extends Phaser.Scene {
   rewardGroup;
   submitButton;
   backButton;
+  helpButton;
   hour;
   min;
   backGroup;
@@ -87,6 +88,15 @@ export default class ChestScene extends Phaser.Scene {
       this.resetScene();
       this.scene.switch("MainScene");
     });
+
+    this.helpButton = this.add.text(0, 0, "Help", {fill: "red", font: "bold 80px Serif"});
+    this.helpButton.setBackgroundColor("black");
+    this.helpButton.setX(this.scale.width-this.helpButton.width);
+    this.helpButton.setInteractive();
+    this.helpButton.on("pointerdown", () => {
+      console.log("hlp button");
+      this.scene.switch("MainScene");
+    })
 
     this.submitButton = this.add.text(0, 0, "Submit", {fill: "red", font: "bold 80px Serif"});
     this.submitButton.setBackgroundColor("black");
