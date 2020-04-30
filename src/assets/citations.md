@@ -24,7 +24,21 @@ https://www.youtube.com/watch?v=RGUOG3lnwVg
 Bustre - By Shadow 
 https://www.youtube.com/watch?v=k1IaGHfZ4YU
 
+Summon In The Sunlight - by Jamserton 
+https://www.youtube.com/watch?v=dzB2cN-AU8w
 
 Images:
 Turret Gun image
 https://www.deviantart.com/ultimaodin/art/Turret-001x3-500578422 
+
+Purple Ship
+https://opengameart.org/content/purple-space-ship
+
+Wizard
+https://opengameart.org/content/topdown-wizard
+
+barrelGun
+https://opengameart.org/content/gun-mine
+
+Iron Bars
+https://www.google.com/url?sa=i&url=http%3A%2F%2Fpixelartmaker.com%2Fart%2Fda1d5e18b0e709b&psig=AOvVaw0vg1L_tsk38Lqy4GHzxAVu&ust=1588300497298000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCID-x9COj-kCFQAAAAAdAAAAABAJ

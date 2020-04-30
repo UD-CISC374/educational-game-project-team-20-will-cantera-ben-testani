@@ -32,15 +32,22 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image("armor_goblin", "assets/images/ArmoredGoblin.png");
     this.load.image("speed_goblin", "assets/images/SpeedGoblin.png");
     this.load.image("the_punisher", "assets/images/ThePunisher.png");
+    
 
     // Defensive Structures
     this.load.image("chrome_turret", "assets/images/chromeTurret.png");
+    this.load.image("wizard_dude", "assets/images/wizardGuy.png");
+    this.load.image("purple_ship", "assets/images/purpleShip.png");
+    this.load.image("barrel_turret", "assets/images/barrelTurret.png");
 
     // Projectiles
     this.load.image("laser_beam", "assets/images/laser.png");
 
     // Health bar
     this.load.image("health_bar", "assets/images/healthbar.png");
+
+    // Iron Bars 
+    this.load.image("iron_bar", "assets/images/ironBar.png");
 
 
     // Spritesheets
@@ -70,6 +77,8 @@ export default class PreloadScene extends Phaser.Scene {
     
   
 //-----------------------------------------------------------------------------------------------------------
+    // For Victory Scene
+    this.load.audio("win_song", "assets/audio/sunlight.mp3");
 
   }
 
