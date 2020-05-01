@@ -1,6 +1,9 @@
 export default class LevelComplete extends Phaser.Scene {
     public static levelNumber: number = 1; // Global
+    public static switching: boolean = false;
     private levelCount: number = LevelComplete.levelNumber;
+    private hasSwitched: boolean = LevelComplete.switching;
+
     private levelOneVictoryMusic: Phaser.Sound.BaseSound;
     private levelTwoVictoryMusic: Phaser.Sound.BaseSound;
     private levelOneCompleteImage: Phaser.GameObjects.Image;
@@ -90,6 +93,7 @@ export default class LevelComplete extends Phaser.Scene {
                 this.levelTwoVictoryMusic.stop();
         }
         this.shouldRun = true;
+        LevelComplete.switching = true;
         LevelComplete.levelNumber++; // This should be the only spot this variable is ever incremented
         this.scene.switch("MainScene");
     }

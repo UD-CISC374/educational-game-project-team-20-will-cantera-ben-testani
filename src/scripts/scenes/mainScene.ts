@@ -54,7 +54,7 @@ export default class MainScene extends Phaser.Scene {
     "level1": {
       "wave1": 1,
       "wave2": 6,
-      "wave3": 12
+      "wave3": 9
       //"wave4": 12
     }, 
     "level2": {
@@ -64,8 +64,8 @@ export default class MainScene extends Phaser.Scene {
       //"wave4": 45
     },
     "level3": {
-      "wave1": 8,
-      "wave2": 15,
+      "wave1": 12,
+      "wave2": 20,
       "wave3": 40
       //"wave4": 10
     }
@@ -80,6 +80,7 @@ export default class MainScene extends Phaser.Scene {
   private tutorialTextArray: Array<GameObjects.Text> = [];
   private tutorialMessageNumber: number = 0;
   private resetGame: boolean = false;
+  private isLevelSwitching: boolean = false;
 
 
   /**
@@ -287,7 +288,7 @@ export default class MainScene extends Phaser.Scene {
    */
   hurtCrystal(crystal, enemy): void {
     if (this.health - 45 < 0) {
-      this.resetGameProtocol(); // Reset the game to level 1 so it is ready if the player hitrs play again in the lose scene
+      this.resetGameProtocol(true); // Reset the game to level 1 so it is ready if the player hitrs play again in the lose scene
       this.scene.switch("LoseScene"); // Use start to reset main scene
     } else {
       this.health -= 45;
@@ -303,11 +304,14 @@ export default class MainScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  resetGameProtocol(): void {
+  resetGameProtocol(hasLost: boolean): void {
     this.resetGame = true;
-    this.isWaveDone = false;
-    this.isWaveStarted = false;
-    this.setVisibleHandler();
+    
+    if (!hasLost) {
+      this.setVisibleHandler();
+      this.isWaveDone = false;
+      this.isWaveStarted = false;
+    }
     let turretGroup = this.turrets.getChildren();
     let turretLen: number = turretGroup.length
     for (let i = 0; i < turretLen; i++) {
@@ -348,8 +352,9 @@ export default class MainScene extends Phaser.Scene {
    */
   getPossibleHours(): Array<number> {
     let randomHours: Array<number> = [];
-    for (let i = 0; i < 4; i++)
+    for (let i = 0; i < 4; i++) {
       randomHours.push(Math.floor(Math.random() * 12) + 1); // Gets random number between 1 and 12
+    }
     return randomHours;
   }
 
@@ -537,20 +542,23 @@ export default class MainScene extends Phaser.Scene {
     this.setInvisibleHandler(); // Clears things off the screen 
     let levelWaves = this.levelInfo["level" + LevelComplete.levelNumber.toString()];
     let numEnemies = levelWaves[this.waveNumber];
-    for (let i = 0; i < parseInt(numEnemies); i++) { // Spawn the enemies, let the fun begin
-      if (this.resetGame) {
-        this.isWaveDone = true;
-        return; // Stop spawing enemies if the game ends
+    console.log(this.spawnTimes.length);
+    if (this.spawnTimes.length != 0) {
+      for (let i = 0; i < parseInt(numEnemies); i++) { // Spawn the enemies, let the fun begin
+        if (this.resetGame) {
+          this.isWaveDone = true;
+          return; // Stop spawing enemies if the game ends
+        }
+        await sleep(200); // Milliseconds
+        if (this.resetGame) { // Using async causes weird problems, this is the only way I could fix it
+          this.isWaveDone = true;
+          return; // Stop spawing enemies if the game ends
+        }
+        this.spawnEnemy(this.getEnemyCoords(this.spawnTimes[i])); 
+        this.isWaveStarted = true; // Defend mode
       }
-      await sleep(200); // Milliseconds
-      if (this.resetGame) { // Using async causes weird problems, this is the only way I could fix it
-        this.isWaveDone = true;
-        return; // Stop spawing enemies if the game ends
-      }
-      this.spawnEnemy(this.getEnemyCoords(this.spawnTimes[i])); // Converts the time to coordinates, spawns a Phaser sprite
-      this.isWaveStarted = true; // Defend mode
+      this.isWaveDone = true;
     }
-    this.isWaveDone = true;
   }
 
 
@@ -565,7 +573,7 @@ export default class MainScene extends Phaser.Scene {
     waveIndex++; // Go to next wave
     if (waveIndex > Object.keys(this.levelInfo["level" + LevelComplete.levelNumber.toString()]).length) {// Go to level complete scene if the end of the final wave is reached.
       if (LevelComplete.levelNumber+1 > 3) {
-        this.resetGameProtocol();
+        this.resetGameProtocol(false);
         this.scene.setVisible(false);
         this.getCurrentSong().stop();
         this.scene.switch("VictoryScene"); // End of the game
@@ -574,6 +582,7 @@ export default class MainScene extends Phaser.Scene {
         this.waveNumber = "wave1"; // Go to next level
         this.handleMusic(3); // 3 for stopping the song
         this.scene.setVisible(false);
+        this.isLevelSwitching = true;
         this.scene.switch("LevelComplete");
       }
     } else {
@@ -950,6 +959,11 @@ export default class MainScene extends Phaser.Scene {
 
 
   update(): void {
+    if (LevelComplete.switching) {
+      LevelComplete.switching = false;
+      this.isLevelSwitching = false;
+      this.prepWave();
+    }
     let length = this.enemies.getChildren().length;
     if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
       console.log("LENGTH: " + length.toString());
@@ -959,7 +973,8 @@ export default class MainScene extends Phaser.Scene {
         this.moveEnemy(this.enemies.getChildren()[i]);
       if (length == 0 && this.isWaveDone) { // If all the enemies are gone, go back to prep mode
         this.endWave();
-        this.prepWave();
+        if (!this.isLevelSwitching)
+          this.prepWave();
       }
       this.shootAtEnemy(this.chromeTurret);
       this.shootAtEnemy(this.wizardGuy);
