@@ -48,7 +48,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/audio/warsaw.mp3"
   },
   {
-    "revision": "d20b65f0dc3567095a461ac875c0b936",
+    "revision": "815c4e45dd3a38d12c0ad79cd33f3c3a",
     "url": "assets/citations.md"
   },
   {
@@ -80,7 +80,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/icons/icons8-game-controller-16.png"
   },
   {
-    "revision": "f343257e77e6aa99b5aa76a7c8af8170",
+    "revision": "eb18d40489a113fe0495f2461e972090",
     "url": "assets/images/ArmoredGoblin.png"
   },
   {
@@ -88,15 +88,15 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/images/BaseClock.png"
   },
   {
-    "revision": "7d72560067e75a466335cbc8bfcea437",
+    "revision": "4688c12aa838fe1cba2693f3c6c0eb1f",
     "url": "assets/images/SpeedGoblin.png"
   },
   {
-    "revision": "4c2337e8ee3c28c661d39f4d28e87315",
+    "revision": "013f39cb6d1b86488cf8ca87dffccb86",
     "url": "assets/images/ThePunisher.png"
   },
   {
-    "revision": "851cbec570787948b076d3d88f6eb369",
+    "revision": "d9ecdb0f94224b0b22d2681a53f6133f",
     "url": "assets/images/TimeGoblin.png"
   },
   {
@@ -124,8 +124,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/images/closedChest.v1.png"
   },
   {
+    "revision": "469c6b8ddd8aa37847ad6b48be2ddda4",
+    "url": "assets/images/confetti.png"
+  },
+  {
     "revision": "661bc2e9a27818b7297a69fce4fb4d7b",
     "url": "assets/images/fireball.png"
+  },
+  {
+    "revision": "8e6fda513af21f02b478e3c911509419",
+    "url": "assets/images/grassBackground.png"
   },
   {
     "revision": "1490e9c11ec50896ce332e1f6e8399b1",
@@ -172,8 +180,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/images/purpleShip.png"
   },
   {
+    "revision": "ee147987563ecce8c392fa6f2acdb5a7",
+    "url": "assets/images/rainbowFlame.png"
+  },
+  {
     "revision": "ab82f12c76fbc3e15c884162dfaeb8b5",
     "url": "assets/images/wizardGuy.png"
+  },
+  {
+    "revision": "462b9fb18795ba6d004d7f9937e85c3c",
+    "url": "assets/images/yellowBall.png"
   },
   {
     "revision": "6b049a7de07cc7981e2667d0cf8a03d7",
@@ -184,12 +200,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "favicon.ico"
   },
   {
-    "revision": "36b1e70fdbc415321947520e2b8673ef",
+    "revision": "b30c4153a0a6c538f92f9b9c630e88f9",
     "url": "index.html"
   },
   {
-    "revision": "0544e8f0871f3aaf55bd",
-    "url": "main.fce868340b9fa8243df4.bundle.js"
+    "revision": "1165d065851a8a3a8bfd",
+    "url": "main.3e5dfff92782a5eef35b.bundle.js"
   },
   {
     "revision": "601680b9d7c735e2dac776c6e564a81b",

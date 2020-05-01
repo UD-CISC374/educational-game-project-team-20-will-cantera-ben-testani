@@ -45,3 +45,30 @@ https://www.google.com/url?sa=i&url=http%3A%2F%2Fpixelartmaker.com%2Fart%2Fda1d5
 
 Fire Ball
 https://www.google.com/url?sa=i&url=http%3A%2F%2Fpixelartmaker.com%2Fart%2Ff59eaa826d4e49f&psig=AOvVaw25UHQXs20lJjCVFPQq5-X1&ust=1588381992436000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCID24pW-kekCFQAAAAAdAAAAABAI
+
+Shield Orc
+https://www.google.com/url?sa=i&url=https%3A%2F%2Fmarketplace.roll20.net%2Fbrowse%2Fset%2F544%2F02-goblins-and-kobolds&psig=AOvVaw2y6oTUeAAIZvZsaiUpY_ho&ust=1588435436983000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCLiSpqmFk-kCFQAAAAAdAAAAABAX
+
+Green Blob
+https://opengameart.org/content/gloo-enemy
+
+Archer Goblin
+https://www.google.com/url?sa=i&url=https%3A%2F%2Fmarketplace.roll20.net%2Fbrowse%2Fset%2F544%2F02-goblins-and-kobolds&psig=AOvVaw2y6oTUeAAIZvZsaiUpY_ho&ust=1588435436983000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCLiSpqmFk-kCFQAAAAAdAAAAABAr
+
+Goblin Slayer
+https://www.deviantart.com/pktome/art/Token-Goblin-Slayer-779218806
+
+Grass Background
+https://www.slynyrd.com/blog/2019/8/27/pixelblog-20-top-down-tiles
+
+Raindow Flame Background 
+https://www.vectorstock.com/royalty-free-vector/rainbow-colored-pixel-fire-icon-vector-20845182
+
+Yellow Thumbs Up Ball
+https://i.4pcdn.org/pol/1472336885414.jpg
+
+Confetti Background
+https://www.pinterest.com/pin/444237950742655999/
+
+
+

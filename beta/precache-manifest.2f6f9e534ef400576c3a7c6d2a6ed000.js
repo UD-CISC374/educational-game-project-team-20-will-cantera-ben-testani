@@ -48,7 +48,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/audio/warsaw.mp3"
   },
   {
-    "revision": "d20b65f0dc3567095a461ac875c0b936",
+    "revision": "815c4e45dd3a38d12c0ad79cd33f3c3a",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/citations.md"
   },
   {
@@ -80,7 +80,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/icons/icons8-game-controller-16.png"
   },
   {
-    "revision": "f343257e77e6aa99b5aa76a7c8af8170",
+    "revision": "eb18d40489a113fe0495f2461e972090",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/images/ArmoredGoblin.png"
   },
   {
@@ -88,15 +88,15 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/images/BaseClock.png"
   },
   {
-    "revision": "7d72560067e75a466335cbc8bfcea437",
+    "revision": "4688c12aa838fe1cba2693f3c6c0eb1f",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/images/SpeedGoblin.png"
   },
   {
-    "revision": "4c2337e8ee3c28c661d39f4d28e87315",
+    "revision": "013f39cb6d1b86488cf8ca87dffccb86",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/images/ThePunisher.png"
   },
   {
-    "revision": "851cbec570787948b076d3d88f6eb369",
+    "revision": "d9ecdb0f94224b0b22d2681a53f6133f",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/images/TimeGoblin.png"
   },
   {
@@ -124,8 +124,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/images/closedChest.v1.png"
   },
   {
+    "revision": "469c6b8ddd8aa37847ad6b48be2ddda4",
+    "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/images/confetti.png"
+  },
+  {
     "revision": "661bc2e9a27818b7297a69fce4fb4d7b",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/images/fireball.png"
+  },
+  {
+    "revision": "8e6fda513af21f02b478e3c911509419",
+    "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/images/grassBackground.png"
   },
   {
     "revision": "1490e9c11ec50896ce332e1f6e8399b1",
@@ -172,8 +180,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/images/purpleShip.png"
   },
   {
+    "revision": "ee147987563ecce8c392fa6f2acdb5a7",
+    "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/images/rainbowFlame.png"
+  },
+  {
     "revision": "ab82f12c76fbc3e15c884162dfaeb8b5",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/images/wizardGuy.png"
+  },
+  {
+    "revision": "462b9fb18795ba6d004d7f9937e85c3c",
+    "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaassets/images/yellowBall.png"
   },
   {
     "revision": "6b049a7de07cc7981e2667d0cf8a03d7",
@@ -184,15 +200,15 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/betafavicon.ico"
   },
   {
-    "revision": "88beee9c3cccc1d3e783",
-    "url": "/educational-game-project-team-20-will-cantera-ben-testani/betagen.main.66f2c2f4637fca635eb0.bundle.js"
+    "revision": "ca0aa928e5342cde9c2d",
+    "url": "/educational-game-project-team-20-will-cantera-ben-testani/betagen.main.1ec411910380c92b8c54.bundle.js"
   },
   {
     "revision": "3e6a94567f4f575a23ba",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/betagen.vendors.dda463f5e75cc32e0e32.bundle.js"
   },
   {
-    "revision": "5857dc947ec3fbf9671d2ecf596cb2d5",
+    "revision": "4e32b9edd058a9278ef82d60eafa616a",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/betaindex.html"
   },
   {
