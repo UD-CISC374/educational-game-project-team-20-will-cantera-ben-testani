@@ -36,7 +36,6 @@ export default class VictoryScene  extends Phaser.Scene {
     onClick(): void {
         this.victoryMusic.pause();
         this.shouldRun = true;
-        LevelComplete.levelNumber = 1; // Reset to level 1 if you want to play again
         this.scene.switch("MainScene"); // The start method resets the main scene as if you were just starting the game for the first time.
     }
 

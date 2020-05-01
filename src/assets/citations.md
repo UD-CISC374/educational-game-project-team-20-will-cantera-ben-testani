@@ -42,3 +42,6 @@ https://opengameart.org/content/gun-mine
 
 Iron Bars
 https://www.google.com/url?sa=i&url=http%3A%2F%2Fpixelartmaker.com%2Fart%2Fda1d5e18b0e709b&psig=AOvVaw0vg1L_tsk38Lqy4GHzxAVu&ust=1588300497298000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCID-x9COj-kCFQAAAAAdAAAAABAJ
+
+Fire Ball
+https://www.google.com/url?sa=i&url=http%3A%2F%2Fpixelartmaker.com%2Fart%2Ff59eaa826d4e49f&psig=AOvVaw25UHQXs20lJjCVFPQq5-X1&ust=1588381992436000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCID24pW-kekCFQAAAAAdAAAAABAI

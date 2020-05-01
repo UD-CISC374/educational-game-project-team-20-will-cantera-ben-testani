@@ -1,7 +1,5 @@
-import ExampleObject from '../objects/exampleObject';
 
 export default class StartScene extends Phaser.Scene {
-  private exampleObject: ExampleObject;
   private introTrack: Phaser.Sound.BaseSound;
   spacebar: Phaser.Input.Keyboard.Key;
 

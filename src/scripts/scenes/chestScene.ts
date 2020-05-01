@@ -1,7 +1,5 @@
-import ExampleObject from '../objects/exampleObject';
 
 export default class ChestScene extends Phaser.Scene {
-  private exampleObject: ExampleObject;
   closedChest: Phaser.GameObjects.Image;
   openedChest: Phaser.GameObjects.Image;
   clock: Phaser.GameObjects.Image;
@@ -42,7 +40,6 @@ export default class ChestScene extends Phaser.Scene {
    * Produces: Nothing
    */
   create() {
-    this.exampleObject = new ExampleObject(this, 0, 0);
     this.backGroup = this.add.group();
     this.textGroup = this.add.group();
     this.rewardGroup = this.physics.add.group({

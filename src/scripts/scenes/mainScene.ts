@@ -1,4 +1,3 @@
-import LaserBeam from '../objects/laserBeam';
 import ArmorGoblin from '../objects/armorGoblin';
 import TimeGoblin from '../objects/timeGoblin';
 import SpeedGoblin from '../objects/speedGoblin';
@@ -9,6 +8,7 @@ import ChromeTurret from '../objects/chromeTurret';
 import PurpleShip from '../objects/purpleShip';
 import BarrelGun from '../objects/barrelTurret';
 import WizardGuy from '../objects/wizardGuy';
+import Projectile from '../objects/projectile';
 
 
 function sleep (milliseconds) { // Making the program wait for the given time
@@ -40,6 +40,9 @@ export default class MainScene extends Phaser.Scene {
   private healthBar: GameObjects.Image;
   private enemySpawnText: GameObjects.Text;
   private beamSound: Phaser.Sound.BaseSound;
+  private kamehamehaSound: Phaser.Sound.BaseSound;
+  private pewPewSound: Phaser.Sound.BaseSound;
+  private fireBallSound: Phaser.Sound.BaseSound;
   private levelTwoTrack: Phaser.Sound.BaseSound;
   private levelThreeTrack: Phaser.Sound.BaseSound;
  
@@ -74,7 +77,6 @@ export default class MainScene extends Phaser.Scene {
   private lockImageList: Array<any> = [];
   private defensiveInventoryCoords: Array<any> = [];
   private isWaveDone: boolean = false;
-  private bulletDelay: number = new Date().getTime();
   private tutorialTextArray: Array<GameObjects.Text> = [];
   private tutorialMessageNumber: number = 0;
   private resetGame: boolean = false;
@@ -104,6 +106,9 @@ export default class MainScene extends Phaser.Scene {
 
     // Projectile Sounds
     this.beamSound = this.sound.add("laser_sound");
+    this.kamehamehaSound = this.sound.add("kamehameha_sound");
+    this.pewPewSound = this.sound.add("pew_pew");
+    this.fireBallSound = this.sound.add("fireball_sound");
 
     // Draw the players defensive strucutre inventory on screen
     this.handleBoxes();
@@ -134,9 +139,9 @@ export default class MainScene extends Phaser.Scene {
     this.prepWave(); // Takes a varying amount of time
     
     // Load all the main songs for each level
-    this.levelOneTrack = this.sound.add("warsaw_song");
-    this.levelTwoTrack = this.sound.add("peace_reigns");
-    this.levelThreeTrack = this.sound.add("shadow");
+    this.levelOneTrack = this.sound.add("warsaw_song", {volume: .3});
+    this.levelTwoTrack = this.sound.add("peace_reigns", {volume: .2}); 
+    this.levelThreeTrack = this.sound.add("shadow", {volume: .3});
 
     // Plays the background song for this scene
     this.levelOneTrack.play(); // 2 for playing the song
@@ -149,10 +154,7 @@ export default class MainScene extends Phaser.Scene {
     this.turretProjectiles = this.add.group();
 
     // Adds collision between players shots and powerups, causing them to bounce
-    this.physics.add.collider(this.turretProjectiles, this.enemies, function(projectile, enemy) {
-      projectile.destroy();
-      enemy.destroy();
-    });
+    this.physics.add.overlap(this.turretProjectiles, this.enemies, this.handleBulletCollision, this.giveTrue, this);
 
     // Adding collision for the time crystal and enemies
     this.physics.add.overlap(this.timeCrystal, this.enemies, this.hurtCrystal, this.giveTrue, this);
@@ -168,6 +170,41 @@ export default class MainScene extends Phaser.Scene {
   giveTrue(): boolean {
     return true;
   }
+
+
+  /**
+   * handleBulletCollision, destroys projectiles and enemies.
+   * 
+   * Consumes: projectile, enemy
+   * Produces: Nothing
+   */
+  handleBulletCollision(projectile, enemy): void {
+    projectile.destroy();
+    enemy.destroy();
+    if (projectile.name === "kamehameha_beam") {
+      this.collideMultiple(enemy);
+    }
+  }
+
+
+  /**
+   * collideMultiple, destroys multiple enemies based on how close they are to the enemy that collided with a projectile.
+   * 
+   * Consumes: An enemy
+   * Produces: Nothing
+   */
+  collideMultiple(enemy) {
+    for (let i = 0; i < this.enemies.getChildren().length; i++) {
+      let child = this.enemies.getChildren()[i];
+      if (child.x < enemy.x+50 && child.x > enemy.x - 50) {
+        if (child.y < enemy.y+50 && child.y > enemy.y - 50) {
+          console.log("WRECKED");
+          child.destroy();
+        }
+      }
+    }
+  }
+
 
   /**
    * onDrag, defines the behaviour for the turrets when they are dragged. THe turrets get rotated to match the angle of the clock.
@@ -269,7 +306,8 @@ export default class MainScene extends Phaser.Scene {
   resetGameProtocol(): void {
     this.resetGame = true;
     let turretGroup = this.turrets.getChildren();
-    for (let i = 0; i < turretGroup.length; i++) {
+    let turretLen: number = turretGroup.length
+    for (let i = 0; i < turretLen; i++) {
       let turret = turretGroup[i];
       turret.x = this.defensiveInventoryCoords[i][0];
       turret.y = this.defensiveInventoryCoords[i][1];
@@ -365,7 +403,6 @@ export default class MainScene extends Phaser.Scene {
       case 3:
         song = this.levelThreeTrack;
       default:
-        console.log("No Song");
         break;
     }
     return song;
@@ -575,36 +612,38 @@ export default class MainScene extends Phaser.Scene {
   unlockTurret(): void {
     let randomUnlock: number = Math.floor(Math.random() * 3) + 1; // Get random number between 1 and 3
     let notUnlocked: boolean = true;
-    if (!this.barrelTurret.isUnlocked || !this.wizardGuy.isUnlocked || !this.purpleShip.isUnlocked) {
-      while (notUnlocked) { // Keep re rolling random number until a turret is unlocked
-        if (randomUnlock == 1) { // Wizard Guy
-          if (!this.wizardGuy.isUnlocked) {
-            notUnlocked = false;
-            this.wizardGuy.isUnlocked = true;
-            this.lockImageList[2].setVisible(false);
-            this.lockImageList[2] = -1; // Remove this image from the array
-            this.wizardGuy.setInteractive({draggable: true});
+    if (this.waveNumber.charAt(this.waveNumber.length-1) != "1") { // Don't run this on wave 1
+      if (!this.barrelTurret.isUnlocked || !this.wizardGuy.isUnlocked || !this.purpleShip.isUnlocked) {
+        while (notUnlocked) { // Keep re rolling random number until a turret is unlocked
+          if (randomUnlock == 1) { // Wizard Guy
+            if (!this.wizardGuy.isUnlocked) {
+              notUnlocked = false;
+              this.wizardGuy.isUnlocked = true;
+              this.lockImageList[2].setVisible(false);
+              this.lockImageList[2] = -1; // Remove this image from the array
+              this.wizardGuy.setInteractive({draggable: true});
+            }
+          } 
+          if (randomUnlock == 2) { // Barrel Turret
+            if (!this.barrelTurret.isUnlocked) {
+              notUnlocked = false;
+              this.barrelTurret.isUnlocked = true;
+              this.lockImageList[1].setVisible(false);
+              this.lockImageList[1] = -1;
+              this.barrelTurret.setInteractive({draggable: true});
+            }
+          } 
+          if (randomUnlock == 3) { // Purple Ship
+            if (!this.purpleShip.isUnlocked) {
+              notUnlocked = false;
+              this.purpleShip.isUnlocked = true;
+              this.lockImageList[0].setVisible(false);
+              this.lockImageList[0] = -1;
+              this.purpleShip.setInteractive({draggable: true});
+            }
           }
-        } 
-        if (randomUnlock == 2) { // Barrel Turret
-          if (!this.barrelTurret.isUnlocked) {
-            notUnlocked = false;
-            this.barrelTurret.isUnlocked = true;
-            this.lockImageList[1].setVisible(false);
-            this.lockImageList[1] = -1;
-            this.barrelTurret.setInteractive({draggable: true});
-          }
-        } 
-        if (randomUnlock == 3) { // Purple Ship
-          if (!this.purpleShip.isUnlocked) {
-            notUnlocked = false;
-            this.purpleShip.isUnlocked = true;
-            this.lockImageList[0].setVisible(false);
-            this.lockImageList[0] = -1;
-            this.purpleShip.setInteractive({draggable: true});
-          }
+          randomUnlock = Math.floor(Math.random() * 3) + 1; // Re-Roll
         }
-        randomUnlock = Math.floor(Math.random() * 3) + 1; // Re-Roll
       }
     }
   }
@@ -776,12 +815,12 @@ export default class MainScene extends Phaser.Scene {
    *                    (hour) to be able to shoot at incoming enemies. Returns a number indicating the hour the
    *                     player put the turret at.
    * 
-   * Consumes: Nothing
+   * Consumes: A turret
    * Produces: A number
    */
-  getTurretPosition(): number {
+  getTurretPosition(turret: any): number {
     let position: number = 0;
-    let rotation: number = this.chromeTurret.rotation*(180/Math.PI); // Convert radians to degrees
+    let rotation: number = turret.rotation*(180/Math.PI); // Convert radians to degrees
     if (((rotation > -13) && (rotation < 0)) || ((rotation > 0) && (rotation < 11))) { // Range for 12:00, special case, signs switch
       position = 12;
     } else if (rotation > 19.69134377126048 && rotation < 39.99554037468087) {
@@ -812,28 +851,83 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * shootAtEnemy, make defenses fire if an enemy is within their range.
-   * 
-   * Consumes: Nothing
+   * moveProjectiles, handles the custom movement for each turrets projectile.
+   *
+   * Consumes: turret, enemy, projectile
    * Produces: Nothing
    */
-  shootAtEnemy(): void {
-    const turretPlacement: number = this.getTurretPosition();
-    this.chromeTurret.rotation*(180/Math.PI);
+  moveProjectiles(turret: any, enemy: any, projectile: any): void {
+      projectile.setRotation(turret.rotation-80.1); // Don't touch 
+      if (turret === this.chromeTurret) {
+        this.physics.moveTo(projectile, enemy.x, enemy.y, 400); // Last arg is projectile speed
+
+      }
+      if (turret === this.wizardGuy) {
+        this.physics.moveTo(projectile, enemy.x, enemy.y, 400); // Last arg is projectile speed
+
+      }
+      if (turret === this.barrelTurret) {
+        this.physics.moveTo(projectile, enemy.x, enemy.y, 400); // Last arg is projectile speed
+
+      }
+      if (turret === this.purpleShip) {
+        this.physics.moveTo(projectile, enemy.x, enemy.y, 200); // Last arg is projectile speed
+
+      }
+  }
+
+
+  /**
+   * armoredResponseCoalition, takes in a turret and spawns projectiles for the turret based on which clas it belongs to.
+   *                           The projectile moves towards an enemy at a speed pre determined by the turret class. 
+   * 
+   * Consumes: turret 
+   * Produces: Nothing
+   */
+  armoredResponseCoalition(turret: any, enemy: any, time: number): void {
+    let projectile: any = null;
+    if (turret === this.chromeTurret && (time - this.chromeTurret.bulletDelay > 200)) { // Magic numbers are just delays between each shot
+      this.beamSound.play();
+      projectile = new Projectile(this, this.chromeTurret, "laser_beam");
+      this.chromeTurret.bulletDelay = new Date().getTime(); // Get new current time of day
+    }
+    if (turret === this.purpleShip && (time - this.purpleShip.bulletDelay > 2000)) {
+      this.kamehamehaSound.play();
+      projectile = new Projectile(this, this.purpleShip, "kamehameha_beam");
+      this.purpleShip.bulletDelay = new Date().getTime(); // Get new current time of day
+    }
+    if (turret === this.barrelTurret && (time - this.barrelTurret.bulletDelay > 1500)) {
+      this.pewPewSound.play();
+      projectile = new Projectile(this, this.barrelTurret, "pixel_bullet");
+      this.barrelTurret.bulletDelay = new Date().getTime(); // Get new current time of day
+    }
+    if (turret === this.wizardGuy && (time - this.wizardGuy.bulletDelay > 1000)) {
+      this.fireBallSound.play();
+      projectile = new Projectile(this, this.wizardGuy, "fire_ball");
+      this.wizardGuy.bulletDelay = new Date().getTime(); // Get new current time of day
+    }
+    if (projectile != null)
+      this.moveProjectiles(turret, enemy, projectile);
+  }
+
+
+  /**
+   * shootAtEnemy, make defenses fire if an enemy is within their range.
+   * 
+   * Consumes: turret
+   * Produces: Nothing
+   */
+  shootAtEnemy(turret: any): void {
+    const turretPlacement: number = this.getTurretPosition(turret);
     for (let i = 0; i < this.spawnTimes.length; i++) {
       if (this.spawnTimes[i] == turretPlacement) {
-          let time: number = new Date().getTime(); // Returns milliseconds
-          for (let i = 0; i < this.enemies.getChildren().length; i++) {
-            let enemy = this.enemies.getChildren()[i];
-            if ((enemy.spawnPosition == turretPlacement) && (time - this.bulletDelay > 200)) { // My attempt at staggering the projectile spawn rate
-              this.bulletDelay = new Date().getTime(); // Get new current time of day
-              this.beamSound.play();
-              let laserBeam = new LaserBeam(this);
-              laserBeam.setRotation(this.chromeTurret.rotation-80.1);
-              this.physics.moveTo(laserBeam, enemy.x, enemy.y, 400); // Last arg is projectile speed
+        let time: number = new Date().getTime(); // Returns milliseconds
+        for (let i = 0; i < this.enemies.getChildren().length; i++) {
+          let enemy = this.enemies.getChildren()[i];
+          if (enemy.spawnPosition == turretPlacement) { // My attempt at staggering the projectile spawn rate
+            this.armoredResponseCoalition(turret, enemy, time);
           }
         }
-        break;
       }
     }
   }
@@ -846,7 +940,7 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   moveEnemy(enemy): void {
-    this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2); // Add 4rth paramter for speed
+    this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2, 10); // Add 4rth paramter for speed
   }
 
 
@@ -862,12 +956,15 @@ export default class MainScene extends Phaser.Scene {
         this.endWave();
         this.prepWave();
       }
-      this.shootAtEnemy();
+      this.shootAtEnemy(this.chromeTurret);
+      this.shootAtEnemy(this.wizardGuy);
+      this.shootAtEnemy(this.purpleShip);
+      this.shootAtEnemy(this.barrelTurret);
     }
     if (this.scene.isVisible("MainScene")) {
       this.handleMusic(1); // Unpause music
       this.handleMusic(2); // Start the next song
-    }
+    } 
     if (!this.tutorialTextArray.length) {
       this.runTutorial(this.tutorialMessageNumber);
       this.tutorialMessageNumber++;
