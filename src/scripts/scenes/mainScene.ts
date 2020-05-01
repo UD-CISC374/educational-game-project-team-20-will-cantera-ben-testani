@@ -940,7 +940,7 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   moveEnemy(enemy): void {
-    this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2, 10); // Add 4rth paramter for speed
+    this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2); // Add 4rth paramter for speed
   }
 
 
