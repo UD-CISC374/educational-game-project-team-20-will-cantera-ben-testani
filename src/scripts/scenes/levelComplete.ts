@@ -3,6 +3,8 @@ export default class LevelComplete extends Phaser.Scene {
     private levelCount: number = LevelComplete.levelNumber;
     private levelOneVictoryMusic: Phaser.Sound.BaseSound;
     private levelTwoVictoryMusic: Phaser.Sound.BaseSound;
+    private levelOneCompleteImage: Phaser.GameObjects.Image;
+    private levelTwoCompleteImage: Phaser.GameObjects.Image;
     levelCompleteText: Phaser.GameObjects.Text;
     shouldRun: boolean = true;
 
@@ -11,12 +13,8 @@ export default class LevelComplete extends Phaser.Scene {
     }
 
     create() {
-
-        // Level complete music
-        // level 1 victory music
         this.levelOneVictoryMusic = this.sound.add("level_one_victory");
         this.levelTwoVictoryMusic = this.sound.add("level_two_victory");
-
     }
 
     /**
@@ -64,6 +62,19 @@ export default class LevelComplete extends Phaser.Scene {
         nextLevelButton.on("pointerdown", () => this.onClick());
     }
 
+
+    drawBackground(): void {
+        switch(this.levelCount) {
+            case 1:
+                this.levelOneCompleteImage = this.add.image(this.scale.width/2, this.scale.height/2, "level_one_complete_image");
+                break;
+            case 2:
+                this.levelOneCompleteImage.destroy();
+                this.levelTwoCompleteImage = this.add.image(this.scale.width/2, this.scale.height/2, "level_two_complete_image");
+        }
+    }
+
+
     /**
      * onClick, switches the scene back to the main scene to play the next level.
      * 
@@ -87,6 +98,7 @@ export default class LevelComplete extends Phaser.Scene {
         if (this.shouldRun) {
             this.shouldRun = false;
             this.levelCount = LevelComplete.levelNumber;
+            this.drawBackground();
             this.drawText();
             this.handleMusic();
         }

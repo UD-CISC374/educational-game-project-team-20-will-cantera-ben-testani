@@ -45,7 +45,7 @@ export default class MainScene extends Phaser.Scene {
   private fireBallSound: Phaser.Sound.BaseSound;
   private levelTwoTrack: Phaser.Sound.BaseSound;
   private levelThreeTrack: Phaser.Sound.BaseSound;
- 
+  private levelOneBackground: GameObjects.Image;
 
 
   // Variables with set values
@@ -54,19 +54,19 @@ export default class MainScene extends Phaser.Scene {
     "level1": {
       "wave1": 1,
       "wave2": 3,
-      "wave3": 5
+      //"wave3": 5
       //"wave4": 12
     }, 
     "level2": {
       "wave1": 1,
       "wave2": 18,
-      "wave3": 30
+      //"wave3": 30
       //"wave4": 45
     },
     "level3": {
       "wave1": 1,
-      "wave2": 10,
-      "wave3": 40
+      //"wave2": 10,
+      //"wave3": 40
       //"wave4": 10
     }
   };
@@ -101,7 +101,8 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   create() {
-    // Analog clock in the background
+    // Background Stuff
+    this.levelOneBackground = this.add.image(this.scale.width/2, this.scale.height/2, "level_one_backdrop");
     this.add.image(this.scale.width/2, this.scale.height/2, "main_clock");
 
     // Projectile Sounds
@@ -198,7 +199,6 @@ export default class MainScene extends Phaser.Scene {
       let child = this.enemies.getChildren()[i];
       if (child.x < enemy.x+50 && child.x > enemy.x - 50) {
         if (child.y < enemy.y+50 && child.y > enemy.y - 50) {
-          console.log("WRECKED");
           child.destroy();
         }
       }
@@ -305,6 +305,9 @@ export default class MainScene extends Phaser.Scene {
    */
   resetGameProtocol(): void {
     this.resetGame = true;
+    this.isWaveDone = false;
+    this.isWaveStarted = false;
+    this.setVisibleHandler();
     let turretGroup = this.turrets.getChildren();
     let turretLen: number = turretGroup.length
     for (let i = 0; i < turretLen; i++) {
@@ -562,20 +565,19 @@ export default class MainScene extends Phaser.Scene {
     waveIndex++; // Go to next wave
     if (waveIndex > Object.keys(this.levelInfo["level" + LevelComplete.levelNumber.toString()]).length) {// Go to level complete scene if the end of the final wave is reached.
       if (LevelComplete.levelNumber+1 > 3) {
+        this.resetGameProtocol();
         this.scene.setVisible(false);
         this.getCurrentSong().stop();
-        this.resetGameProtocol();
         this.scene.switch("VictoryScene"); // End of the game
-        return;
+      } else {
+        this.endWaveHelper(waveIndex);
+        this.waveNumber = "wave1"; // Go to next level
+        this.handleMusic(3); // 3 for stopping the song
+        this.scene.setVisible(false);
+        this.scene.switch("LevelComplete");
       }
-      this.endWaveHelper(waveIndex);
-      this.waveNumber = "wave1"; // Go to next level
-      this.handleMusic(3); // 3 for stopping the song
-      this.scene.setVisible(false);
-      this.scene.switch("LevelComplete");
     } else {
-      this.endWaveHelper(waveIndex); // Just prepares for the next wave
-      this.unlockTurret();
+        this.endWaveHelper(waveIndex); // Just prepares for the next wave
     }
   }
 
@@ -595,9 +597,10 @@ export default class MainScene extends Phaser.Scene {
     this.isWaveDone = false;
     this.spawnTimes.splice(0, this.spawnTimes.length); // Reset the spawn times for the next wave
     if (!this.resetGame) {
+      this.unlockTurret();
       this.waveNumber = this.waveNumber.substr(0, this.waveNumber.length-1); // Delete last character
       this.waveNumber += waveIndex; // Concatenate    
-    }  
+    }
   }
 
 
@@ -612,38 +615,36 @@ export default class MainScene extends Phaser.Scene {
   unlockTurret(): void {
     let randomUnlock: number = Math.floor(Math.random() * 3) + 1; // Get random number between 1 and 3
     let notUnlocked: boolean = true;
-    if (this.waveNumber.charAt(this.waveNumber.length-1) != "1") { // Don't run this on wave 1
-      if (!this.barrelTurret.isUnlocked || !this.wizardGuy.isUnlocked || !this.purpleShip.isUnlocked) {
-        while (notUnlocked) { // Keep re rolling random number until a turret is unlocked
-          if (randomUnlock == 1) { // Wizard Guy
-            if (!this.wizardGuy.isUnlocked) {
-              notUnlocked = false;
-              this.wizardGuy.isUnlocked = true;
-              this.lockImageList[2].setVisible(false);
-              this.lockImageList[2] = -1; // Remove this image from the array
-              this.wizardGuy.setInteractive({draggable: true});
-            }
-          } 
-          if (randomUnlock == 2) { // Barrel Turret
-            if (!this.barrelTurret.isUnlocked) {
-              notUnlocked = false;
-              this.barrelTurret.isUnlocked = true;
-              this.lockImageList[1].setVisible(false);
-              this.lockImageList[1] = -1;
-              this.barrelTurret.setInteractive({draggable: true});
-            }
-          } 
-          if (randomUnlock == 3) { // Purple Ship
-            if (!this.purpleShip.isUnlocked) {
-              notUnlocked = false;
-              this.purpleShip.isUnlocked = true;
-              this.lockImageList[0].setVisible(false);
-              this.lockImageList[0] = -1;
-              this.purpleShip.setInteractive({draggable: true});
-            }
+    if (!this.barrelTurret.isUnlocked || !this.wizardGuy.isUnlocked || !this.purpleShip.isUnlocked) {
+      while (notUnlocked) { // Keep re rolling random number until a turret is unlocked
+        if (randomUnlock == 1) { // Wizard Guy
+          if (!this.wizardGuy.isUnlocked) {
+            notUnlocked = false;
+            this.wizardGuy.isUnlocked = true;
+            this.lockImageList[2].setVisible(false);
+            this.lockImageList[2] = -1; // Remove this image from the array
+            this.wizardGuy.setInteractive({draggable: true});
           }
-          randomUnlock = Math.floor(Math.random() * 3) + 1; // Re-Roll
+        } 
+        if (randomUnlock == 2) { // Barrel Turret
+          if (!this.barrelTurret.isUnlocked) {
+            notUnlocked = false;
+            this.barrelTurret.isUnlocked = true;
+            this.lockImageList[1].setVisible(false);
+            this.lockImageList[1] = -1;
+            this.barrelTurret.setInteractive({draggable: true});
+          }
+        } 
+        if (randomUnlock == 3) { // Purple Ship
+          if (!this.purpleShip.isUnlocked) {
+            notUnlocked = false;
+            this.purpleShip.isUnlocked = true;
+            this.lockImageList[0].setVisible(false);
+            this.lockImageList[0] = -1;
+            this.purpleShip.setInteractive({draggable: true});
+          }
         }
+        randomUnlock = Math.floor(Math.random() * 3) + 1; // Re-Roll
       }
     }
   }
@@ -792,18 +793,22 @@ export default class MainScene extends Phaser.Scene {
     switch(enemyNumber) {
       case 1:
         let armorGoblin: ArmorGoblin = new ArmorGoblin(this, x, y, spawnPosition);
+        armorGoblin.setRotation(Phaser.Math.Angle.Between(500, 500, armorGoblin.x, armorGoblin.y)-80.1);
         this.enemies.add(armorGoblin);
         break;
       case 2:
         let speedGoblin: SpeedGoblin = new SpeedGoblin(this, x, y, spawnPosition);
+        speedGoblin.setRotation(Phaser.Math.Angle.Between(500, 500, speedGoblin.x, speedGoblin.y)-80.1);
         this.enemies.add(speedGoblin);
         break;
       case 3:
         let timeGoblin: TimeGoblin = new TimeGoblin(this, x, y, spawnPosition);
+        timeGoblin.setRotation(Phaser.Math.Angle.Between(500, 500, timeGoblin.x, timeGoblin.y)-80.1);
         this.enemies.add(timeGoblin);
         break;
       case 4: 
         let thePunisher: ThePunisher = new ThePunisher(this, x, y, spawnPosition);
+        thePunisher.setRotation(Phaser.Math.Angle.Between(500, 500, thePunisher.x, thePunisher.y)-80.1);
         this.enemies.add(thePunisher);
         break;
     }

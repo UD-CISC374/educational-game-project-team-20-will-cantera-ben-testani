@@ -25,6 +25,9 @@ export default class PreloadScene extends Phaser.Scene {
 
     // Images 
 
+    // Backgrounds
+    this.load.image("level_one_backdrop", "assets/images/grassBackground.png");
+
     // Enemies
     this.load.image("main_clock", "assets/images/BaseClock.png");
     this.load.image("time_goblin", "assets/images/TimeGoblin.png");
@@ -78,15 +81,19 @@ export default class PreloadScene extends Phaser.Scene {
     // Fonts
     this.load.bitmapFont("pixelFont", "assets/font/font.png", "assets/font/font.xml");
 
+//-----------------------------------------------------------------------------------------------------------
+    // For Level Switch Scene
+    this.load.image("level_one_complete_image", "assets/images/rainbowFlame.png");
+    this.load.image("level_two_complete_image", "assets/images/yellowBall.png");
 
 //-----------------------------------------------------------------------------------------------------------
     // For lose scene
     this.load.audio("lose_song", "assets/audio/endSong.mp3");
     
-  
 //-----------------------------------------------------------------------------------------------------------
     // For Victory Scene
     this.load.audio("win_song", "assets/audio/sunlight.mp3");
+    this.load.image("confetti_background", "assets/images/confetti.png")
 
   }
 

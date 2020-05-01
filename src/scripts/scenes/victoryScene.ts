@@ -4,12 +4,17 @@ export default class VictoryScene  extends Phaser.Scene {
     private levelCompleteText: Phaser.GameObjects.Text;
     private shouldRun: boolean = true;
     private victoryMusic: Phaser.Sound.BaseSound;
+    private background: Phaser.GameObjects.TileSprite;
 
     constructor() {
         super({ key: 'VictoryScene' });
     }
 
     create() {
+        this.background = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, "confetti_background");
+        this.background.setOrigin(0, 0);
+        this.background.setScrollFactor(0);
+
         this.victoryMusic = this.sound.add("win_song");
         this.levelCompleteText = this.add.text(0, 0, "Game " + " Complete! ", {fill: "red", font: "bold 80px Serif"});
         this.levelCompleteText.setBackgroundColor("black");
@@ -17,7 +22,7 @@ export default class VictoryScene  extends Phaser.Scene {
         this.levelCompleteText.setY(this.scale.height/2 - 300); // Put the text towards the top 
 
         // Button for restartng the game if you want to play again
-        let resetButton = this.add.text(0, 0, "Try Again?", {fill: "red", font: "bold 80px Serif"});
+        let resetButton = this.add.text(0, 0, "Play Again?", {fill: "red", font: "bold 80px Serif"});
         resetButton.setBackgroundColor("black");
         resetButton.setX(this.scale.width/2 - resetButton.width/2);
         resetButton.setY(this.scale.height/2 + 300); // Put the text towards the top 
@@ -41,6 +46,7 @@ export default class VictoryScene  extends Phaser.Scene {
 
 
     update() {
+        this.background.tilePositionY -= 2;
         if (this.shouldRun) {
             this.shouldRun = false;
             let victoryMusicConfig = {
