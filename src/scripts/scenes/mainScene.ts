@@ -53,20 +53,20 @@ export default class MainScene extends Phaser.Scene {
   private levelInfo: Object = { // Three waves per level, key is the number of enemies per wave
     "level1": {
       "wave1": 1,
-      "wave2": 3,
-      //"wave3": 5
+      "wave2": 6,
+      "wave3": 12
       //"wave4": 12
     }, 
     "level2": {
-      "wave1": 1,
+      "wave1": 10,
       "wave2": 18,
-      //"wave3": 30
+      "wave3": 30
       //"wave4": 45
     },
     "level3": {
-      "wave1": 1,
-      //"wave2": 10,
-      //"wave3": 40
+      "wave1": 8,
+      "wave2": 15,
+      "wave3": 40
       //"wave4": 10
     }
   };
