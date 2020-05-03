@@ -22,6 +22,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.audio("shadow", "assets/audio/shadow.mp3");
     this.load.audio("level_one_victory", "assets/audio/level1victory.mp3");
     this.load.audio("level_two_victory", "assets/audio/level2victory.mp3");
+    this.load.audio("death_sound", "assets/audio/death.mp3");
 
     // Images 
 
@@ -59,6 +60,10 @@ export default class PreloadScene extends Phaser.Scene {
 
     // Iron Bars 
     this.load.image("iron_bar", "assets/images/ironBar.png");
+
+    // Death Clock
+    this.load.image("death_clock", "assets/images/finalClock.png");
+
 
 
     // Spritesheets

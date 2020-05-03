@@ -2,7 +2,6 @@ export default class LevelComplete extends Phaser.Scene {
     public static levelNumber: number = 1; // Global
     public static switching: boolean = false;
     private levelCount: number = LevelComplete.levelNumber;
-    private hasSwitched: boolean = LevelComplete.switching;
 
     private levelOneVictoryMusic: Phaser.Sound.BaseSound;
     private levelTwoVictoryMusic: Phaser.Sound.BaseSound;

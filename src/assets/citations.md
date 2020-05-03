@@ -70,5 +70,9 @@ https://i.4pcdn.org/pol/1472336885414.jpg
 Confetti Background
 https://www.pinterest.com/pin/444237950742655999/
 
+Death Clock 
+https://www.google.com/url?sa=i&url=https%3A%2F%2Fpholder.com%2Fr%2Fenterthegungeon%2F%3Fpage%3D6&psig=AOvVaw1dwr67WHGRbRKFw28Lkp2C&ust=1588606543000000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMigvOaCmOkCFQAAAAAdAAAAABAD 
+
+
 
 

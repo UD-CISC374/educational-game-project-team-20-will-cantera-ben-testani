@@ -4,6 +4,7 @@ import { GameObjects } from 'phaser';
 export default class LoseScene extends Phaser.Scene {
     private mainTrack: Phaser.Sound.BaseSound;
     private shouldRun: boolean = true;
+    public static switching: boolean = false;
 
     constructor() {
         super({ key: 'LoseScene' });
@@ -48,6 +49,7 @@ export default class LoseScene extends Phaser.Scene {
     onClick(): void {
         this.mainTrack.pause();
         this.shouldRun = true;
+        LoseScene.switching = true;
         this.scene.switch("MainScene"); // The start method resets the main scene as if you were just starting the game for the first time.
     }
 
