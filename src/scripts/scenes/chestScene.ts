@@ -1,5 +1,6 @@
 
 export default class ChestScene extends Phaser.Scene {
+  public static switching: boolean = false;
   closedChest: Phaser.GameObjects.Image;
   openedChest: Phaser.GameObjects.Image;
   clock: Phaser.GameObjects.Image;
@@ -82,6 +83,7 @@ export default class ChestScene extends Phaser.Scene {
     //this.backButton.setY(this.scale.height/2 + 350);
     this.backButton.setInteractive();
     this.backButton.on("pointerdown", () => {
+      ChestScene.switching = true;
       this.resetScene();
       this.scene.switch("MainScene");
     });

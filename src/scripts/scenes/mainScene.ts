@@ -11,6 +11,7 @@ import WizardGuy from '../objects/wizardGuy';
 import Projectile from '../objects/projectile';
 import LoseScene from './loseScene';
 import VictoryScene from './victoryScene';
+import ChestScene from './chestScene';
 
 
 function sleep (milliseconds) { // Making the program wait for the given time
@@ -36,7 +37,6 @@ export default class MainScene extends Phaser.Scene {
   private timeCrystal: Phaser.GameObjects.Sprite;
   private chestButton: Phaser.GameObjects.Text;
   private levelOneTrack: Phaser.Sound.BaseSound;
-  private spacebar: Phaser.Input.Keyboard.Key;
   private waveStartButton: GameObjects.Text;
   private healthBar: GameObjects.Image;
   private enemySpawnText: GameObjects.Text;
@@ -146,9 +146,6 @@ export default class MainScene extends Phaser.Scene {
     this.turrets.add(this.barrelTurret);
     this.turrets.add(this.wizardGuy);
 
-    // Enable spacebar
-    this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-
     // Draws the button onscreen for starting the wave
     this.makeWaveStartButton();
 
@@ -198,7 +195,7 @@ export default class MainScene extends Phaser.Scene {
   handleBulletCollision(projectile, enemy): void {
     projectile.destroy();
     enemy.destroy();
-    if (projectile.name === "kamehameha_beam") {
+    if (projectile.name === "kamehameha_beam" || projectile.name === "pixel_bullet") {
       this.collideMultiple(enemy);
     }
   }
@@ -317,7 +314,7 @@ export default class MainScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  deathSequence(): void {
+  async deathSequence() {
     // Death Clock
     let length: number = this.enemies.getChildren().length;
     for (let i = 0; i < length; i++) // Clear remaining enemies
@@ -328,8 +325,8 @@ export default class MainScene extends Phaser.Scene {
       this.deathClock = this.physics.add.sprite(0, this.scale.height/2, "death_clock");
       this.tweens.add({ // Animation for respawning player
         targets: this.deathClock,
-        x: this.scale.width-350,
-        duration: 3500, 
+        x: this.scale.width-260,
+        duration: 4000, 
         repeat: 0,
         onComplete: () => {
           this.deathClock.destroy();
@@ -338,6 +335,8 @@ export default class MainScene extends Phaser.Scene {
         },
         callbackscope: this,
       });
+      await sleep(2700);
+      this.cameras.main.flash(700, 255, 0, 0); // Number is the duration of the flash
     }
   }
 
@@ -1025,6 +1024,10 @@ export default class MainScene extends Phaser.Scene {
     }
     if (LoseScene.switching) {
       LoseScene.switching = false;
+      this.handleMusic(1);
+    }
+    if (ChestScene.switching) {
+      ChestScene.switching = false;
       this.handleMusic(1);
     }
     if (VictoryScene.switching) {
