@@ -40,7 +40,7 @@ export default class ChestScene extends Phaser.Scene {
   init(data){
     this.powerupNum = data.powerup;
     this.chestNum = data.chest;
-    //console.log(this.powerupNum);
+    console.log(this.chestNum);
   }
 
   /**
@@ -154,6 +154,7 @@ export default class ChestScene extends Phaser.Scene {
     this.backButton.setInteractive();
     this.backButton.on("pointerdown", () => {
       this.resetScene();
+      console.log(this.powerupNum);
       this.scene.start("MainScene", {powerup: this.powerupNum, chest: this.chestNum});
       this.scene.switch("MainScene");
     });
@@ -266,7 +267,7 @@ export default class ChestScene extends Phaser.Scene {
   showPowerup(){
     let x = Math.round(Math.floor(Math.random() * this.rewardGroup.getChildren().length));
     this.rewardGroup.getChildren()[x].setVisible(true);
-    this.powerupNum = x;
+    //this.powerupNum = x;
   }
 
   /**

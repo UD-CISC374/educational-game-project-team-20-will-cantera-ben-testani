@@ -6,6 +6,7 @@ import SpeedGoblin from '../objects/speedGoblin';
 import ThePunisher from '../objects/thePunisher';
 import { GameObjects } from 'phaser';
 import LevelComplete from './levelComplete';
+import Bomb from '../objects/bomb';
 
 function sleep (milliseconds) { // Making the program wait for the given time
   return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -29,10 +30,13 @@ export default class MainScene extends Phaser.Scene {
   private enemySpawnText: GameObjects.Text;
   public chromeTurret: Phaser.Physics.Arcade.Sprite;
   public turretProjectiles: GameObjects.Group;
+  public powerUps: GameObjects.Group;
   private beamSound: Phaser.Sound.BaseSound;
   private levelTwoTrack: Phaser.Sound.BaseSound;
   private powerUpNum=1;
   private chestNum=1;
+  private bombBool=false;
+  private bomb: Phaser.GameObjects.Image;
 
 
   // Variables with set values
@@ -83,7 +87,10 @@ export default class MainScene extends Phaser.Scene {
   init(data){
     this.powerUpNum = data.powerup;
     this.chestNum = data.chest;
+    this.bombBool= data.bombBool;
+    this.checkPowerUps();
   }
+
   /**
    * create, most of the code is moved to their own functions, that code is called in create to 
    *         setup this screen.
@@ -137,10 +144,32 @@ export default class MainScene extends Phaser.Scene {
       enemy.destroy();
     });
 
+    this.powerUps = this.add.group();
+    this.physics.add.collider(this.powerUps, this.enemies, function(powerUp, enemy){
+      powerUp.destroy();
+      enemy.destroy();
+    });
+
     // Adding collision for the time crystal and enemies
     this.physics.add.overlap(this.timeCrystal, this.enemies, this.hurtCrystal, this.giveTrue, this);
   }
 
+
+  checkPowerUps(){
+    if(this.bombBool){
+      this.makeBomb();
+    }
+  }
+
+  makeBomb(){
+    // this.bomb=this.add.image(this.scale.width/5, this.scale.height/5, "bombPowerup");
+    // this.bomb.setScale(.2);
+    // this.bombBool = false;
+    // this.bomb.setInteractive({draggable:true});
+
+    let bomb = new Bomb(this);
+    
+  }
 
   /**
    * giveTrue, for some reason, the Phaser overlap function needs a callback that returns true?
@@ -510,7 +539,8 @@ export default class MainScene extends Phaser.Scene {
     this.powerUpButton.setY((this.scale.height/2) - (this.chestButton.height/2) + 460);
     this.powerUpButton.setInteractive();
     this.powerUpButton.on("pointerdown", () => {
-      this.scene.start("PowerUp", {bombPowerUp: this.powerUpNum});
+      console.log(this.chestNum);
+      this.scene.start("PowerUp", {bombPowerUp: this.powerUpNum, chest: this.chestNum, bombBool: this.bombBool});
       this.scene.switch("PowerUp");
     });
   }

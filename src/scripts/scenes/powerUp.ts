@@ -9,7 +9,9 @@ export default class PowerUp extends Phaser.Scene {
     bombPowerup: Phaser.GameObjects.Image;
     bombPowerUpLabel: Phaser.GameObjects.BitmapText;
     bombPowerUpNum: number;
+    chestNum: number;
     bombPowerUpDesc: Phaser.GameObjects.BitmapText;
+    bombBool: boolean;
 
     constructor() {
         super({ key: 'PowerUp' });
@@ -17,6 +19,9 @@ export default class PowerUp extends Phaser.Scene {
 
     init(data){
         this.bombPowerUpNum = data.bombPowerUp;
+        this.chestNum = data.chest;
+        this.bombBool = data.bombBool;
+        console.log(data.chest);
     }
 
     create() {
@@ -32,6 +37,16 @@ export default class PowerUp extends Phaser.Scene {
     drawText(): void {
         this.bombPowerup=this.add.image(this.scale.width/5, this.scale.height/4, "bombPowerup");
         this.bombPowerup.setScale(.3);
+        this.bombPowerup.setInteractive();
+        this.bombPowerup.on("pointerdown", () => {
+            if(this.bombPowerUpNum != 0){
+                this.bombBool = true;
+                this.bombPowerUpNum--;
+                this.scene.start("MainScene", {powerup: this.bombPowerUpNum, chest: this.chestNum, bombBool: this.bombBool});
+                console.log("test");
+                this.scene.switch("MainScene");
+            }
+        });
         this.bombPowerUpLabel = this.add.bitmapText(25, this.scale.height/5, "pixelFont", "x" + this.bombPowerUpNum, 120);
         let bombtext = "Bomb - Blows up destroying \nnearby enemies";
         this.bombPowerUpDesc = this.add.bitmapText(this.scale.width/3.3, this.scale.height/5, "pixelFont", bombtext, 70);
@@ -54,7 +69,11 @@ export default class PowerUp extends Phaser.Scene {
         this.backButton.setX(10);
         this.backButton.setY(10); // Put the text towards the top 
         this.backButton.setInteractive();
-        this.backButton.on("pointerdown", () => this.scene.switch("MainScene"));
+        this.backButton.on("pointerdown", () => {
+            this.scene.start("MainScene", {powerup: this.bombPowerUpNum, chest: this.chestNum, bombBool: this.bombBool});
+            console.log("test");
+            this.scene.switch("MainScene");
+        });
     }
 
     /**
