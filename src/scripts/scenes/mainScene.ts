@@ -47,6 +47,8 @@ export default class MainScene extends Phaser.Scene {
   private levelTwoTrack: Phaser.Sound.BaseSound;
   private levelThreeTrack: Phaser.Sound.BaseSound;
   private levelOneBackground: GameObjects.Image;
+  private levelTwoBackground: GameObjects.Image;
+  private levelThreeBackground: GameObjects.Image;
   private deathSound: Phaser.Sound.BaseSound;
   private deathClock: Phaser.Physics.Arcade.Sprite;
 
@@ -106,6 +108,14 @@ export default class MainScene extends Phaser.Scene {
   create() {
     // Background Stuff
     this.levelOneBackground = this.add.image(this.scale.width/2, this.scale.height/2, "level_one_backdrop");
+    this.levelTwoBackground = this.add.image(this.scale.width/2, this.scale.height/2, "level_two_backdrop");
+    this.levelThreeBackground = this.add.image(this.scale.width/2, this.scale.height/2, "level_three_backdrop");
+    this.levelOneBackground.depth = -1;
+    this.levelTwoBackground.depth = -1;
+    this.levelThreeBackground.depth = -1;
+    this.levelTwoBackground.setVisible(false);
+    this.levelThreeBackground.setVisible(false);
+
     this.add.image(this.scale.width/2, this.scale.height/2, "main_clock");
 
     // Death Sound
@@ -340,6 +350,9 @@ export default class MainScene extends Phaser.Scene {
    */
   resetGameProtocol(hasLost: boolean): void {
     this.resetGame = true;
+    this.levelTwoBackground.setVisible(false);
+    this.levelThreeBackground.setVisible(false);
+    this.levelOneBackground.setVisible(true);
     if (!hasLost) {
       this.setVisibleHandler();
       this.isWaveDone = false;
@@ -999,6 +1012,14 @@ export default class MainScene extends Phaser.Scene {
     if (LevelComplete.switching) {
       LevelComplete.switching = false;
       this.isLevelSwitching = false;
+      if (LevelComplete.levelNumber === 2) {
+        this.levelOneBackground.setVisible(false);
+        this.levelTwoBackground.setVisible(true);
+      }
+      if (LevelComplete.levelNumber === 3) {
+        this.levelTwoBackground.setVisible(false);
+        this.levelThreeBackground.setVisible(true);
+      }
       this.handleMusic(2);
       this.prepWave();
     }

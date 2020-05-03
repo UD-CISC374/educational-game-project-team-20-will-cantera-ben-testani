@@ -28,6 +28,9 @@ export default class PreloadScene extends Phaser.Scene {
 
     // Backgrounds
     this.load.image("level_one_backdrop", "assets/images/grassBackground.png");
+    this.load.image("level_two_backdrop", "assets/images/fountain.png");
+    this.load.image("level_three_backdrop", "assets/images/void.png");
+
 
     // Enemies
     this.load.image("main_clock", "assets/images/BaseClock.png");
