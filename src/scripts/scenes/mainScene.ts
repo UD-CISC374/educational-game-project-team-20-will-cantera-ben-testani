@@ -13,10 +13,12 @@ import LoseScene from './loseScene';
 import VictoryScene from './victoryScene';
 import ChestScene from './chestScene';
 
+import Bomb from '../objects/bomb';
 
 function sleep (milliseconds) { // Making the program wait for the given time
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
+
 export default class MainScene extends Phaser.Scene {
   // Constants
   private readonly numEnemies: number = 4;
@@ -36,6 +38,7 @@ export default class MainScene extends Phaser.Scene {
   public turretProjectiles: GameObjects.Group;
   private timeCrystal: Phaser.GameObjects.Sprite;
   private chestButton: Phaser.GameObjects.Text;
+  private powerUpButton: Phaser.GameObjects.Text;
   private levelOneTrack: Phaser.Sound.BaseSound;
   private waveStartButton: GameObjects.Text;
   private healthBar: GameObjects.Image;
@@ -51,6 +54,12 @@ export default class MainScene extends Phaser.Scene {
   private levelThreeBackground: GameObjects.Image;
   private deathSound: Phaser.Sound.BaseSound;
   private deathClock: Phaser.Physics.Arcade.Sprite;
+
+  // Powerup Stuff
+  public powerUps: any;
+  private powerUpNum = 1;
+  private chestNum = 1;
+  private bombBool = false;
 
   // Variables with set values
   private health: number = this.MAXHEALTH; // Width in pixels of the health bar
@@ -97,6 +106,13 @@ export default class MainScene extends Phaser.Scene {
     super({ key: 'MainScene' });
   }
 
+
+  init(data){
+    this.powerUpNum = data.powerup;
+    this.chestNum = data.chest;
+    this.bombBool= data.bombBool;
+    //this.checkPowerUps();
+  }
 
   /**
    * create, most of the code is moved to their own functions, that code is called in create to 
@@ -163,6 +179,7 @@ export default class MainScene extends Phaser.Scene {
     // Making some things to be drawn on screen
     this.makeTimeCrystal();
     this.makeChestButton();
+    this.makePowerUpButton();
 
     // Group for projectiles
     this.turretProjectiles = this.add.group();
@@ -170,10 +187,33 @@ export default class MainScene extends Phaser.Scene {
     // Adds collision between players shots and powerups, causing them to bounce
     this.physics.add.overlap(this.turretProjectiles, this.enemies, this.handleBulletCollision, this.giveTrue, this);
 
+    this.powerUps = this.add.group();
+    this.physics.add.collider(this.powerUps, this.enemies, function(powerUp, enemy){
+      powerUp.destroy();
+      enemy.destroy();
+    });
+
     // Adding collision for the time crystal and enemies
     this.physics.add.overlap(this.timeCrystal, this.enemies, this.hurtCrystal, this.giveTrue, this);
   }
 
+
+  checkPowerUps(){
+    if(this.bombBool){
+      this.makeBomb();
+      this.bombBool = false;
+    }
+  }
+
+  makeBomb(){
+    // this.bomb=this.add.image(this.scale.width/5, this.scale.height/5, "bombPowerup");
+    // this.bomb.setScale(.2);
+    // this.bombBool = false;
+    // this.bomb.setInteractive({draggable:true});
+
+    let bomb = new Bomb(this);
+    //this.powerUps.add(bomb);
+  }
 
   /**
    * giveTrue, for some reason, the Phaser overlap function needs a callback that returns true?
@@ -773,10 +813,31 @@ export default class MainScene extends Phaser.Scene {
     this.chestButton.on("pointerdown", () => {
       let song: Phaser.Sound.BaseSound = this.getCurrentSong();
       song.pause();
+      this.scene.start("ChestScene", {powerup: this.powerUpNum, chest: this.chestNum});
       this.scene.switch("ChestScene");
     });
   }
 
+
+  /**
+   * makePowerUpButton, handles displaying the button to switch to the chest scene on the screen when the wave of enemies 
+   *                  is over.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  makePowerUpButton(): void {
+    this.powerUpButton = this.add.text(0, 0, "Power-Ups", {fill: "red", font: "bold 50px Serif"});
+    this.powerUpButton.setBackgroundColor("black");
+    this.powerUpButton.setX((this.scale.width/2) - (this.powerUpButton.width/2) + 350);
+    this.powerUpButton.setY((this.scale.height/2) - (this.chestButton.height/2) + 460);
+    this.powerUpButton.setInteractive();
+    this.powerUpButton.on("pointerdown", () => {
+      console.log(this.chestNum);
+      this.scene.start("PowerUp", {bombPowerUp: this.powerUpNum, chest: this.chestNum, bombBool: this.bombBool});
+      this.scene.switch("PowerUp");
+    });
+  }
 
    /**
    * getEnemyCoords, Returns a range of pixels for the enemy to spawn based on the random hour chosen.
@@ -1069,6 +1130,7 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   update(): void {
+    this.checkPowerUps();
     this.sceneSwitchUpdater(); // Handle sounds and level resets
     this.mainUpdater(); // Level switching among other things
     if (!this.tutorialTextArray.length) {

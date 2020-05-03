@@ -41,7 +41,7 @@ export default class StartScene extends Phaser.Scene {
    */
   onClick(): void {
     this.introTrack.stop()
-    this.scene.start("MainScene"); // Move onto main scene for the game
+    this.scene.start("MainScene", {powerup:1, chest:1}); // Move onto main scene for the game
   }
 
   

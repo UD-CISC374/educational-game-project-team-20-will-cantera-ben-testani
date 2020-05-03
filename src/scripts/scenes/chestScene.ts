@@ -154,7 +154,7 @@ export default class ChestScene extends Phaser.Scene {
       ChestScene.switching = true;
       this.resetScene();
       console.log(this.powerupNum);
-      this.scene.start("MainScene", {powerup: this.powerupNum, chest: this.chestNum});
+      //this.scene.start("MainScene", {powerup: this.powerupNum, chest: this.chestNum});
       this.scene.switch("MainScene");
     });
   }
