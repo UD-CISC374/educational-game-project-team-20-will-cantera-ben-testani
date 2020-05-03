@@ -1,8 +1,5 @@
-*Please be sure to list the source of all assets you used here.*
-
-*At least a URL, but also be sure to include any extra information that the artist/author requests you include.*
-
 Music:
+
 The Witcher 3 - A Magic Cave
 https://www.youtube.com/watch?v=n9bFQrH3RRg
 
@@ -27,7 +24,10 @@ https://www.youtube.com/watch?v=k1IaGHfZ4YU
 Summon In The Sunlight - by Jamserton 
 https://www.youtube.com/watch?v=dzB2cN-AU8w
 
+
+
 Images:
+
 Turret Gun image
 https://www.deviantart.com/ultimaodin/art/Turret-001x3-500578422 
 
@@ -69,6 +69,17 @@ https://i.4pcdn.org/pol/1472336885414.jpg
 
 Confetti Background
 https://www.pinterest.com/pin/444237950742655999/
+
+Death Clock 
+https://www.google.com/url?sa=i&url=https%3A%2F%2Fpholder.com%2Fr%2Fenterthegungeon%2F%3Fpage%3D6&psig=AOvVaw1dwr67WHGRbRKFw28Lkp2C&ust=1588606543000000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMigvOaCmOkCFQAAAAAdAAAAABAD 
+
+Level Two Background 
+https://www.pinterest.de/pin/334321972342367674/
+
+Level Three Background
+https://www.google.com/url?sa=i&url=https%3A%2F%2Fsociety6.com%2Fproduct%2Fpixel-void_print&psig=AOvVaw1YwvRHUAChxaHzw33TtmVs&ust=1588615232426000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMjYq7qjmOkCFQAAAAAdAAAAABAD
+
+
 
 
 

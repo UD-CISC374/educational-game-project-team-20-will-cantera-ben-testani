@@ -8,6 +8,10 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/audio/beam.mp3"
   },
   {
+    "revision": "2146ca63efbbdb7fa8002e3ba9be8a83",
+    "url": "assets/audio/death.mp3"
+  },
+  {
     "revision": "896be79961ff2adbcfcf3d19c0d61201",
     "url": "assets/audio/endSong.mp3"
   },
@@ -48,7 +52,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/audio/warsaw.mp3"
   },
   {
-    "revision": "815c4e45dd3a38d12c0ad79cd33f3c3a",
+    "revision": "7a1cdc6752593d5ef5514aa298593668",
     "url": "assets/citations.md"
   },
   {
@@ -128,8 +132,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/images/confetti.png"
   },
   {
+    "revision": "484a293bc2c2dfa22c0199ea597f05ce",
+    "url": "assets/images/finalClock.png"
+  },
+  {
     "revision": "661bc2e9a27818b7297a69fce4fb4d7b",
     "url": "assets/images/fireball.png"
+  },
+  {
+    "revision": "2a42d5975a0dc186b1d83dc3a9aea69f",
+    "url": "assets/images/fountain.png"
   },
   {
     "revision": "8e6fda513af21f02b478e3c911509419",
@@ -184,6 +196,10 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/images/rainbowFlame.png"
   },
   {
+    "revision": "5cee7246baeaf3fd2a48cec98cdcaa73",
+    "url": "assets/images/void.png"
+  },
+  {
     "revision": "ab82f12c76fbc3e15c884162dfaeb8b5",
     "url": "assets/images/wizardGuy.png"
   },
@@ -200,12 +216,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "favicon.ico"
   },
   {
-    "revision": "7dbf68e56e3a95a03eb8e2ce8993e02d",
+    "revision": "7dd4db70d0933103bda482557ceb1903",
     "url": "index.html"
   },
   {
-    "revision": "00f9f87c14e4cefaf9b2",
-    "url": "main.6fb0232e32121188043c.bundle.js"
+    "revision": "f9a53019f6b4758e3c88",
+    "url": "main.59ee03072ae7276c7a1b.bundle.js"
   },
   {
     "revision": "601680b9d7c735e2dac776c6e564a81b",
@@ -216,7 +232,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "sw.js"
   },
   {
-    "revision": "3e6a94567f4f575a23ba",
-    "url": "vendors.dda463f5e75cc32e0e32.bundle.js"
+    "revision": "210b82913c8bdb919a16",
+    "url": "vendors.b9cb136a26266691a7fb.bundle.js"
   }
 ]);
