@@ -36,7 +36,7 @@ export default class MainScene extends Phaser.Scene {
   private powerUpNum=1;
   private chestNum=1;
   private bombBool=false;
-  private bomb: Phaser.GameObjects.Image;
+  //private bomb: Phaser.GameObjects.Image;
 
 
   // Variables with set values
@@ -168,7 +168,7 @@ export default class MainScene extends Phaser.Scene {
     // this.bomb.setInteractive({draggable:true});
 
     let bomb = new Bomb(this);
-    
+    //this.powerUps.add(bomb);
   }
 
   /**
