@@ -30,7 +30,7 @@ export default class MainScene extends Phaser.Scene {
   private enemySpawnText: GameObjects.Text;
   public chromeTurret: Phaser.Physics.Arcade.Sprite;
   public turretProjectiles: GameObjects.Group;
-  public powerUps: GameObjects.Group;
+  public powerUps: any;
   private beamSound: Phaser.Sound.BaseSound;
   private levelTwoTrack: Phaser.Sound.BaseSound;
   private powerUpNum=1;
@@ -88,7 +88,7 @@ export default class MainScene extends Phaser.Scene {
     this.powerUpNum = data.powerup;
     this.chestNum = data.chest;
     this.bombBool= data.bombBool;
-    this.checkPowerUps();
+    //this.checkPowerUps();
   }
 
   /**
@@ -158,6 +158,7 @@ export default class MainScene extends Phaser.Scene {
   checkPowerUps(){
     if(this.bombBool){
       this.makeBomb();
+      this.bombBool = false;
     }
   }
 
@@ -709,6 +710,7 @@ export default class MainScene extends Phaser.Scene {
 
 
   update(): void {
+    this.checkPowerUps();
     let length = this.enemies.getChildren().length;
     if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
       console.log("LENGTH: " + length.toString());
