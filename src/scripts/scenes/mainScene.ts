@@ -57,9 +57,10 @@ export default class MainScene extends Phaser.Scene {
 
   // Powerup Stuff
   public powerUps: any;
-  private powerUpNum = 1;
-  private chestNum = 1;
-  private bombBool = false;
+  public static bombPowerUpNum = 1;
+  public static chestNum = 1;
+  public static bombBool = false;
+  public static beginning: boolean;
 
   // Variables with set values
   private health: number = this.MAXHEALTH; // Width in pixels of the health bar
@@ -108,9 +109,9 @@ export default class MainScene extends Phaser.Scene {
 
 
   init(data){
-    this.powerUpNum = data.powerup;
-    this.chestNum = data.chest;
-    this.bombBool= data.bombBool;
+    // this.powerUpNum = data.powerup;
+    // this.chestNum = data.chest;
+    // this.bombBool= data.bombBool;
     //this.checkPowerUps();
   }
 
@@ -199,9 +200,9 @@ export default class MainScene extends Phaser.Scene {
 
 
   checkPowerUps(){
-    if(this.bombBool){
+    if(MainScene.bombBool){
       this.makeBomb();
-      this.bombBool = false;
+      MainScene.bombBool = false;
     }
   }
 
@@ -813,7 +814,7 @@ export default class MainScene extends Phaser.Scene {
     this.chestButton.on("pointerdown", () => {
       let song: Phaser.Sound.BaseSound = this.getCurrentSong();
       song.pause();
-      this.scene.start("ChestScene", {powerup: this.powerUpNum, chest: this.chestNum});
+      //this.scene.start("ChestScene", {powerup: this.powerUpNum, chest: this.chestNum});
       this.scene.switch("ChestScene");
     });
   }
@@ -833,8 +834,8 @@ export default class MainScene extends Phaser.Scene {
     this.powerUpButton.setY((this.scale.height/2) - (this.chestButton.height/2) + 460);
     this.powerUpButton.setInteractive();
     this.powerUpButton.on("pointerdown", () => {
-      console.log(this.chestNum);
-      this.scene.start("PowerUp", {bombPowerUp: this.powerUpNum, chest: this.chestNum, bombBool: this.bombBool});
+      //console.log(this.chestNum);
+      //this.scene.start("PowerUp", {bombPowerUp: this.powerUpNum, chest: this.chestNum, bombBool: this.bombBool});
       this.scene.switch("PowerUp");
     });
   }

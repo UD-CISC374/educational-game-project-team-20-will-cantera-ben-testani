@@ -1,3 +1,4 @@
+import MainScene from "./mainScene";
 
 export default class ChestScene extends Phaser.Scene {
   public static switching: boolean = false;
@@ -14,6 +15,7 @@ export default class ChestScene extends Phaser.Scene {
   minutesQuestion: Phaser.GameObjects.BitmapText;
   response: Phaser.GameObjects.BitmapText;
   powerupNum: number; //number to return to mainScene
+
   rewardGroup;
   submitButton;
   chestNumLabel;
@@ -50,13 +52,14 @@ export default class ChestScene extends Phaser.Scene {
    * Produces: Nothing
    */
   create() {
+    MainScene.beginning = true;
     this.backGroup = this.add.group();
     this.textGroup = this.add.group();
     this.rewardGroup = this.physics.add.group({
       immovable: false,
       allowGravity: false
     });
-    if(this.chestNum > 0){
+    if(MainScene.chestNum > 0){
       this.setUpScreen();
       this.makeHelpButton();
       this.makeBackButton();
@@ -95,7 +98,7 @@ export default class ChestScene extends Phaser.Scene {
     this.minLabel=this.add.bitmapText(this.scale.width/4 - 65, this.scale.height/4 + this.scale.height/2 + 40, "pixelFont", "MINUTES", 50);
     this.mainLabel=this.add.bitmapText(150, 150, "pixelFont", "TIME TO DISPLAY ON CLOCK: ", 75);
     this.hoursQuestion = this.add.bitmapText(0,0,"pixelFont", " ", 75);
-    this.chestNumLabel = this.add.text(0, 0, "Chests: " + this.chestNum, {fill: "red", font: "bold 80px Serif"});
+    this.chestNumLabel = this.add.text(0, 0, "Chests: " + MainScene.chestNum, {fill: "red", font: "bold 80px Serif"});
     this.chestNumLabel.setBackgroundColor("black");
     this.chestNumLabel.setX(this.scale.width/2 - this.chestNumLabel.width/2);
     this.hoursDot.setInteractive({draggable:true});
@@ -151,6 +154,7 @@ export default class ChestScene extends Phaser.Scene {
     //this.backButton.setY(this.scale.height/2 + 350);
     this.backButton.setInteractive();
     this.backButton.on("pointerdown", () => {
+      MainScene.beginning = true;
       ChestScene.switching = true;
       this.resetScene();
       console.log(this.powerupNum);
@@ -167,12 +171,20 @@ export default class ChestScene extends Phaser.Scene {
    */
   makeNoChestScene(){
     this.makeBackButton();
-    this.chestNumLabel = this.add.text(0, 0, "Chests: " + this.chestNum, {fill: "red", font: "bold 80px Serif"});
+    this.chestNumLabel = this.add.text(0, 0, "Chests: " + MainScene.chestNum, {fill: "red", font: "bold 80px Serif"});
     this.chestNumLabel.setBackgroundColor("black");
     this.chestNumLabel.setX(this.scale.width/2 - this.chestNumLabel.width/2)
     let noChests = this.add.text(0,0, "You have no chests", {fill: "red", font: "bold 80px Serif"});
     noChests.setX(this.scale.width/2-noChests.width/2);
     noChests.setY(this.scale.height/2-noChests.height/2);
+
+    this.hideClosedChest();
+    this.hideClock();
+    this.hideDots();
+    this.hideSubmit();
+    this.hidePowerup()
+    this.hideText();
+    this.hideResponse();
   }
 
   /**
@@ -213,6 +225,7 @@ export default class ChestScene extends Phaser.Scene {
    * Produces: Nothing
    */
   onClickCheck(){
+    MainScene.beginning = false;
     this.hideResponse();
     let h = this.checkHour();
     let m = this.checkMin();
@@ -294,8 +307,8 @@ export default class ChestScene extends Phaser.Scene {
       this.response.setX(this.scale.width/2 - this.response.width/2);
       this.response.setY(this.chestNumLabel.height + 10);
       this.response.setTint(0x00FF06);
-      this.powerupNum++;
-      this.chestNum--;
+      MainScene.bombPowerUpNum++;
+      MainScene.chestNum--;
     }
     if(num==0){
       this.response = this.add.bitmapText(0, 0, "pixelFont", "INCORRECT ", 75);
@@ -600,5 +613,11 @@ export default class ChestScene extends Phaser.Scene {
   }
 
   update() {
+    if(MainScene.beginning){
+      if(MainScene.chestNum == 0){
+        this.makeNoChestScene();
+      }
+      this.chestNumLabel.setText("Chests: " + MainScene.chestNum);
+    }
   }
 }
