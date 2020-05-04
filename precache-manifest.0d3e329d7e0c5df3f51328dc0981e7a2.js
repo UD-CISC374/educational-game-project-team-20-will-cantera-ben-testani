@@ -212,16 +212,20 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/spritesheets/crystalSheet.png"
   },
   {
+    "revision": "ea801e18a4f14b0c4740b555536b414e",
+    "url": "assets/spritesheets/explosion.png"
+  },
+  {
     "revision": "53cefca2a0f75654486b180949686165",
     "url": "favicon.ico"
   },
   {
-    "revision": "73bba7927db7d6dfddf8fe972148077b",
+    "revision": "9ba8a4eaae9bd80130eb6e1a392d8d70",
     "url": "index.html"
   },
   {
-    "revision": "82ee7b9cf7c7ef7bfd04",
-    "url": "main.0f36387fc21f20ae23e9.bundle.js"
+    "revision": "dcbdb470ccdda6373fb3",
+    "url": "main.e8086b96b98c9a83b5a9.bundle.js"
   },
   {
     "revision": "601680b9d7c735e2dac776c6e564a81b",
@@ -232,7 +236,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "sw.js"
   },
   {
-    "revision": "076ea9e1879acb6ebaa8",
-    "url": "vendors.8b91cc545670ea86d393.bundle.js"
+    "revision": "bcc3cadc25f910ee9e7f",
+    "url": "vendors.963a964ddc3db94db351.bundle.js"
   }
 ]);
