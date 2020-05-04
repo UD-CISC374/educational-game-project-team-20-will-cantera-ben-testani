@@ -548,62 +548,62 @@ export default class ChestScene extends Phaser.Scene {
       //   }
       //   break;
       case 1:
-        if(this.hoursDot.x >= 555 && this.hoursDot.x <= 596 && this.hoursDot.y >= 355 && this.hoursDot.y <= 398){
+        if(this.hoursDot.x >= 564 && this.hoursDot.x <= 648 && this.hoursDot.y >= 361 && this.hoursDot.y <= 449){
           h = true;
         }
         break;
       case 2:
-        if(this.hoursDot.x >= 598 && this.hoursDot.x <= 648 && this.hoursDot.y >= 400 && this.hoursDot.y <= 456){
+        if(this.hoursDot.x >= 604 && this.hoursDot.x <= 667 && this.hoursDot.y >= 415 && this.hoursDot.y <= 514){
           h = true;
         }
         break;
       case 3:
-        if(this.hoursDot.x >= 615 && this.hoursDot.x <= 656 && this.hoursDot.y >= 475 && this.hoursDot.y <= 527){
+        if(this.hoursDot.x >= 592 && this.hoursDot.x <= 668 && this.hoursDot.y >= 494 && this.hoursDot.y <= 595){
           h = true;
         }
         break;
       case 4:
-        if(this.hoursDot.x >= 604 && this.hoursDot.x <= 646 && this.hoursDot.y >= 550 && this.hoursDot.y <= 610){
+        if(this.hoursDot.x >= 564 && this.hoursDot.x <= 644 && this.hoursDot.y >= 560 && this.hoursDot.y <= 651){
           h = true;
         }
         break;
       case 5:
-        if(this.hoursDot.x >= 545 && this.hoursDot.x <= 600 && this.hoursDot.y >= 610 && this.hoursDot.y <= 635){
+        if(this.hoursDot.x >= 480 && this.hoursDot.x <= 579 && this.hoursDot.y >= 603 && this.hoursDot.y <= 668){
           h = true;
         }
         break;
       case 6:
-        if(this.hoursDot.x >= 475 && this.hoursDot.x <= 527 && this.hoursDot.y >= 623 && this.hoursDot.y <= 658){
+        if(this.hoursDot.x >= 419 && this.hoursDot.x <= 516 && this.hoursDot.y >= 603 && this.hoursDot.y <= 667){
           h = true;
         }
         break;
       case 7:
-        if(this.hoursDot.x >= 400 && this.hoursDot.x <= 462 && this.hoursDot.y >= 600 && this.hoursDot.y <= 652){
+        if(this.hoursDot.x >= 346 && this.hoursDot.x <= 442 && this.hoursDot.y >= 559 && this.hoursDot.y <= 658){
           h = true;
         }
         break;
       case 8:
-        if(this.hoursDot.x >= 351 && this.hoursDot.x <= 410 && this.hoursDot.y >= 340 && this.hoursDot.y <= 587){
+        if(this.hoursDot.x >= 334 && this.hoursDot.x <= 395 && this.hoursDot.y >= 491 && this.hoursDot.y <= 591){
           h = true;
         }
         break;
       case 9:
-        if(this.hoursDot.x >= 342 && this.hoursDot.x <= 384 && this.hoursDot.y >= 475 && this.hoursDot.y <= 538){
+        if(this.hoursDot.x >= 339 && this.hoursDot.x <= 387 && this.hoursDot.y >= 402 && this.hoursDot.y <= 519){
           h = true;
         }
         break;
       case 10:
-        if(this.hoursDot.x >= 365 && this.hoursDot.x <= 395 && this.hoursDot.y >= 400 && this.hoursDot.y <= 459){
+        if(this.hoursDot.x >= 353 && this.hoursDot.x <= 439 && this.hoursDot.y >= 354 && this.hoursDot.y <= 450){
           h = true;
         }
         break;
       case 11:
-        if(this.hoursDot.x >= 418 && this.hoursDot.x <= 445 && this.hoursDot.y >= 355 && this.hoursDot.y <= 410){
+        if(this.hoursDot.x >= 414 && this.hoursDot.x <= 516 && this.hoursDot.y >= 337 && this.hoursDot.y <= 397){
           h = true;
         }
         break;
       case 12:
-        if(this.hoursDot.x >= 475 && this.hoursDot.x <= 520 && this.hoursDot.y >= 340 && this.hoursDot.y <= 380){
+        if(this.hoursDot.x >= 492 && this.hoursDot.x <= 575 && this.hoursDot.y >= 337 && this.hoursDot.y <= 391){
           h = true;
         }
         break;
