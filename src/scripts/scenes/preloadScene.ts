@@ -74,6 +74,11 @@ export default class PreloadScene extends Phaser.Scene {
       frameWidth: 57.2, // Don't touch it works 57.4
       frameHeight: 112
     });
+
+    this.load.spritesheet("explosion", "assets/spritesheets/explosion.png", {
+      frameWidth: 16,
+      frameHeight: 16
+    });
     
 //----------------------------------------------------------------------------------------------------------
     // For chest scene
@@ -113,6 +118,14 @@ export default class PreloadScene extends Phaser.Scene {
       frames: this.anims.generateFrameNumbers("time_crystal", { start: 0, end: 4 }),
       frameRate: 10,
       repeat: -1
+    });
+
+    this.anims.create({
+      key: "explode",
+      frames: this.anims.generateFrameNumbers("explosion" , { start: 0, end: 4 }),
+      frameRate: 20,
+      repeat: 0,
+      hideOnComplete: true
     });
   }
 }

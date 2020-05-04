@@ -12,7 +12,7 @@ import Projectile from '../objects/projectile';
 import LoseScene from './loseScene';
 import VictoryScene from './victoryScene';
 import ChestScene from './chestScene';
-
+import Explosion from '../objects/explosion';
 import Bomb from '../objects/bomb';
 
 function sleep (milliseconds) { // Making the program wait for the given time
@@ -190,14 +190,20 @@ export default class MainScene extends Phaser.Scene {
 
     this.powerUps = this.add.group();
     this.physics.add.collider(this.powerUps, this.enemies, function(powerUp, enemy){
+      //let explosion = new Explosion(MainScene, powerUp., enemy.y);
       powerUp.destroy();
       enemy.destroy();
     });
+
+    this.physics.add.overlap(this.powerUps, this.enemies, this.hitEnemy, this.giveTrue, this);
 
     // Adding collision for the time crystal and enemies
     this.physics.add.overlap(this.timeCrystal, this.enemies, this.hurtCrystal, this.giveTrue, this);
   }
 
+hitEnemy(powerUp){
+  let explosion = new Explosion(this, powerUp.x, powerUp.y);
+}
 
   checkPowerUps(){
     if(MainScene.bombBool){
