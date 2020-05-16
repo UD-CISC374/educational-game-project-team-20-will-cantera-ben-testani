@@ -60,6 +60,7 @@ export default class MainScene extends Phaser.Scene {
   private powerupWheel: GameObjects.Image;
   private spacebar: Phaser.Input.Keyboard.Key;
   private chestPickupSound: Phaser.Sound.BaseSound;
+  private zaWarudo: Phaser.Sound.BaseSound;
 
 
   // Powerup Stuff                
@@ -151,8 +152,11 @@ export default class MainScene extends Phaser.Scene {
     // Death Sound
     this.deathSound = this.sound.add("death_sound", {volume: 2});
 
+    // Time Slow Sound
+    this.zaWarudo = this.sound.add("za_warudo");
+
     // Chest Pickup Sound
-    this.chestPickupSound = this.sound.add("chest_pickup", {volume: 2});
+    this.chestPickupSound = this.sound.add("chest_pickup");
 
     // Projectile Sounds
     this.beamSound = this.sound.add("laser_sound");
@@ -192,7 +196,7 @@ export default class MainScene extends Phaser.Scene {
     this.levelThreeTrack = this.sound.add("shadow");
 
     // Plays the background song for this scene
-    this.levelOneTrack.play({volume: .3}); // 2 for playing the song
+    this.levelOneTrack.play({volume: .1}); // 2 for playing the song
 
     // Making some things to be drawn on screen
     this.makeTimeCrystal();
@@ -521,7 +525,7 @@ export default class MainScene extends Phaser.Scene {
     this.enemySpawnText.destroy(); // Reset the text for new game
     this.health = this.MAXHEALTH;
     this.healthBar.setCrop(0, 0, this.health, 97);
-    this.getCurrentSong().pause(); // Stop song from playing in lose scene
+    this.handleMusic(3); // Stop song from playing in lose scene
     LevelComplete.levelNumber = 1; // Back to level 1
   }
 
@@ -605,7 +609,7 @@ export default class MainScene extends Phaser.Scene {
    * 
    *              action -> 1: resume the song
    *              action -> 2: play the song
-   *              action -> 3: stop the song
+   *              action -> 3: pause the song
    * 
    * Consumes: action(number)
    * Produces: Nothing
@@ -614,7 +618,7 @@ export default class MainScene extends Phaser.Scene {
     let song: Phaser.Sound.BaseSound = this.getCurrentSong();
     let trackConfig = {
       mute: false,
-      volume: .3,
+      volume: .2,
       rate: 1,
       detune: 0,
       seek: 0,
@@ -1110,31 +1114,24 @@ export default class MainScene extends Phaser.Scene {
       wizardDelay += bulletDelay;
       soundRate = .2;
     }
-    let projectileSoundConfig = {
-      mute: false,
-      rate: soundRate, // All I care about
-      detune: 0,
-      seek: 0,
-      loop: false,
-      delay: 0
-    };
+    let projectileSoundConfig = {rate: soundRate, volume: turret === this.chromeTurret || turret === this.purpleShip ? .2 : .4};
     if (turret === this.chromeTurret && (time - this.chromeTurret.bulletDelay > chromeDelay)) { // Magic numbers are just delays between each shot
-      this.beamSound.play(projectileSoundConfig, {volume: .4});
+      this.beamSound.play(projectileSoundConfig);
       projectile = new Projectile(this, this.chromeTurret, "laser_beam");
       this.chromeTurret.bulletDelay = new Date().getTime(); // Get new current time of day
     }
     if (turret === this.purpleShip && (time - this.purpleShip.bulletDelay > purpleDelay)) {
-      this.kamehamehaSound.play(projectileSoundConfig, {volume: .4});
+      this.kamehamehaSound.play(projectileSoundConfig);
       projectile = new Projectile(this, this.purpleShip, "kamehameha_beam");
       this.purpleShip.bulletDelay = new Date().getTime(); // Get new current time of day
     }
     if (turret === this.barrelTurret && (time - this.barrelTurret.bulletDelay > barrelDelay)) {
-      this.pewPewSound.play(projectileSoundConfig, {volume: .4});
+      this.pewPewSound.play(projectileSoundConfig);
       projectile = new Projectile(this, this.barrelTurret, "pixel_bullet");
       this.barrelTurret.bulletDelay = new Date().getTime(); // Get new current time of day
     }
     if (turret === this.wizardGuy && (time - this.wizardGuy.bulletDelay > wizardDelay)) {
-      this.fireBallSound.play(projectileSoundConfig, {volume: .4});
+      this.fireBallSound.play(projectileSoundConfig);
       projectile = new Projectile(this, this.wizardGuy, "fire_ball");
       this.wizardGuy.bulletDelay = new Date().getTime(); // Get new current time of day
     }
@@ -1252,6 +1249,9 @@ export default class MainScene extends Phaser.Scene {
   displayPowerupBar(): void {
     this.isSpacebarDown = true;
     if (this.isSpacebarDown && !this.isScrollWheelUp) {
+      this.handleMusic(3);
+      this.stopSounds();
+      this.zaWarudo.play({volume: .6});
       this.powerupWheel.setVisible(true);
       for (let i = 0; i < this.POWERUP_COUNT; i++) 
         this.powerUpGroup.getChildren()[i].setVisible(true);
@@ -1263,7 +1263,7 @@ export default class MainScene extends Phaser.Scene {
   /**
    * hidePowerBar, hides the powerbar and the powerups when the space bar is released. 
    * 
-   * Consumes: Nothing
+   * Consumes: Nothing 
    * Produces: Nothing
    */
   hidePowerBar(): void {
@@ -1272,11 +1272,25 @@ export default class MainScene extends Phaser.Scene {
       this.powerUpGroup.getChildren()[i].setVisible(false);
     this.isScrollWheelUp = false;
     this.isSpacebarDown = false;
+    this.stopSounds();
+    if (this.zaWarudo.isPlaying)
+      this.zaWarudo.stop();
+    this.handleMusic(1);
+    this.hasPowerup = false;
+  }
+
+
+  /**
+   * stopSounds, stops the projectile sounds.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  stopSounds(): void {
     this.fireBallSound.stop();
     this.kamehamehaSound.stop();
     this.fireBallSound.stop();
     this.beamSound.stop();
-    this.hasPowerup = false;
   }
 
 

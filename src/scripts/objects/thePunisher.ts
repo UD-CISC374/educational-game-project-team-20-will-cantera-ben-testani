@@ -3,7 +3,7 @@ import MainScene from "../scenes/mainScene";
 export default class ThePunisher extends Phaser.GameObjects.Sprite {
     body: Phaser.Physics.Arcade.Body;
     spawnPosition: number;
-    moveSpeed: number = 175;
+    moveSpeed: number = 75;
 
     constructor (scene:MainScene, x: number, y: number, spawnPosition: number) { 
         super(scene, x, y, "the_punisher");

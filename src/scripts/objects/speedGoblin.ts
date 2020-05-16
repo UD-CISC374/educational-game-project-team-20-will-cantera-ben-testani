@@ -3,7 +3,7 @@ import MainScene from "../scenes/mainScene";
 export default class SpeedGoblin extends Phaser.GameObjects.Sprite {
     body: Phaser.Physics.Arcade.Body;
     spawnPosition: number;
-    moveSpeed: number = 150;
+    moveSpeed: number = 100;
 
     constructor (scene:MainScene, x: number, y: number, spawnPosition: number) { 
         super(scene, x, y, "speed_goblin");

@@ -28,7 +28,7 @@ export default class LevelComplete extends Phaser.Scene {
     handleMusic(): void {
         let victoryMusicConfig = {
             mute: false,
-            volume: 1,
+            volume: .6,
             rate: 1,
             detune: 0,
             seek: 0,

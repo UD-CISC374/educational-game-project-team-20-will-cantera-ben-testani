@@ -12,7 +12,7 @@ export default class StartScene extends Phaser.Scene {
     this.introTrack = this.sound.add("magic_cave");    
     let introTrackConfig = {
       mute: false,
-      volume: 2,
+      volume: .7,
       rate: 1,
       detune: 0,
       seek: 0,
