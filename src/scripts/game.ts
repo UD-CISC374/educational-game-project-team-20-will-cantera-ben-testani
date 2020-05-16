@@ -23,7 +23,7 @@ const config: GameConfig = {
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT
     },
-    scene: [PreloadScene, StartScene, MainScene, ChestScene, ChestHelp, LevelComplete, LoseScene, VictoryScene, PowerUp],
+    scene: [PreloadScene, StartScene, MainScene, ChestScene, ChestHelp, LevelComplete, LoseScene, VictoryScene],
     physics: {
         default: "arcade",
         arcade: {

@@ -307,8 +307,9 @@ export default class ChestScene extends Phaser.Scene {
       this.response.setX(this.scale.width/2 - this.response.width/2);
       this.response.setY(this.chestNumLabel.height + 10);
       this.response.setTint(0x00FF06);
-      MainScene.bombPowerUpNum++;
+      MainScene.powerUps[0] += 1; // Refer to the key above the variable declaration in main scene, index 0 is the bomb powerup
       MainScene.chestNum--;
+
     }
     if(num==0){
       this.response = this.add.bitmapText(0, 0, "pixelFont", "INCORRECT ", 75);
