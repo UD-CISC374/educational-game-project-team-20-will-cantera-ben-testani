@@ -204,6 +204,10 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/images/rainbowFlame.png"
   },
   {
+    "revision": "dd4073b8739e82272603328c1bb8016f",
+    "url": "assets/images/spikeBall.png"
+  },
+  {
     "revision": "57abdf4e953a8613bb16956c36ffeea3",
     "url": "assets/images/treasureChest.png"
   },
@@ -232,12 +236,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "favicon.ico"
   },
   {
-    "revision": "172ad7b1d151afc5cf0a9ba1e8f4e4ec",
+    "revision": "36a3da397d5da0617666d8f6d995c732",
     "url": "index.html"
   },
   {
-    "revision": "870e43db25c19630875f",
-    "url": "main.44ab28d9d58281dadef4.bundle.js"
+    "revision": "c8c01dd03fa579fe4030",
+    "url": "main.a45dd5649e0a056c5010.bundle.js"
   },
   {
     "revision": "601680b9d7c735e2dac776c6e564a81b",

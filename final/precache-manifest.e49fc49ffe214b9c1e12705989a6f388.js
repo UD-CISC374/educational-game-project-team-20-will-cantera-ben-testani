@@ -204,6 +204,10 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalassets/images/rainbowFlame.png"
   },
   {
+    "revision": "dd4073b8739e82272603328c1bb8016f",
+    "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalassets/images/spikeBall.png"
+  },
+  {
     "revision": "57abdf4e953a8613bb16956c36ffeea3",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalassets/images/treasureChest.png"
   },
@@ -232,15 +236,15 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalfavicon.ico"
   },
   {
-    "revision": "dac7641a93c2953fcd86",
-    "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalgen.main.2d84483991355aadff3b.bundle.js"
+    "revision": "5328e6c151bccd7d7c84",
+    "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalgen.main.11ca56b1c5e0c6422cb1.bundle.js"
   },
   {
     "revision": "89b0deb00ccc35e5bdee",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalgen.vendors.9e875e58a33795bd6679.bundle.js"
   },
   {
-    "revision": "2ca6427614424cccdb103529a07f03e3",
+    "revision": "8ba37578b077deefe4b5c08b4f470770",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalindex.html"
   },
   {
