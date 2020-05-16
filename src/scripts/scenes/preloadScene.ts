@@ -64,6 +64,9 @@ export default class PreloadScene extends Phaser.Scene {
 
     // Powerup wheel
     this.load.image("powerup_wheel", "assets/images/pieChart.png");
+    this.load.image("bombPowerup", "assets/images/bombPowerup.png")
+    this.load.image("spike_powerup", "assets/images/spikeBall.png")
+
     
     // Treasure chest
     this.load.image("treasure_chest", "assets/images/treasureChest.png");
@@ -96,7 +99,6 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image("clock", "assets/images/clock.png");
     this.load.image("hoursDot", "assets/images/hoursDot.png");
     this.load.image("minutesDot", "assets/images/minutesDot.png");
-    this.load.image("bombPowerup", "assets/images/bombPowerup.png")
 
     // Fonts
     this.load.bitmapFont("pixelFont", "assets/font/font.png", "assets/font/font.xml");

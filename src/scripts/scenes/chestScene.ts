@@ -27,6 +27,8 @@ export default class ChestScene extends Phaser.Scene {
   textGroup
   chestNum;
   noChests: Phaser.GameObjects.Text;
+  spikePowerup: any;
+  powerupIndex: number = 1;
 
   /**
    * constructor, provides a reference to this scene
@@ -42,8 +44,8 @@ export default class ChestScene extends Phaser.Scene {
   init(data){
     this.powerupNum = data.powerup;
     this.chestNum = data.chest;
-    console.log(this.chestNum);
   }
+
 
   /**
    * create, most of the code is moved to their own functions, that code is called in create to 
@@ -71,12 +73,11 @@ export default class ChestScene extends Phaser.Scene {
 
         gameObject.x = dragX;
         gameObject.y = dragY;
-
-        console.log("X: " + dragX + " " + " Y: " + dragY);
         
       });
     } 
   }
+
 
   /**
    * setUpScreen, sets up most of the labels and images for the scene
@@ -90,6 +91,7 @@ export default class ChestScene extends Phaser.Scene {
     this.openedChest=this.add.image(this.scale.width/2, this.scale.height/2, "openChest");
     this.hideOpenedChest();
     this.bombPowerup=this.add.image(this.scale.width/2, this.scale.height/2, "bombPowerup");
+    this.spikePowerup = this.add.image(this.scale.width/2, this.scale.height/2, "spike_powerup");
     this.clock=this.add.image(this.scale.width/2, this.scale.height/2, "clock");
     this.hoursDot=this.add.image(this.scale.width/4 + this.scale.width/2, this.scale.width/4 + this.scale.width/2, "hoursDot");
     this.minuetsDot=this.add.image(this.scale.width/4, this.scale.height/4 + this.scale.height/2, "minutesDot");
@@ -105,8 +107,10 @@ export default class ChestScene extends Phaser.Scene {
     this.backGroup.add(this.closedChest);
     this.textGroup.add(this.hoursQuestion);
     this.rewardGroup.add(this.bombPowerup);
+    this.rewardGroup.add(this.spikePowerup);
     this.hidePowerup();
   }
+
 
   /**
    * makeHelpButton, makes the help button for the scene
@@ -120,10 +124,10 @@ export default class ChestScene extends Phaser.Scene {
     this.helpButton.setX(this.scale.width-this.helpButton.width);
     this.helpButton.setInteractive();
     this.helpButton.on("pointerdown", () => {
-      console.log("hlp button");
       this.scene.switch("ChestHelp");
     });
   }
+
 
   /**
    * makeSubmitButton, makes the submit button for the scene
@@ -139,6 +143,7 @@ export default class ChestScene extends Phaser.Scene {
     this.submitButton.setInteractive();
     this.submitButton.on("pointerdown", () => this.onClickCheck());
   }
+
 
   /**
    * makeBackButton, makes the back button for the scene
@@ -156,11 +161,11 @@ export default class ChestScene extends Phaser.Scene {
       MainScene.beginning = true;
       ChestScene.switching = true;
       this.resetScene();
-      console.log(this.powerupNum);
       //this.scene.start("MainScene", {powerup: this.powerupNum, chest: this.chestNum});
       this.scene.switch("MainScene");
     });
   }
+
 
   /**
    * makeNoChestScene, makes the mostly empty scene when the player has no available chests to open
@@ -185,6 +190,7 @@ export default class ChestScene extends Phaser.Scene {
     this.hideText();
     this.hideResponse();
   }
+
 
   /**
    * questionTime, generates a random time to ask the user to display on the clock
@@ -213,9 +219,9 @@ export default class ChestScene extends Phaser.Scene {
     this.hoursQuestion.setX(this.scale.width/2 - 60);
     this.hoursQuestion.setY(200);
     //this.hoursQuestion.setTint(0x00FF06)
-    console.log("hour: " + this.hour + "x: " + this.hoursQuestion.x + "y: " + this.hoursQuestion.y);
-    console.log("min: " + this.min);
+
   }
+
 
   /**
    * onClickCheck, calls helper functions to decide if the player correctly displayed the time on the clock
@@ -244,6 +250,7 @@ export default class ChestScene extends Phaser.Scene {
     else this.showResponse(0);
   }
 
+
   resetScene(){
     this.questionTime();
     this.hideResponse();
@@ -257,6 +264,7 @@ export default class ChestScene extends Phaser.Scene {
     this.hidePowerup();
   }
 
+
   /**
    * hidePowerup, hides the powerup
    * 
@@ -269,6 +277,7 @@ export default class ChestScene extends Phaser.Scene {
     }
   }
 
+
   /**
    * showPowerup, shows the powerup the player won
    * 
@@ -276,9 +285,14 @@ export default class ChestScene extends Phaser.Scene {
    * Produces: Nothing
    */
   showPowerup(){
-    let x = Math.round(Math.floor(Math.random() * this.rewardGroup.getChildren().length));
-    this.rewardGroup.getChildren()[x].setVisible(true);
-    //this.powerupNum = x;
+    this.powerupIndex = Math.floor(Math.random() * this.rewardGroup.getChildren().length);
+    console.log(this.powerupIndex);
+    if (this.powerupIndex === 0)
+      this.bombPowerup.setVisible(true);
+    if (this.powerupIndex === 1)
+      this.spikePowerup.setVisible(true);
+    MainScene.powerUps[this.powerupIndex] += 1;
+    MainScene.chestNum--;
   }
 
   /**
@@ -294,6 +308,7 @@ export default class ChestScene extends Phaser.Scene {
     this.minuetsDot.setY(this.scale.height/4 + this.scale.height/2);
   }
 
+
   /**
    * showResponse, shows if the users response was correct or incorrect
    * 
@@ -306,9 +321,6 @@ export default class ChestScene extends Phaser.Scene {
       this.response.setX(this.scale.width/2 - this.response.width/2);
       this.response.setY(this.chestNumLabel.height + 10);
       this.response.setTint(0x00FF06);
-      MainScene.powerUps[0] += 1; // Refer to the key above the variable declaration in main scene, index 0 is the bomb powerup
-      MainScene.chestNum--;
-
     }
     if(num==0){
       this.response = this.add.bitmapText(0, 0, "pixelFont", "INCORRECT ", 75);
@@ -614,6 +626,9 @@ export default class ChestScene extends Phaser.Scene {
 
   update() {
     if(MainScene.beginning){
+      let powerups: any = this.rewardGroup.getChildren();
+      //for (let i = 0; i < powerups.length; i++)
+        //powerups[0].destroy();
       if(!MainScene.chestNum){
         this.makeNoChestScene();
       } else {

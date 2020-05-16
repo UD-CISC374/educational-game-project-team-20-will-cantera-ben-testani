@@ -2,7 +2,7 @@ import ArmorGoblin from '../objects/armorGoblin';
 import TimeGoblin from '../objects/timeGoblin';
 import SpeedGoblin from '../objects/speedGoblin';
 import ThePunisher from '../objects/thePunisher';
-import { GameObjects } from 'phaser';
+import { GameObjects, Game } from 'phaser';
 import LevelComplete from './levelComplete';
 import ChromeTurret from '../objects/chromeTurret';
 import PurpleShip from '../objects/purpleShip';
@@ -24,6 +24,7 @@ export default class MainScene extends Phaser.Scene {
   private readonly numEnemies: number = 4;
   private readonly MAXHEALTH: number = 225;
   private readonly POWERUP_COUNT: number = 5; 
+  private readonly CLONE_DEPTH = 102;
   private readonly FRONT_FIRST: number = 101;
   private readonly FRONT_SECOND: number = 100;
   
@@ -41,7 +42,6 @@ export default class MainScene extends Phaser.Scene {
   public turretProjectiles: GameObjects.Group;
   private timeCrystal: Phaser.GameObjects.Sprite;
   private chestButton: Phaser.GameObjects.Text;
-  private powerUpButton: Phaser.GameObjects.Text;
   private levelOneTrack: Phaser.Sound.BaseSound;
   private waveStartButton: GameObjects.Text;
   private healthBar: GameObjects.Image;
@@ -59,13 +59,14 @@ export default class MainScene extends Phaser.Scene {
   private deathClock: Phaser.Physics.Arcade.Sprite;
   private powerupWheel: GameObjects.Image;
   private spacebar: Phaser.Input.Keyboard.Key;
-  private chestPickuSound: Phaser.Sound.BaseSound;
+  private chestPickupSound: Phaser.Sound.BaseSound;
 
 
   // Powerup Stuff                
-  // Should enumerate this, it goes index: 0 = bomb, 1 = 
-  public static powerUps: Array<number> = [0];
+  // Should enumerate this, it goes index: 0 = bomb, 1 = spike, 2 = 
+  public static powerUps: Array<number> = [0, 0];
   public powerUpGroup: any;
+  private activePowerUps: any;
   public static chestNum: number = 0;
   public static beginning: boolean;
 
@@ -111,6 +112,7 @@ export default class MainScene extends Phaser.Scene {
   private isLevelSwitching: boolean = false;
   private isSpacebarDown: boolean = false;
   private isScrollWheelUp: boolean = false;
+  private hasPowerup: boolean = false;
 
 
   /**
@@ -145,12 +147,12 @@ export default class MainScene extends Phaser.Scene {
     this.powerupWheel = this.add.image(this.scale.width/2, this.scale.height/2, "powerup_wheel");
     this.powerupWheel.setVisible(false); // Initially invisible, must hold down space
     this.powerupWheel.depth = this.FRONT_SECOND; // Make sure its on top
-
+  
     // Death Sound
     this.deathSound = this.sound.add("death_sound", {volume: 2});
 
     // Chest Pickup Sound
-    this.chestPickuSound = this.sound.add("chest_pickup", {volume: 2});
+    this.chestPickupSound = this.sound.add("chest_pickup", {volume: 2});
 
     // Projectile Sounds
     this.beamSound = this.sound.add("laser_sound");
@@ -198,16 +200,13 @@ export default class MainScene extends Phaser.Scene {
 
     // Group for projectiles
     this.turretProjectiles = this.add.group();
+    // Group for powerups 
+    this.activePowerUps = this.physics.add.group();
 
     // Adds collision between players shots and powerups, causing them to bounce
     this.physics.add.overlap(this.turretProjectiles, this.enemies, this.handleBulletCollision, this.giveTrue, this);
-    //this.physics.add.collider(this.powerUpGroup, this.enemies, function(powerUp, enemy){
-      //let explosion = new Explosion(MainScene, powerUp., enemy.y);
-     // powerUp.destroy();
-     // enemy.destroy();
-   // });
 
-    //this.physics.add.overlap(this.powerUpGroup, this.enemies, this.hitEnemy, this.giveTrue, this);
+    this.physics.add.overlap(this.activePowerUps, this.enemies, this.powerupCollisionHandler, this.giveTrue, this);
 
     // Adding collision for the time crystal and enemies
     this.physics.add.overlap(this.timeCrystal, this.enemies, this.hurtCrystal, this.giveTrue, this);
@@ -222,10 +221,13 @@ export default class MainScene extends Phaser.Scene {
    */
   addPowerups(): void {
     this.powerup1 = this.add.image(500, 300, "bombPowerup");
-    this.powerup2 = this.add.image(300, 430, "bombPowerup");
+    this.powerup2 = this.add.image(300, 430, "spike_powerup");
     this.powerup3 = this.add.image(380, 660, "bombPowerup");
     this.powerup4 = this.add.image(625, 660, "bombPowerup");
     this.powerup5 = this.add.image(700, 430, "bombPowerup");
+
+    this.onDrag(this.powerup1);
+    this.onDrag(this.powerup2);
 
     this.powerUpGroup = this.physics.add.group(); // Make it a physics group
     this.powerUpGroup.add(this.powerup1); 
@@ -234,25 +236,12 @@ export default class MainScene extends Phaser.Scene {
     this.powerUpGroup.add(this.powerup4);
     this.powerUpGroup.add(this.powerup5);
 
-    //this.onDrag(); // Makes a copy of the powerup to drag if its available
-
     for (let i = 0; i < this.POWERUP_COUNT; i++) {
       this.powerUpGroup.getChildren()[i].setAlpha(.5); // No powerups at first, all half visibility
       this.powerUpGroup.getChildren()[i].setInteractive();
       this.powerUpGroup.getChildren()[i].depth = this.FRONT_FIRST;
       this.powerUpGroup.getChildren()[i].setVisible(false);
     }
-  }
-
-
-  /**
-   * hitEnemy, makes an explosion if an enemy is hit with a powerup.
-   * 
-   * Consumes: powerup -> image, the powerup
-   * Produces: Nothing
-   */
-  hitEnemy(powerUp) {
-    new Explosion(this, powerUp.x, powerUp.y);
   }
 
 
@@ -283,9 +272,8 @@ export default class MainScene extends Phaser.Scene {
       chest.setInteractive();
       chest.on("pointerdown", () => {
         MainScene.chestNum++; // Increment global static chest count
-        this.chestPickuSound.play();
+        this.chestPickupSound.play();
         chest.destroy();
-        MainScene.powerUps[0] += 1; // TODO ad more powerups, get a random powerup
       });
     }
   }
@@ -333,17 +321,54 @@ export default class MainScene extends Phaser.Scene {
    * Consumes: Nothing 
    * Produces: Nothing
    */
-  onDrag(): void {
+  onDrag(object: any): void {
     // Defining drag behaviour
-    this.input.on('drag', function (pointer, gameObject, dragX, dragY) { // Update turrets position on drag
-      let spriteRotation: number = Phaser.Math.Angle.Between(500, 500, gameObject.x, gameObject.y); 
-      gameObject.setRotation(spriteRotation-80.1); // Don't touch this number
-      gameObject.x = dragX;
-      gameObject.y = dragY;      
-    });
-
-
+    if (object.name === "chromeTurret" || object.name === "purpleShip" || object.name === "barrelTurret" || object.name === "wizardGuy") {
+      this.input.on('drag', function (pointer, gameObject, dragX, dragY) { // Update turrets position on drag
+        let spriteRotation: number = Phaser.Math.Angle.Between(500, 500, gameObject.x, gameObject.y); 
+        gameObject.setRotation(spriteRotation-80.1); // Don't touch this number
+        gameObject.x = dragX;
+        gameObject.y = dragY;      
+      });
+    } else {
+      this.input.on("pointerover", () => { // Update turrets position on drag
+        //console.log("DRAGGED1");
+        //console.log(this.isScrollWheelUp);
+        //console.log(object.alpha);
+        //console.log(this.hasPowerup);
+        if (this.isScrollWheelUp && object.alpha === 1 && !this.hasPowerup) {
+          if (object === this.powerup1) {
+            MainScene.powerUps[0]--;
+          }
+          if (object === this.powerup2) {
+            MainScene.powerUps[1]--;
+          }
+          this.hasPowerup = true;   
+          let clone: any = this.add.image(object.x, object.y, object.texture);       
+          clone.setInteractive({draggable: true});
+          clone.depth = this.CLONE_DEPTH;
+          this.activePowerUps.add(clone);
+        }
+      });
+    }
   }
+
+
+  /**
+   * powerupCollisionHandler, destroys enemies that come into contact with an acitve powerup.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  powerupCollisionHandler(powerup: any, enemy: any): void {
+    console.log("rekt");
+    new Explosion(this, powerup.x, powerup.y);
+    powerup.destroy();
+    this.collideMultiple(enemy); // Destroys many enemies in the vicinity.
+    enemy.destroy(); 
+  }
+
+
   /**
    * makeDefenses, adds sprites to the game for the defensive structures when they are recieved.
    * 
@@ -358,7 +383,7 @@ export default class MainScene extends Phaser.Scene {
     this.wizardGuy = new WizardGuy(this, this.defensiveInventoryCoords[3][0], this.defensiveInventoryCoords[3][1]);
 
     this.chromeTurret.setInteractive({draggable: true}); // Chrome Turret is the only available turret at first
-    this.onDrag();
+    this.onDrag(this.chromeTurret);
     this.turrets = this.physics.add.group(); // Make a physics enabled group for the turrets
     this.turrets.add(this.chromeTurret); // Add the four turrets to the group
     this.turrets.add(this.purpleShip);
@@ -653,7 +678,7 @@ export default class MainScene extends Phaser.Scene {
     let turretText: string = "These are your defenses,\ndrag them to the correct\ntimes up top to\ndefend your crystal!\nCLICK TO DELETE";
     let startWaveText: string = "This is the start wave\nbutton, click it when you\n have set up your defenses\nto start defending.";
     let chestText: string = "Here is a chest, some enemies drop them.\nClick on it to pick it up\nthen go to open chests to open it.";
-    let powerupText: string = "Hold down spacebar at any time\n to see your powerups and drag to use them\n Try it out now!";
+    let powerupText: string = "Hold down spacebar at any time\nto see your powerups and drag to use them\nenemies will be slower while you choose!";
     let stringList: Array<string> = [turretText, startWaveText, chestText, powerupText];
     if (messageNumber > stringList.length-1)
       return;
@@ -1251,6 +1276,7 @@ export default class MainScene extends Phaser.Scene {
     this.kamehamehaSound.stop();
     this.fireBallSound.stop();
     this.beamSound.stop();
+    this.hasPowerup = false;
   }
 
 
@@ -1261,6 +1287,16 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   update(): void {
+    if (MainScene.powerUps[0]) {
+      this.powerup1.setAlpha(1);
+    } else {
+      this.powerup1.setAlpha(.5);
+    }
+    if (MainScene.powerUps[1]) {
+      this.powerup2.setAlpha(1);
+    } else {
+      this.powerup2.setAlpha(.5);
+    }
     if (Phaser.Input.Keyboard.JustDown(this.spacebar)) 
       console.log("X: " + this.game.input.mousePointer.x + " Y: " + this.game.input.mousePointer.y);
     this.input.keyboard.on("keydown-" + "SPACE", () => {this.displayPowerupBar();}); 
