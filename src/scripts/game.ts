@@ -7,7 +7,6 @@ import LoseScene from './scenes/loseScene';
 import LevelComplete from './scenes/levelComplete';
 import VictoryScene from './scenes/victoryScene';
 import ChestHelp from './scenes/chestHelp';
-import PowerUp from './scenes/powerUp';
 import GameConfig = Phaser.Types.Core.GameConfig;
 
 

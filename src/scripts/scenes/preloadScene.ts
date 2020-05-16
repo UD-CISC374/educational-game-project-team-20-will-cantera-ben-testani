@@ -23,6 +23,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.audio("level_one_victory", "assets/audio/level1victory.mp3");
     this.load.audio("level_two_victory", "assets/audio/level2victory.mp3");
     this.load.audio("death_sound", "assets/audio/death.mp3");
+    this.load.audio("chest_pickup", "assets/audio/chestPickup.mp3");
 
     // Images 
 

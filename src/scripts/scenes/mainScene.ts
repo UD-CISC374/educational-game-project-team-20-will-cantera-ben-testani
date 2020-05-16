@@ -59,13 +59,14 @@ export default class MainScene extends Phaser.Scene {
   private deathClock: Phaser.Physics.Arcade.Sprite;
   private powerupWheel: GameObjects.Image;
   private spacebar: Phaser.Input.Keyboard.Key;
+  private chestPickuSound: Phaser.Sound.BaseSound;
 
 
   // Powerup Stuff                
   // Should enumerate this, it goes index: 0 = bomb, 1 = 
   public static powerUps: Array<number> = [0];
   public powerUpGroup: any;
-  public static chestNum: number = 1;
+  public static chestNum: number = 0;
   public static beginning: boolean;
 
   private powerup1: any;
@@ -148,6 +149,9 @@ export default class MainScene extends Phaser.Scene {
     // Death Sound
     this.deathSound = this.sound.add("death_sound", {volume: 2});
 
+    // Chest Pickup Sound
+    this.chestPickuSound = this.sound.add("chest_pickup", {volume: 2});
+
     // Projectile Sounds
     this.beamSound = this.sound.add("laser_sound");
     this.kamehamehaSound = this.sound.add("kamehameha_sound");
@@ -156,9 +160,6 @@ export default class MainScene extends Phaser.Scene {
 
     // Draw the players defensive strucutre inventory on screen
     this.handleBoxes();
-
-    // Add starting defensive structure to inventory 
-    this.addDefenses();
     
     // Health bar for the time crystal
     this.healthBar = this.add.image(this.scale.width/2, (this.scale.height/2)-80, "health_bar");
@@ -166,15 +167,14 @@ export default class MainScene extends Phaser.Scene {
     // Make a physics enabled group for the enemies
     this.enemies = this.physics.add.group();
 
-    // Make a physics enabled group for the turrets
-    this.turrets = this.physics.add.group();
-    this.turrets.add(this.chromeTurret);
-    this.turrets.add(this.purpleShip);
-    this.turrets.add(this.barrelTurret);
-    this.turrets.add(this.wizardGuy);
+    // Add starting defensive structure to inventory 
+    this.addDefenses();
 
     // Add the powerups
     this.addPowerups();
+
+    // Make an inital tutorial chest
+    this.spawnChest(this.scale.width/2-250, this.scale.height/2, true); // true to ignore random
 
     this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
@@ -201,13 +201,13 @@ export default class MainScene extends Phaser.Scene {
 
     // Adds collision between players shots and powerups, causing them to bounce
     this.physics.add.overlap(this.turretProjectiles, this.enemies, this.handleBulletCollision, this.giveTrue, this);
-    this.physics.add.collider(this.powerUpGroup, this.enemies, function(powerUp, enemy){
+    //this.physics.add.collider(this.powerUpGroup, this.enemies, function(powerUp, enemy){
       //let explosion = new Explosion(MainScene, powerUp., enemy.y);
-      powerUp.destroy();
-      enemy.destroy();
-    });
+     // powerUp.destroy();
+     // enemy.destroy();
+   // });
 
-    this.physics.add.overlap(this.powerUpGroup, this.enemies, this.hitEnemy, this.giveTrue, this);
+    //this.physics.add.overlap(this.powerUpGroup, this.enemies, this.hitEnemy, this.giveTrue, this);
 
     // Adding collision for the time crystal and enemies
     this.physics.add.overlap(this.timeCrystal, this.enemies, this.hurtCrystal, this.giveTrue, this);
@@ -239,7 +239,6 @@ export default class MainScene extends Phaser.Scene {
     for (let i = 0; i < this.POWERUP_COUNT; i++) {
       this.powerUpGroup.getChildren()[i].setAlpha(.5); // No powerups at first, all half visibility
       this.powerUpGroup.getChildren()[i].setInteractive();
-      this.powerUpGroup.getChildren()[i].setScale(.2);
       this.powerUpGroup.getChildren()[i].depth = this.FRONT_FIRST;
       this.powerUpGroup.getChildren()[i].setVisible(false);
     }
@@ -271,14 +270,20 @@ export default class MainScene extends Phaser.Scene {
   /**
    * spawnChest, has a random chance to spawn a chest where an enemy died. 
    * 
-   * Consumes: enemyX, enemyY -> numbers, the x and y location of the enemy that died
+   * Consumes: enemyX, enemyY, ignoreChance -> numbers, boolean, the x and y location of the enemy that died
+   *                                                             true if ranndom should be ignored, false otherwise.
    * Produces: Nothing
    */
-  spawnChest(enemyX: number, enemyY: number): void {
-    if (Math.floor(Math.random() * 9) === 5) { // 1 in 10 chance
+  spawnChest(enemyX: number, enemyY: number, ignoreChance: boolean): void {
+    let randomNumber: number = Math.floor(Math.random() * 9);
+    if (ignoreChance)
+      randomNumber = 5;
+    if (randomNumber === 5) { // 1 in 10 chance
       let chest: GameObjects.Image = this.add.image(enemyX, enemyY, "treasure_chest");
       chest.setInteractive();
       chest.on("pointerdown", () => {
+        MainScene.chestNum++; // Increment global static chest count
+        this.chestPickuSound.play();
         chest.destroy();
         MainScene.powerUps[0] += 1; // TODO ad more powerups, get a random powerup
       });
@@ -296,7 +301,7 @@ export default class MainScene extends Phaser.Scene {
     projectile.destroy();
     let enemyX: number = enemy.x;
     let enemyY: number = enemy.y;
-    this.spawnChest(enemyX, enemyY);
+    this.spawnChest(enemyX, enemyY, false); // false for indicating randomness
     enemy.destroy();
     if (projectile.name === "kamehameha_beam" || projectile.name === "pixel_bullet") {
       this.collideMultiple(enemy);
@@ -354,6 +359,11 @@ export default class MainScene extends Phaser.Scene {
 
     this.chromeTurret.setInteractive({draggable: true}); // Chrome Turret is the only available turret at first
     this.onDrag();
+    this.turrets = this.physics.add.group(); // Make a physics enabled group for the turrets
+    this.turrets.add(this.chromeTurret); // Add the four turrets to the group
+    this.turrets.add(this.purpleShip);
+    this.turrets.add(this.barrelTurret);
+    this.turrets.add(this.wizardGuy);
     
     for (let i = 1; i < 4; i++) { // Add locks on the other three turrets
       let ironBarLock = this.add.image(this.defensiveInventoryCoords[i][0], this.defensiveInventoryCoords[i][1], "iron_bar");
@@ -642,8 +652,9 @@ export default class MainScene extends Phaser.Scene {
   runTutorial(messageNumber: number): void {
     let turretText: string = "These are your defenses,\ndrag them to the correct\ntimes up top to\ndefend your crystal!\nCLICK TO DELETE";
     let startWaveText: string = "This is the start wave\nbutton, click it when you\n have set up your defenses\nto start defending.";
-    let powerupText: string = "Hold down spacebar at any time\n to see your powerups and use them\n during the attacks! Try it now!";
-    let stringList: Array<string> = [turretText, startWaveText, powerupText];
+    let chestText: string = "Here is a chest, some enemies drop them.\nClick on it to pick it up\nthen go to open chests to open it.";
+    let powerupText: string = "Hold down spacebar at any time\n to see your powerups and drag to use them\n Try it out now!";
+    let stringList: Array<string> = [turretText, startWaveText, chestText, powerupText];
     if (messageNumber > stringList.length-1)
       return;
     switch(messageNumber) {
@@ -653,8 +664,12 @@ export default class MainScene extends Phaser.Scene {
       case 1: // Start Button Text
         this.makeText(stringList[messageNumber], -250, -250); // Display it above the turrets
         break;
-      case 2: // Powerup Text
+      case 2: // Chest Text
+        this.makeText(stringList[messageNumber], -250, -100);
+        break;
+      case 3: // Powerup Text
         this.makeText(stringList[messageNumber], 0, 0);
+        break;
     }
   }
   
@@ -1018,20 +1033,31 @@ export default class MainScene extends Phaser.Scene {
    */
   moveProjectiles(turret: any, enemy: any, projectile: any): void {
       projectile.setRotation(turret.rotation-80.1); // Don't touch 
+      let chromeSpeed: number = 400;
+      let wizardSpeed: number = 400; 
+      let barrelSpeed: number = 400;
+      let purpleSpeed: number = 200;
+      let speedSlow: number = 350;
+      if (this.isScrollWheelUp) { // Slows projectiles while player is choosing powerup
+        chromeSpeed -= speedSlow;
+        wizardSpeed -= speedSlow;
+        barrelSpeed -= speedSlow;
+        purpleSpeed -= 150;
+      }
       if (turret === this.chromeTurret) {
-        this.physics.moveTo(projectile, enemy.x, enemy.y, 400); // Last arg is projectile speed
+        this.physics.moveTo(projectile, enemy.x, enemy.y, chromeSpeed); // Last arg is projectile speed
 
       }
       if (turret === this.wizardGuy) {
-        this.physics.moveTo(projectile, enemy.x, enemy.y, 400); // Last arg is projectile speed
+        this.physics.moveTo(projectile, enemy.x, enemy.y, wizardSpeed); // Last arg is projectile speed
 
       }
       if (turret === this.barrelTurret) {
-        this.physics.moveTo(projectile, enemy.x, enemy.y, 400); // Last arg is projectile speed
+        this.physics.moveTo(projectile, enemy.x, enemy.y, barrelSpeed); // Last arg is projectile speed
 
       }
       if (turret === this.purpleShip) {
-        this.physics.moveTo(projectile, enemy.x, enemy.y, 200); // Last arg is projectile speed
+        this.physics.moveTo(projectile, enemy.x, enemy.y, purpleSpeed); // Last arg is projectile speed
 
       }
   }
@@ -1046,23 +1072,44 @@ export default class MainScene extends Phaser.Scene {
    */
   armoredResponseCoalition(turret: any, enemy: any, time: number): void {
     let projectile: any = null;
-    if (turret === this.chromeTurret && (time - this.chromeTurret.bulletDelay > 200)) { // Magic numbers are just delays between each shot
-      this.beamSound.play({volume: .4});
+    let bulletDelay: number = 3000;
+    let chromeDelay: number = 200; // Milliseconds
+    let purpleDelay: number = 2000;
+    let barrelDelay: number = 1500;
+    let wizardDelay: number = 1000;
+    let soundRate: number = 1;
+    if (this.isScrollWheelUp) {
+      chromeDelay += bulletDelay;
+      purpleDelay += bulletDelay;
+      barrelDelay += bulletDelay;
+      wizardDelay += bulletDelay;
+      soundRate = .2;
+    }
+    let projectileSoundConfig = {
+      mute: false,
+      rate: soundRate, // All I care about
+      detune: 0,
+      seek: 0,
+      loop: false,
+      delay: 0
+    };
+    if (turret === this.chromeTurret && (time - this.chromeTurret.bulletDelay > chromeDelay)) { // Magic numbers are just delays between each shot
+      this.beamSound.play(projectileSoundConfig, {volume: .4});
       projectile = new Projectile(this, this.chromeTurret, "laser_beam");
       this.chromeTurret.bulletDelay = new Date().getTime(); // Get new current time of day
     }
-    if (turret === this.purpleShip && (time - this.purpleShip.bulletDelay > 2000)) {
-      this.kamehamehaSound.play({volume: .4});
+    if (turret === this.purpleShip && (time - this.purpleShip.bulletDelay > purpleDelay)) {
+      this.kamehamehaSound.play(projectileSoundConfig, {volume: .4});
       projectile = new Projectile(this, this.purpleShip, "kamehameha_beam");
       this.purpleShip.bulletDelay = new Date().getTime(); // Get new current time of day
     }
-    if (turret === this.barrelTurret && (time - this.barrelTurret.bulletDelay > 1500)) {
-      this.pewPewSound.play();
+    if (turret === this.barrelTurret && (time - this.barrelTurret.bulletDelay > barrelDelay)) {
+      this.pewPewSound.play(projectileSoundConfig, {volume: .4});
       projectile = new Projectile(this, this.barrelTurret, "pixel_bullet");
       this.barrelTurret.bulletDelay = new Date().getTime(); // Get new current time of day
     }
-    if (turret === this.wizardGuy && (time - this.wizardGuy.bulletDelay > 1000)) {
-      this.fireBallSound.play();
+    if (turret === this.wizardGuy && (time - this.wizardGuy.bulletDelay > wizardDelay)) {
+      this.fireBallSound.play(projectileSoundConfig, {volume: .4});
       projectile = new Projectile(this, this.wizardGuy, "fire_ball");
       this.wizardGuy.bulletDelay = new Date().getTime(); // Get new current time of day
     }
@@ -1094,13 +1141,18 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * moveEnemy, updates the x and y position of the enemy based on the enemies speed attribute.
+   * moveEnemy, updates the x and y position of the enemy based on the enemies speed attribute. Slows all enemies down to a crawl
+   *            if the speedDown parsamter is not 0.
    * 
    * Consumes: enemy(Object)
    * Produces: Nothing
    */
   moveEnemy(enemy): void {
-    this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2); // Add 4rth paramter for speed
+    if (this.isScrollWheelUp) {
+      this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2, 5); // Add 4rth paramter for speed
+    } else {
+      this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2, enemy.moveSpeed);
+    }
   }
 
 
@@ -1131,8 +1183,6 @@ export default class MainScene extends Phaser.Scene {
       this.handleMusic(1);
     }
     if (ChestScene.switching) {
-      console.log("ASDF")
-
       ChestScene.switching = false;
       this.handleMusic(1);
     }
@@ -1197,6 +1247,10 @@ export default class MainScene extends Phaser.Scene {
       this.powerUpGroup.getChildren()[i].setVisible(false);
     this.isScrollWheelUp = false;
     this.isSpacebarDown = false;
+    this.fireBallSound.stop();
+    this.kamehamehaSound.stop();
+    this.fireBallSound.stop();
+    this.beamSound.stop();
   }
 
 
