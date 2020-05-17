@@ -33,6 +33,7 @@ export default class ChestScene extends Phaser.Scene {
   orbPowerup: Phaser.GameObjects.Image;
   picklePowerup: Phaser.GameObjects.Image;
   pearlPowerup: Phaser.GameObjects.Image;
+  noChestText: Phaser.GameObjects.Text;
 
   /**
    * constructor, provides a reference to this scene
@@ -75,19 +76,11 @@ export default class ChestScene extends Phaser.Scene {
       gameObject.y = dragY;
       
     });
-    if(MainScene.chestNum > 0){
-      this.setUpScreen();
-      this.makeHelpButton();
-      this.makeBackButton();
-      this.makeSubmitButton();
-      this.questionTime();
-      //this.hideNoChestScene();
-      // http://labs.phaser.io/index.html?dir=input/dragging/&q=
-      
-    } 
-    else{
-      this.makeNoChestScene();
-    }
+    this.setUpScreen();
+    this.makeHelpButton();
+    this.makeBackButton();
+    this.makeSubmitButton();
+    this.questionTime();
   }
 
 
@@ -98,26 +91,22 @@ export default class ChestScene extends Phaser.Scene {
    * Produces: Nothing
    */
   setUpScreen(){
+    this.noChestText = this.add.text(0, 0, "No Chests Available");
+    this.noChestText.depth = 100;
+    this.noChestText.setColor("red");
+    this.noChestText.setFontSize(32);
+    this.noChestText.setFontStyle("bold");
+    this.noChestText.setX(this.scale.width/2-this.noChestText.width/2);
+    this.noChestText.setY(this.scale.height/2-this.noChestText.height/2);
     this.response = this.add.bitmapText(0,0,"pixelFont"," ", 75);
     this.closedChest=this.add.image(this.scale.width/2, this.scale.height/2, "closeChest");
     this.openedChest=this.add.image(this.scale.width/2, this.scale.height/2, "openChest");
     this.hideOpenedChest();
-    this.noChests = this.add.text(0,0, "You have no chests", {fill: "red", font: "bold 80px Serif"});
-    this.hideNoChestScene();
-
-
     this.bombPowerup=this.add.image(this.scale.width/2, this.scale.height/2, "bombPowerup");
     this.spikePowerup = this.add.image(this.scale.width/2, this.scale.height/2, "spike_powerup");
     this.orbPowerup = this.add.image(this.scale.width/2, this.scale.height/2, "energy_ball");
     this.picklePowerup = this.add.image(this.scale.width/2, this.scale.height/2, "pickle_rick");
     this.pearlPowerup = this.add.image(this.scale.width/2, this.scale.height/2, "pearl");
-    this.bombPowerup.depth = 100;
-    this.spikePowerup.depth = 100; 
-    this.orbPowerup.depth = 100;
-    this.picklePowerup.depth = 100; 
-    this.pearlPowerup.depth = 100;
-    
-
     this.clock=this.add.image(this.scale.width/2, this.scale.height/2, "clock");
     this.hoursDot=this.add.image(this.scale.width/4 + this.scale.width/2, this.scale.width/4 + this.scale.width/2, "hoursDot");
     this.minuetsDot=this.add.image(this.scale.width/4, this.scale.height/4 + this.scale.height/2, "minutesDot");
@@ -194,31 +183,6 @@ export default class ChestScene extends Phaser.Scene {
       //this.scene.start("MainScene", {powerup: this.powerupNum, chest: this.chestNum});
       this.scene.switch("MainScene");
     });
-  }
-
-
-  /**
-   * makeNoChestScene, makes the mostly empty scene when the player has no available chests to open
-   * 
-   * Consumes: Nothing
-   * Produces: Nothing
-   */
-  makeNoChestScene(){
-    this.makeBackButton();
-    this.chestNumLabel = this.add.text(0, 0, "Chests: " + MainScene.chestNum, {fill: "red", font: "bold 80px Serif"});
-    this.chestNumLabel.setBackgroundColor("black");
-    this.chestNumLabel.setX(this.scale.width/2 - this.chestNumLabel.width/2)
-    this.noChests.setX(this.scale.width/2-this.noChests.width/2);
-    this.noChests.setY(this.scale.height/2-this.noChests.height/2);
-    this.noChests.setVisible(true);
-
-    this.hideClosedChest();
-    this.hideClock();
-    this.hideDots();
-    this.hideSubmit();
-    this.hidePowerup()
-    this.hideText();
-    this.hideResponse();
   }
 
   hideNoChestScene(){
@@ -667,12 +631,24 @@ export default class ChestScene extends Phaser.Scene {
   update() {
     if(MainScene.beginning){
       MainScene.beginning = false;
-      if(!MainScene.chestNum){
-        this.makeNoChestScene();
+      if (!MainScene.chestNum) {
+        this.hideClosedChest();
+        this.hideClock();
+        this.hideDots();
+        this.hideSubmit();
+        this.hidePowerup()
+        this.hideText();
+    this.hideResponse();
+        this.noChestText.setVisible(true);
       } else {
-        this.questionTime();
-        this.setUpScreen();
+        this.showClosedChest();
+        this.showDots();
+        this.showText();
+        this.showClock();
+        this.showSubmit();
+        this.noChestText.setVisible(false);
       }
+      this.questionTime();
       this.chestNumLabel.setText("Chests: " + MainScene.chestNum);
     }
   }

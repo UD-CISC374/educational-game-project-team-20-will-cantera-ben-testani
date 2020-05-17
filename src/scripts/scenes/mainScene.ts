@@ -585,7 +585,6 @@ export default class MainScene extends Phaser.Scene {
    */
   getCurrentSong(): Phaser.Sound.BaseSound {
     let song: Phaser.Sound.BaseSound = this.levelOneTrack;
-
     switch(LevelComplete.levelNumber) {
       case 1:
         song = this.levelOneTrack;
