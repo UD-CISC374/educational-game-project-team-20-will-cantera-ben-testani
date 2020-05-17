@@ -34,6 +34,7 @@ export default class ChestScene extends Phaser.Scene {
   picklePowerup: Phaser.GameObjects.Image;
   pearlPowerup: Phaser.GameObjects.Image;
   noChestText: Phaser.GameObjects.Text;
+  nextButton: Phaser.GameObjects.Text;
 
   /**
    * constructor, provides a reference to this scene
@@ -68,6 +69,7 @@ export default class ChestScene extends Phaser.Scene {
       allowGravity: false
     });
     this.makeHelpButton();
+
     this.makeBackButton();
     this.makeSubmitButton();
     this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
@@ -77,10 +79,26 @@ export default class ChestScene extends Phaser.Scene {
       
     });
     this.setUpScreen();
+    this.makeNextButton();
     this.makeHelpButton();
     this.makeBackButton();
     this.makeSubmitButton();
     this.questionTime();
+  }
+
+  makeNextButton() {
+    this.nextButton = this.add.text(0, this.scale.height/2, "Next Chest", {fill: "red", font: "bold 35px Serif"});
+    this.nextButton.setBackgroundColor("black");
+    this.nextButton.setX(this.scale.width-this.nextButton.width);
+    this.nextButton.setInteractive();
+    this.nextButton.on("pointerdown", () => {
+      this.chestNumLabel.setText("Chests: " + MainScene.chestNum);
+      if (MainScene.chestNum) {
+        this.resetScene();
+      } else {
+        this.displayNoChests();
+      }
+    });
   }
 
 
@@ -118,7 +136,7 @@ export default class ChestScene extends Phaser.Scene {
     this.chestNumLabel.setBackgroundColor("black");
     this.chestNumLabel.setX(this.scale.width/2 - this.chestNumLabel.width/2);
     this.hoursDot.setInteractive({draggable:true});
-    this.minuetsDot.setInteractive({draggable:true});
+    this.minuetsDot.setInteractive({draggable:true}); 
     this.backGroup.add(this.closedChest);
     this.textGroup.add(this.hoursQuestion);
     this.rewardGroup.add(this.bombPowerup);
@@ -196,6 +214,10 @@ export default class ChestScene extends Phaser.Scene {
    * Produces: Nothing
    */
   questionTime(){
+    if (!MainScene.chestNum) {
+      this.displayNoChests();
+      return;
+    }
     this.hour = Math.floor(Math.random() * 12)+1;
     this.min = Math.round(Math.floor(Math.random() * 59)/5)*5;
     if(this.min==60){
@@ -628,18 +650,23 @@ export default class ChestScene extends Phaser.Scene {
     return h;
   }
 
+  displayNoChests(): void {
+    this.hideClosedChest();
+    this.hideOpenedChest();
+    this.hideClock();
+    this.hideDots();
+    this.hideSubmit();
+    this.hidePowerup()
+    this.hideText();
+    this.hideResponse();
+    this.noChestText.setVisible(true);
+  }
+
   update() {
     if(MainScene.beginning){
       MainScene.beginning = false;
       if (!MainScene.chestNum) {
-        this.hideClosedChest();
-        this.hideClock();
-        this.hideDots();
-        this.hideSubmit();
-        this.hidePowerup()
-        this.hideText();
-    this.hideResponse();
-        this.noChestText.setVisible(true);
+        this.displayNoChests();
       } else {
         this.showClosedChest();
         this.showDots();
