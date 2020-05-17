@@ -115,7 +115,7 @@ export default class MainScene extends Phaser.Scene {
   private isLevelSwitching: boolean = false;
   private isSpacebarDown: boolean = false;
   private isScrollWheelUp: boolean = false;
-  private hasPowerup: boolean = false;
+  private numClones: Array<number> = [0,0,0,0,0]; // Just for displaying the number of powerups as text on screen
 
 
   /**
@@ -240,12 +240,6 @@ export default class MainScene extends Phaser.Scene {
     this.powerup4 = this.add.image(625, 660, "pickle_rick");
     this.powerup5 = this.add.image(700, 430, "pearl");
 
-    this.onDrag(this.powerup1);
-    this.onDrag(this.powerup2);
-    this.onDrag(this.powerup3);
-    this.onDrag(this.powerup4);
-    this.onDrag(this.powerup5);
-
     this.powerUpGroup = this.physics.add.group(); // Make it a physics group
     this.powerUpGroup.add(this.powerup1); 
     this.powerUpGroup.add(this.powerup2);
@@ -340,32 +334,12 @@ export default class MainScene extends Phaser.Scene {
    */
   onDrag(object: any): void {
     // Defining drag behaviour
-    if (object.name === "chromeTurret" || object.name === "purpleShip" || object.name === "barrelTurret" || object.name === "wizardGuy") {
-      this.input.on('drag', function (pointer, gameObject, dragX, dragY) { // Update turrets position on drag
-        let spriteRotation: number = Phaser.Math.Angle.Between(500, 500, gameObject.x, gameObject.y); 
-        gameObject.setRotation(spriteRotation-80.1); // Don't touch this number
-        gameObject.x = dragX;
-        gameObject.y = dragY;      
-      });
-    } else {
-      this.input.on("pointerover", () => { // Update turrets position on drag
-      if (this.isScrollWheelUp && object.alpha === 1 && !this.hasPowerup) {
-          this.hasPowerup = true;   
-          let clone: any = this.add.image(object.x, object.y, object.texture);       
-          clone.setInteractive({draggable: true});
-          clone.depth = this.CLONE_DEPTH;
-          this.activePowerUps.add(clone); 
-          clone.on("pointerdown", () => {
-            if (object === this.powerup1 && clone.x === object.x && MainScene.powerUps[0]) {MainScene.powerUps[0]--;}
-            if (object === this.powerup2 && clone.x === object.x && MainScene.powerUps[1]) {MainScene.powerUps[1]--;}
-            if (object === this.powerup3 && clone.x === object.x && MainScene.powerUps[2]) {MainScene.powerUps[2]--;}
-            if (object === this.powerup4 && clone.x === object.x && MainScene.powerUps[3]) {MainScene.powerUps[3]--;}
-            if (object === this.powerup5 && clone.x === object.x && MainScene.powerUps[4]) {MainScene.powerUps[4]--;}
-        });
-      }
-      this.input.on("pointerup", () => {this.hasPowerup = false;});
-      });
-    }
+    this.input.on('drag', function (pointer, gameObject, dragX, dragY) { // Update turrets position on drag
+      let spriteRotation: number = Phaser.Math.Angle.Between(500, 500, gameObject.x, gameObject.y); 
+      gameObject.setRotation(spriteRotation-80.1); // Don't touch this number
+      gameObject.x = dragX;
+      gameObject.y = dragY;      
+    });
   }
 
 
@@ -1251,6 +1225,37 @@ export default class MainScene extends Phaser.Scene {
     }
   }
 
+
+  /**
+   * makeClones, makes clones of the powerups to be dragged and used. 
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  makeClones(): void {
+    for (let i = 0; i < 5; i++) {
+      if (MainScene.powerUps[i] > 0) {
+        let powerupType: any; 
+        if (i === 0) {powerupType = this.powerup1};
+        if (i === 1) {powerupType = this.powerup2};
+        if (i === 2) {powerupType = this.powerup3};
+        if (i === 3) {powerupType = this.powerup4};
+        if (i === 4) {powerupType = this.powerup5};
+        let depthCount: number = 0;
+        while (MainScene.powerUps[i] != 0) {
+          this.numClones[i] = MainScene.powerUps[i];
+          MainScene.powerUps[i]--;
+          let clone: any = this.add.image(powerupType.x, powerupType.y, powerupType.texture); 
+          this.input.on("pointerdown", () => {this.activePowerUps.add(clone); this.numClones[i]--;});   
+          clone.depth = this.CLONE_DEPTH+depthCount;
+          clone.setInteractive({draggable: true});
+          depthCount++;
+        }
+      }
+    }
+  }
+
+
   /**
    * displayPowerupBar, while the spacebar is held down, a wheel containing the powerups is displayed on screen and
    *                    in game time is slowed down.
@@ -1261,6 +1266,7 @@ export default class MainScene extends Phaser.Scene {
   displayPowerupBar(): void {
     this.isSpacebarDown = true;
     if (this.isSpacebarDown && !this.isScrollWheelUp) {
+      this.makeClones();
       this.handleMusic(3);
       this.stopSounds();
       this.zaWarudo.play({volume: .6});
@@ -1293,7 +1299,6 @@ export default class MainScene extends Phaser.Scene {
     if (this.zaWarudo.isPlaying)
       this.zaWarudo.stop();
     this.handleMusic(1);
-    this.hasPowerup = false;
   }
 
 
@@ -1333,7 +1338,7 @@ export default class MainScene extends Phaser.Scene {
    */
   update(): void {
     for (let i = 0; i < this.powerupTextList.length; i++)
-      this.powerupTextList[i].setText("X" + MainScene.powerUps[i].toString());
+      this.powerupTextList[i].setText("X" + this.numClones[i].toString());
     this.setPowerupAlpha();
     if (Phaser.Input.Keyboard.JustDown(this.spacebar)) 
       console.log("X: " + this.game.input.mousePointer.x + " Y: " + this.game.input.mousePointer.y);
