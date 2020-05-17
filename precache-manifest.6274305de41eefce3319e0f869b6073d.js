@@ -20,6 +20,10 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/audio/endSong.mp3"
   },
   {
+    "revision": "4156ae22f0b91cf185278a2a4a03f235",
+    "url": "assets/audio/explosionSound.mp3"
+  },
+  {
     "revision": "7f18cb3a1d05357f80e30fe03eba1ebe",
     "url": "assets/audio/fireballSound.mp3"
   },
@@ -60,7 +64,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/audio/zaWarudo.mp3"
   },
   {
-    "revision": "a92242b8c51e838281d0bf8f494ff877",
+    "revision": "c05dcd7c5048ff81425968012a52b9a3",
     "url": "assets/citations.md"
   },
   {
@@ -252,12 +256,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "favicon.ico"
   },
   {
-    "revision": "da22b1f46cfa7a3b07a493df6e5cf911",
+    "revision": "9d33d27fb9f2b5041c9fee7da30e2541",
     "url": "index.html"
   },
   {
-    "revision": "f23ed3c2ce28c26c0613",
-    "url": "main.cb8ea99eaeb37865c873.bundle.js"
+    "revision": "722abb3f87919e9d7011",
+    "url": "main.c8f11e0d0aeaeb81e79a.bundle.js"
   },
   {
     "revision": "601680b9d7c735e2dac776c6e564a81b",

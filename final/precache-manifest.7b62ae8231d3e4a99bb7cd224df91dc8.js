@@ -20,6 +20,10 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalassets/audio/endSong.mp3"
   },
   {
+    "revision": "4156ae22f0b91cf185278a2a4a03f235",
+    "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalassets/audio/explosionSound.mp3"
+  },
+  {
     "revision": "7f18cb3a1d05357f80e30fe03eba1ebe",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalassets/audio/fireballSound.mp3"
   },
@@ -60,7 +64,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalassets/audio/zaWarudo.mp3"
   },
   {
-    "revision": "a92242b8c51e838281d0bf8f494ff877",
+    "revision": "c05dcd7c5048ff81425968012a52b9a3",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalassets/citations.md"
   },
   {
@@ -252,15 +256,15 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalfavicon.ico"
   },
   {
-    "revision": "0ef2662efda782c2cb2d",
-    "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalgen.main.8838ed82f8708ad72a61.bundle.js"
+    "revision": "68a3ed339d57307f8112",
+    "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalgen.main.cacbee691b0d054855d6.bundle.js"
   },
   {
     "revision": "89b0deb00ccc35e5bdee",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalgen.vendors.9e875e58a33795bd6679.bundle.js"
   },
   {
-    "revision": "b93a319f03121d1900d9ab8bbc560e9f",
+    "revision": "3018178b1cd6658876f2a92fb956ea53",
     "url": "/educational-game-project-team-20-will-cantera-ben-testani/finalindex.html"
   },
   {
