@@ -66,7 +66,7 @@ export default class MainScene extends Phaser.Scene {
   // Powerup Stuff                
   // Should enumerate this, it goes index: 0 = bomb, 1 = spike, 2 = purple orb, 3 = pickle, 4 = pearl
   public static powerUps: Array<number> = [0, 0, 0, 0, 0];
-  private powerupCoords: Array<Array<number>> = [[550, 300], [350, 430], [330, 660], [575, 660], [750, 430]];
+  private powerupCoords: Array<Array<number>> = [[550, 300], [350, 430], [430, 660], [670, 660], [750, 430]];
   private powerupTextList: Array<Phaser.GameObjects.Text> = [];
   public powerUpGroup: any;
   private activePowerUps: any;
@@ -349,20 +349,20 @@ export default class MainScene extends Phaser.Scene {
       });
     } else {
       this.input.on("pointerover", () => { // Update turrets position on drag
-        if (this.isScrollWheelUp && object.alpha === 1 && !this.hasPowerup) {
+      if (this.isScrollWheelUp && object.alpha === 1 && !this.hasPowerup) {
           this.hasPowerup = true;   
           let clone: any = this.add.image(object.x, object.y, object.texture);       
           clone.setInteractive({draggable: true});
           clone.depth = this.CLONE_DEPTH;
-          this.activePowerUps.add(clone);
+          this.activePowerUps.add(clone); 
           clone.on("pointerdown", () => {
-            if (object === this.powerup1) {MainScene.powerUps[0]--;}
-            if (object === this.powerup2) {MainScene.powerUps[1]--;}
-            if (object === this.powerup3) {MainScene.powerUps[2]--;}
-            if (object === this.powerup4) {MainScene.powerUps[3]--;}
-            if (object === this.powerup5) {MainScene.powerUps[4]--;}
-          });
-        }
+            if (object === this.powerup1 && clone.x === object.x && MainScene.powerUps[0]) {MainScene.powerUps[0]--;}
+            if (object === this.powerup2 && clone.x === object.x && MainScene.powerUps[1]) {MainScene.powerUps[1]--;}
+            if (object === this.powerup3 && clone.x === object.x && MainScene.powerUps[2]) {MainScene.powerUps[2]--;}
+            if (object === this.powerup4 && clone.x === object.x && MainScene.powerUps[3]) {MainScene.powerUps[3]--;}
+            if (object === this.powerup5 && clone.x === object.x && MainScene.powerUps[4]) {MainScene.powerUps[4]--;}
+        });
+      }
       this.input.on("pointerup", () => {this.hasPowerup = false;});
       });
     }
@@ -671,7 +671,7 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   makeText(text: string, x: number, y: number) {
-    let textDisplay = this.add.text(0, 0, text, {fill: "red", font: "bold 24px Serif"});
+    let textDisplay = this.add.text(0, 0, text, {fill: "white", font: "bold 24px Serif"});
     textDisplay.setBackgroundColor("black");
     textDisplay.setX((this.scale.width/2) - (textDisplay.width/2) + x);
     textDisplay.setY((this.scale.height/2) - (textDisplay.height/2) + y);
@@ -692,9 +692,9 @@ export default class MainScene extends Phaser.Scene {
    */
   runTutorial(messageNumber: number): void {
     let turretText: string = "These are your defenses,\ndrag them to the correct\ntimes up top to\ndefend your crystal!\nCLICK TO DELETE";
-    let startWaveText: string = "This is the start wave\nbutton, click it when you\n have set up your defenses\nto start defending.";
+    let startWaveText: string = "This is the start wave\nbutton, click it when you\nhave set up your defenses\nto start defending.";
     let chestText: string = "Here is a chest, some enemies drop them.\nClick on it to pick it up\nthen go to open chests to open it.";
-    let powerupText: string = "Hold down spacebar to see\nyour powerups and drag to use.\ntime slows down while you choose";
+    let powerupText: string = "Hold down spacebar to see your\npowerups and drag them to enemies to destroy them\ntime slows down while you choose";
     let stringList: Array<string> = [turretText, startWaveText, chestText, powerupText];
     if (messageNumber > stringList.length-1)
       return;
