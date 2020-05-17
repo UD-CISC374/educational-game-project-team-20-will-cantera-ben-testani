@@ -14,6 +14,7 @@ import VictoryScene from './victoryScene';
 import ChestScene from './chestScene';
 import Explosion from '../objects/explosion';
 import Bomb from '../objects/bomb';
+import Clone from '../objects/clone';
 
 function sleep (milliseconds) { // Making the program wait for the given time
   return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -37,6 +38,7 @@ export default class MainScene extends Phaser.Scene {
   // Phaser groups
   private enemies: any;
   private turrets: any;
+  private cloneList: any;
 
   // Phaser objects
   public turretProjectiles: GameObjects.Group;
@@ -61,6 +63,7 @@ export default class MainScene extends Phaser.Scene {
   private spacebar: Phaser.Input.Keyboard.Key;
   private chestPickupSound: Phaser.Sound.BaseSound;
   private zaWarudo: Phaser.Sound.BaseSound;
+  private explosionSound: Phaser.Sound.BaseSound;
 
 
   // Powerup Stuff                
@@ -154,6 +157,9 @@ export default class MainScene extends Phaser.Scene {
     // Death Sound
     this.deathSound = this.sound.add("death_sound", {volume: 2});
 
+    // Powerup Sound
+    this.explosionSound = this.sound.add("explosion_sound");
+
     // Time Slow Sound
     this.zaWarudo = this.sound.add("za_warudo");
 
@@ -174,6 +180,8 @@ export default class MainScene extends Phaser.Scene {
 
     // Make a physics enabled group for the enemies
     this.enemies = this.physics.add.group();
+
+    this.cloneList = this.physics.add.group();
 
     // Add starting defensive structure to inventory 
     this.addDefenses();
@@ -223,6 +231,9 @@ export default class MainScene extends Phaser.Scene {
       powerupCount.depth = this.CLONE_DEPTH;
       powerupCount.setVisible(false);
       this.powerupTextList.push(powerupCount);
+      this.powerupTextList[i].setFontSize(24);
+      this.powerupTextList[i].setColor("black");
+      this.powerupTextList[i].setFontStyle("bold");
     }
   }
 
@@ -350,9 +361,12 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   powerupCollisionHandler(powerup: any, enemy: any): void {
-    console.log("rekt");
     new Explosion(this, powerup.x, powerup.y);
+    this.explosionSound.play();
+    console.log("Before: " + this.activePowerUps.getChildren().length.toString());
+    this.activePowerUps.remove(powerup);
     powerup.destroy();
+    console.log("After: " + this.activePowerUps.getChildren().length.toString());
     this.collideMultiple(enemy); // Destroys many enemies in the vicinity.
     enemy.destroy(); 
   }
@@ -1236,19 +1250,30 @@ export default class MainScene extends Phaser.Scene {
     for (let i = 0; i < 5; i++) {
       if (MainScene.powerUps[i] > 0) {
         let powerupType: any; 
-        if (i === 0) {powerupType = this.powerup1};
-        if (i === 1) {powerupType = this.powerup2};
-        if (i === 2) {powerupType = this.powerup3};
-        if (i === 3) {powerupType = this.powerup4};
-        if (i === 4) {powerupType = this.powerup5};
+        let name: string = "";
+        if (i === 0) {powerupType = this.powerup1; name = "bombPowerup"};
+        if (i === 1) {powerupType = this.powerup2; name = "spike_powerup"};
+        if (i === 2) {powerupType = this.powerup3; name = "energy_ball"};
+        if (i === 3) {powerupType = this.powerup4; name = "pickle_rick"};
+        if (i === 4) {powerupType = this.powerup5; name = "pearl"};
         let depthCount: number = 0;
+        this.numClones[i] = MainScene.powerUps[i];
         while (MainScene.powerUps[i] != 0) {
-          this.numClones[i] = MainScene.powerUps[i];
           MainScene.powerUps[i]--;
-          let clone: any = this.add.image(powerupType.x, powerupType.y, powerupType.texture); 
-          this.input.on("pointerdown", () => {this.activePowerUps.add(clone); this.numClones[i]--;});   
+          let clone: any = new Clone(this, powerupType.x, powerupType.y, powerupType.texture, name);
+          this.input.on("drag", () => {
+              if (clone.x != powerupType.x || clone.y != powerupType.y) {
+                if (!clone.isActive) { // Make sure this only happens once. This took way to long to figure out.
+                  this.activePowerUps.add(clone); 
+                  clone.isActive = true;
+                  if (this.numClones[i]) 
+                    this.numClones[i]--;
+              } 
+            }
+          });   
           clone.depth = this.CLONE_DEPTH+depthCount;
-          clone.setInteractive({draggable: true});
+          clone.setVisible(false);
+          this.cloneList.add(clone);
           depthCount++;
         }
       }
@@ -1267,6 +1292,11 @@ export default class MainScene extends Phaser.Scene {
     this.isSpacebarDown = true;
     if (this.isSpacebarDown && !this.isScrollWheelUp) {
       this.makeClones();
+      for (let i = 0; i < this.cloneList.getChildren().length; i++) {
+        this.cloneList.getChildren()[i].setVisible(true);
+        this.cloneList.getChildren()[i].setInteractive({draggable: true});
+      }
+
       this.handleMusic(3);
       this.stopSounds();
       this.zaWarudo.play({volume: .6});
@@ -1289,6 +1319,12 @@ export default class MainScene extends Phaser.Scene {
    */
   hidePowerBar(): void {
     this.powerupWheel.setVisible(false);
+    for (let i = 0; i < this.cloneList.getChildren().length; i++) {
+      if (!this.cloneList.getChildren()[i].isActive) {
+        this.cloneList.getChildren()[i].disableInteractive();
+        this.cloneList.getChildren()[i].setVisible(false);
+      }
+    }
     for (let i = 0; i < this.POWERUP_COUNT; i++) {
       this.powerUpGroup.getChildren()[i].setVisible(false);
       this.powerupTextList[i].setVisible(false);
