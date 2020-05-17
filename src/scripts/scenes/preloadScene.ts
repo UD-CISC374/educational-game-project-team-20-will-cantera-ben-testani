@@ -67,8 +67,10 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image("powerup_wheel", "assets/images/pieChart.png");
     this.load.image("bombPowerup", "assets/images/bombPowerup.png")
     this.load.image("spike_powerup", "assets/images/spikeBall.png")
+    this.load.image("energy_ball", "assets/images/glowBall.png")
+    this.load.image("pickle_rick", "assets/images/pickleRick.png")
+    this.load.image("pearl", "assets/images/pearl.png")
 
-    
     // Treasure chest
     this.load.image("treasure_chest", "assets/images/treasureChest.png");
 

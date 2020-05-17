@@ -29,6 +29,9 @@ export default class ChestScene extends Phaser.Scene {
   noChests: Phaser.GameObjects.Text;
   spikePowerup: any;
   powerupIndex: number = 1;
+  orbPowerup: Phaser.GameObjects.Image;
+  picklePowerup: Phaser.GameObjects.Image;
+  pearlPowerup: Phaser.GameObjects.Image;
 
   /**
    * constructor, provides a reference to this scene
@@ -92,6 +95,9 @@ export default class ChestScene extends Phaser.Scene {
     this.hideOpenedChest();
     this.bombPowerup=this.add.image(this.scale.width/2, this.scale.height/2, "bombPowerup");
     this.spikePowerup = this.add.image(this.scale.width/2, this.scale.height/2, "spike_powerup");
+    this.orbPowerup = this.add.image(this.scale.width/2, this.scale.height/2, "energy_ball");
+    this.picklePowerup = this.add.image(this.scale.width/2, this.scale.height/2, "pickle_rick");
+    this.pearlPowerup = this.add.image(this.scale.width/2, this.scale.height/2, "pearl");
     this.clock=this.add.image(this.scale.width/2, this.scale.height/2, "clock");
     this.hoursDot=this.add.image(this.scale.width/4 + this.scale.width/2, this.scale.width/4 + this.scale.width/2, "hoursDot");
     this.minuetsDot=this.add.image(this.scale.width/4, this.scale.height/4 + this.scale.height/2, "minutesDot");
@@ -108,6 +114,9 @@ export default class ChestScene extends Phaser.Scene {
     this.textGroup.add(this.hoursQuestion);
     this.rewardGroup.add(this.bombPowerup);
     this.rewardGroup.add(this.spikePowerup);
+    this.rewardGroup.add(this.orbPowerup);
+    this.rewardGroup.add(this.picklePowerup);
+    this.rewardGroup.add(this.pearlPowerup);
     this.hidePowerup();
   }
 
@@ -291,7 +300,13 @@ export default class ChestScene extends Phaser.Scene {
       this.bombPowerup.setVisible(true);
     if (this.powerupIndex === 1)
       this.spikePowerup.setVisible(true);
-    MainScene.powerUps[this.powerupIndex] += 1;
+    if (this.powerupIndex === 2)
+      this.orbPowerup.setVisible(true);
+    if (this.powerupIndex === 3) 
+      this.picklePowerup.setVisible(true);
+    if (this.powerupIndex === 4)
+      this.pearlPowerup.setVisible(true);
+    MainScene.powerUps[this.powerupIndex] += 2;
     MainScene.chestNum--;
   }
 
@@ -626,9 +641,6 @@ export default class ChestScene extends Phaser.Scene {
 
   update() {
     if(MainScene.beginning){
-      let powerups: any = this.rewardGroup.getChildren();
-      //for (let i = 0; i < powerups.length; i++)
-        //powerups[0].destroy();
       if(!MainScene.chestNum){
         this.makeNoChestScene();
       } else {
