@@ -2,7 +2,7 @@ import ArmorGoblin from '../objects/armorGoblin';
 import TimeGoblin from '../objects/timeGoblin';
 import SpeedGoblin from '../objects/speedGoblin';
 import ThePunisher from '../objects/thePunisher';
-import { GameObjects } from 'phaser';
+import { GameObjects, Game } from 'phaser';
 import LevelComplete from './levelComplete';
 import ChromeTurret from '../objects/chromeTurret';
 import PurpleShip from '../objects/purpleShip';
@@ -23,6 +23,10 @@ export default class MainScene extends Phaser.Scene {
   // Constants
   private readonly numEnemies: number = 4;
   private readonly MAXHEALTH: number = 225;
+  private readonly POWERUP_COUNT: number = 5; 
+  private readonly CLONE_DEPTH = 102;
+  private readonly FRONT_FIRST: number = 101;
+  private readonly FRONT_SECOND: number = 100;
   
   // Turrets and enemies, must be any to accept custom attributes
   public chromeTurret: any;
@@ -38,7 +42,6 @@ export default class MainScene extends Phaser.Scene {
   public turretProjectiles: GameObjects.Group;
   private timeCrystal: Phaser.GameObjects.Sprite;
   private chestButton: Phaser.GameObjects.Text;
-  private powerUpButton: Phaser.GameObjects.Text;
   private levelOneTrack: Phaser.Sound.BaseSound;
   private waveStartButton: GameObjects.Text;
   private healthBar: GameObjects.Image;
@@ -54,13 +57,28 @@ export default class MainScene extends Phaser.Scene {
   private levelThreeBackground: GameObjects.Image;
   private deathSound: Phaser.Sound.BaseSound;
   private deathClock: Phaser.Physics.Arcade.Sprite;
+  private powerupWheel: GameObjects.Image;
+  private spacebar: Phaser.Input.Keyboard.Key;
+  private chestPickupSound: Phaser.Sound.BaseSound;
+  private zaWarudo: Phaser.Sound.BaseSound;
 
-  // Powerup Stuff
-  public powerUps: any;
-  public static bombPowerUpNum = 1;
-  public static chestNum = 2;
-  public static bombBool = false;
+
+  // Powerup Stuff                
+  // Should enumerate this, it goes index: 0 = bomb, 1 = spike, 2 = purple orb, 3 = pickle, 4 = pearl
+  public static powerUps: Array<number> = [0, 0, 0, 0, 0];
+  private powerupCoords: Array<Array<number>> = [[550, 300], [350, 430], [430, 660], [670, 660], [750, 430]];
+  private powerupTextList: Array<Phaser.GameObjects.Text> = [];
+  public powerUpGroup: any;
+  private activePowerUps: any;
+  public static chestNum: number = 0;
   public static beginning: boolean;
+
+  private powerup1: any;
+  private powerup2: any;
+  private powerup3: any;
+  private powerup4: any;
+  private powerup5: any;
+
 
   // Variables with set values
   private health: number = this.MAXHEALTH; // Width in pixels of the health bar
@@ -95,6 +113,9 @@ export default class MainScene extends Phaser.Scene {
   private tutorialMessageNumber: number = 0;
   private resetGame: boolean = false;
   private isLevelSwitching: boolean = false;
+  private isSpacebarDown: boolean = false;
+  private isScrollWheelUp: boolean = false;
+  private hasPowerup: boolean = false;
 
 
   /**
@@ -107,13 +128,6 @@ export default class MainScene extends Phaser.Scene {
     super({ key: 'MainScene' });
   }
 
-
-  init(data){
-    // this.powerUpNum = data.powerup;
-    // this.chestNum = data.chest;
-    // this.bombBool= data.bombBool;
-    //this.checkPowerUps();
-  }
 
   /**
    * create, most of the code is moved to their own functions, that code is called in create to 
@@ -132,11 +146,19 @@ export default class MainScene extends Phaser.Scene {
     this.levelThreeBackground.depth = -1;
     this.levelTwoBackground.setVisible(false);
     this.levelThreeBackground.setVisible(false);
-
     this.add.image(this.scale.width/2, this.scale.height/2, "main_clock");
-
+    this.powerupWheel = this.add.image(this.scale.width/2, this.scale.height/2, "powerup_wheel");
+    this.powerupWheel.setVisible(false); // Initially invisible, must hold down space
+    this.powerupWheel.depth = this.FRONT_SECOND; // Make sure its on top
+  
     // Death Sound
     this.deathSound = this.sound.add("death_sound", {volume: 2});
+
+    // Time Slow Sound
+    this.zaWarudo = this.sound.add("za_warudo");
+
+    // Chest Pickup Sound
+    this.chestPickupSound = this.sound.add("chest_pickup");
 
     // Projectile Sounds
     this.beamSound = this.sound.add("laser_sound");
@@ -146,9 +168,6 @@ export default class MainScene extends Phaser.Scene {
 
     // Draw the players defensive strucutre inventory on screen
     this.handleBoxes();
-
-    // Add starting defensive structure to inventory 
-    this.addDefenses();
     
     // Health bar for the time crystal
     this.healthBar = this.add.image(this.scale.width/2, (this.scale.height/2)-80, "health_bar");
@@ -156,12 +175,16 @@ export default class MainScene extends Phaser.Scene {
     // Make a physics enabled group for the enemies
     this.enemies = this.physics.add.group();
 
-    // Make a physics enabled group for the turrets
-    this.turrets = this.physics.add.group();
-    this.turrets.add(this.chromeTurret);
-    this.turrets.add(this.purpleShip);
-    this.turrets.add(this.barrelTurret);
-    this.turrets.add(this.wizardGuy);
+    // Add starting defensive structure to inventory 
+    this.addDefenses();
+
+    // Add the powerups
+    this.addPowerups();
+
+    // Make an inital tutorial chest
+    this.spawnChest(this.scale.width/2-250, this.scale.height/2, true); // true to ignore random
+
+    this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
     // Draws the button onscreen for starting the wave
     this.makeWaveStartButton();
@@ -175,52 +198,69 @@ export default class MainScene extends Phaser.Scene {
     this.levelThreeTrack = this.sound.add("shadow");
 
     // Plays the background song for this scene
-    this.levelOneTrack.play({volume: .3}); // 2 for playing the song
+    this.levelOneTrack.play({volume: .1}); // 2 for playing the song
 
     // Making some things to be drawn on screen
     this.makeTimeCrystal();
     this.makeChestButton();
-    this.makePowerUpButton();
 
     // Group for projectiles
     this.turretProjectiles = this.add.group();
+    // Group for powerups 
+    this.activePowerUps = this.physics.add.group();
 
     // Adds collision between players shots and powerups, causing them to bounce
     this.physics.add.overlap(this.turretProjectiles, this.enemies, this.handleBulletCollision, this.giveTrue, this);
 
-    this.powerUps = this.add.group();
-    this.physics.add.collider(this.powerUps, this.enemies, function(powerUp, enemy){
-      //let explosion = new Explosion(MainScene, powerUp., enemy.y);
-      powerUp.destroy();
-      enemy.destroy();
-    });
-
-    this.physics.add.overlap(this.powerUps, this.enemies, this.hitEnemy, this.giveTrue, this);
+    this.physics.add.overlap(this.activePowerUps, this.enemies, this.powerupCollisionHandler, this.giveTrue, this);
 
     // Adding collision for the time crystal and enemies
     this.physics.add.overlap(this.timeCrystal, this.enemies, this.hurtCrystal, this.giveTrue, this);
-  }
 
-hitEnemy(powerUp){
-  let explosion = new Explosion(this, powerUp.x, powerUp.y);
-}
-
-  checkPowerUps(){
-    if(MainScene.bombBool){
-      this.makeBomb();
-      MainScene.bombBool = false;
+    // Draw the starting powerup counts
+    for (let i = 0; i < 5; i++) {
+      let powerupCount: Phaser.GameObjects.Text = this.add.text(this.powerupCoords[i][0], this.powerupCoords[i][1], "X" + MainScene.powerUps[i].toString());
+      powerupCount.depth = this.CLONE_DEPTH;
+      powerupCount.setVisible(false);
+      this.powerupTextList.push(powerupCount);
     }
   }
 
-  makeBomb(){
-    // this.bomb=this.add.image(this.scale.width/5, this.scale.height/5, "bombPowerup");
-    // this.bomb.setScale(.2);
-    // this.bombBool = false;
-    // this.bomb.setInteractive({draggable:true});
 
-    let bomb = new Bomb(this);
-    //this.powerUps.add(bomb);
+  /**
+   * addPowerups, adds the powerups to the scene, they are invisible until space is held down to see the powerup wheel. 
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  addPowerups(): void {
+    this.powerup1 = this.add.image(500, 300, "bombPowerup");
+    this.powerup2 = this.add.image(300, 430, "spike_powerup");
+    this.powerup3 = this.add.image(380, 660, "energy_ball");
+    this.powerup4 = this.add.image(625, 660, "pickle_rick");
+    this.powerup5 = this.add.image(700, 430, "pearl");
+
+    this.onDrag(this.powerup1);
+    this.onDrag(this.powerup2);
+    this.onDrag(this.powerup3);
+    this.onDrag(this.powerup4);
+    this.onDrag(this.powerup5);
+
+    this.powerUpGroup = this.physics.add.group(); // Make it a physics group
+    this.powerUpGroup.add(this.powerup1); 
+    this.powerUpGroup.add(this.powerup2);
+    this.powerUpGroup.add(this.powerup3);
+    this.powerUpGroup.add(this.powerup4);
+    this.powerUpGroup.add(this.powerup5);
+
+    for (let i = 0; i < this.POWERUP_COUNT; i++) {
+      this.powerUpGroup.getChildren()[i].setAlpha(.5); // No powerups at first, all half visibility
+      this.powerUpGroup.getChildren()[i].setInteractive();
+      this.powerUpGroup.getChildren()[i].depth = this.FRONT_FIRST;
+      this.powerUpGroup.getChildren()[i].setVisible(false);
+    }
   }
+
 
   /**
    * giveTrue, for some reason, the Phaser overlap function needs a callback that returns true?
@@ -232,6 +272,29 @@ hitEnemy(powerUp){
     return true;
   }
 
+  
+  /**
+   * spawnChest, has a random chance to spawn a chest where an enemy died. 
+   * 
+   * Consumes: enemyX, enemyY, ignoreChance -> numbers, boolean, the x and y location of the enemy that died
+   *                                                             true if ranndom should be ignored, false otherwise.
+   * Produces: Nothing
+   */
+  spawnChest(enemyX: number, enemyY: number, ignoreChance: boolean): void {
+    let randomNumber: number = Math.floor(Math.random() * 9);
+    if (ignoreChance)
+      randomNumber = 5;
+    if (randomNumber === 5) { // 1 in 10 chance
+      let chest: GameObjects.Image = this.add.image(enemyX, enemyY, "treasure_chest");
+      chest.setInteractive();
+      chest.on("pointerdown", () => {
+        MainScene.chestNum++; // Increment global static chest count
+        this.chestPickupSound.play();
+        chest.destroy();
+      });
+    }
+  }
+
 
   /**
    * handleBulletCollision, destroys projectiles and enemies.
@@ -241,6 +304,9 @@ hitEnemy(powerUp){
    */
   handleBulletCollision(projectile, enemy): void {
     projectile.destroy();
+    let enemyX: number = enemy.x;
+    let enemyY: number = enemy.y;
+    this.spawnChest(enemyX, enemyY, false); // false for indicating randomness
     enemy.destroy();
     if (projectile.name === "kamehameha_beam" || projectile.name === "pixel_bullet") {
       this.collideMultiple(enemy);
@@ -272,17 +338,52 @@ hitEnemy(powerUp){
    * Consumes: Nothing 
    * Produces: Nothing
    */
-  onDrag(): void {
+  onDrag(object: any): void {
     // Defining drag behaviour
-    this.input.on('drag', function (pointer, gameObject, dragX, dragY) { // Update turrets position on drag
-      let spriteRotation: number = Phaser.Math.Angle.Between(500, 500, gameObject.x, gameObject.y); 
-      gameObject.setRotation(spriteRotation-80.1); // Don't touch this number
-      gameObject.x = dragX;
-      gameObject.y = dragY;      
-    });
-
-
+    if (object.name === "chromeTurret" || object.name === "purpleShip" || object.name === "barrelTurret" || object.name === "wizardGuy") {
+      this.input.on('drag', function (pointer, gameObject, dragX, dragY) { // Update turrets position on drag
+        let spriteRotation: number = Phaser.Math.Angle.Between(500, 500, gameObject.x, gameObject.y); 
+        gameObject.setRotation(spriteRotation-80.1); // Don't touch this number
+        gameObject.x = dragX;
+        gameObject.y = dragY;      
+      });
+    } else {
+      this.input.on("pointerover", () => { // Update turrets position on drag
+      if (this.isScrollWheelUp && object.alpha === 1 && !this.hasPowerup) {
+          this.hasPowerup = true;   
+          let clone: any = this.add.image(object.x, object.y, object.texture);       
+          clone.setInteractive({draggable: true});
+          clone.depth = this.CLONE_DEPTH;
+          this.activePowerUps.add(clone); 
+          clone.on("pointerdown", () => {
+            if (object === this.powerup1 && clone.x === object.x && MainScene.powerUps[0]) {MainScene.powerUps[0]--;}
+            if (object === this.powerup2 && clone.x === object.x && MainScene.powerUps[1]) {MainScene.powerUps[1]--;}
+            if (object === this.powerup3 && clone.x === object.x && MainScene.powerUps[2]) {MainScene.powerUps[2]--;}
+            if (object === this.powerup4 && clone.x === object.x && MainScene.powerUps[3]) {MainScene.powerUps[3]--;}
+            if (object === this.powerup5 && clone.x === object.x && MainScene.powerUps[4]) {MainScene.powerUps[4]--;}
+        });
+      }
+      this.input.on("pointerup", () => {this.hasPowerup = false;});
+      });
+    }
   }
+
+
+  /**
+   * powerupCollisionHandler, destroys enemies that come into contact with an acitve powerup.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  powerupCollisionHandler(powerup: any, enemy: any): void {
+    console.log("rekt");
+    new Explosion(this, powerup.x, powerup.y);
+    powerup.destroy();
+    this.collideMultiple(enemy); // Destroys many enemies in the vicinity.
+    enemy.destroy(); 
+  }
+
+
   /**
    * makeDefenses, adds sprites to the game for the defensive structures when they are recieved.
    * 
@@ -297,7 +398,12 @@ hitEnemy(powerUp){
     this.wizardGuy = new WizardGuy(this, this.defensiveInventoryCoords[3][0], this.defensiveInventoryCoords[3][1]);
 
     this.chromeTurret.setInteractive({draggable: true}); // Chrome Turret is the only available turret at first
-    this.onDrag();
+    this.onDrag(this.chromeTurret);
+    this.turrets = this.physics.add.group(); // Make a physics enabled group for the turrets
+    this.turrets.add(this.chromeTurret); // Add the four turrets to the group
+    this.turrets.add(this.purpleShip);
+    this.turrets.add(this.barrelTurret);
+    this.turrets.add(this.wizardGuy);
     
     for (let i = 1; i < 4; i++) { // Add locks on the other three turrets
       let ironBarLock = this.add.image(this.defensiveInventoryCoords[i][0], this.defensiveInventoryCoords[i][1], "iron_bar");
@@ -342,7 +448,7 @@ hitEnemy(powerUp){
    * hurtCrystal, if an enemy collides with the crystal, it is hurt and loses some health. This method crops 
    *              a percentage of the healthbar to indicate the crystal is losing life. 
    * 
-   * Consumes: Nothing
+   * Consumes: crystal, enemy -> game objects
    * Produces: Nothing
    */
   hurtCrystal(crystal, enemy): void {
@@ -396,6 +502,7 @@ hitEnemy(powerUp){
    */
   resetGameProtocol(hasLost: boolean): void {
     this.resetGame = true;
+    MainScene.chestNum = 0;
     this.levelTwoBackground.setVisible(false);
     this.levelThreeBackground.setVisible(false);
     this.levelOneBackground.setVisible(true);
@@ -430,7 +537,7 @@ hitEnemy(powerUp){
     this.enemySpawnText.destroy(); // Reset the text for new game
     this.health = this.MAXHEALTH;
     this.healthBar.setCrop(0, 0, this.health, 97);
-    this.getCurrentSong().pause(); // Stop song from playing in lose scene
+    this.handleMusic(3); // Stop song from playing in lose scene
     LevelComplete.levelNumber = 1; // Back to level 1
   }
 
@@ -514,7 +621,7 @@ hitEnemy(powerUp){
    * 
    *              action -> 1: resume the song
    *              action -> 2: play the song
-   *              action -> 3: stop the song
+   *              action -> 3: pause the song
    * 
    * Consumes: action(number)
    * Produces: Nothing
@@ -523,7 +630,7 @@ hitEnemy(powerUp){
     let song: Phaser.Sound.BaseSound = this.getCurrentSong();
     let trackConfig = {
       mute: false,
-      volume: .3,
+      volume: .2,
       rate: 1,
       detune: 0,
       seek: 0,
@@ -564,7 +671,7 @@ hitEnemy(powerUp){
    * Produces: Nothing
    */
   makeText(text: string, x: number, y: number) {
-    let textDisplay = this.add.text(0, 0, text, {fill: "red", font: "bold 24px Serif"});
+    let textDisplay = this.add.text(0, 0, text, {fill: "white", font: "bold 24px Serif"});
     textDisplay.setBackgroundColor("black");
     textDisplay.setX((this.scale.width/2) - (textDisplay.width/2) + x);
     textDisplay.setY((this.scale.height/2) - (textDisplay.height/2) + y);
@@ -580,13 +687,15 @@ hitEnemy(powerUp){
    * runTutorial, displays some text boxes for the player tro see a tthe start of the game. They are displayed one
    *              afte the other after being destroyed by the  player by a mouse click
    * 
-   * Consumes: Nothing
+   * Consumes: messageNumber -> number, the message to display
    * Produces: Nothing
    */
   runTutorial(messageNumber: number): void {
     let turretText: string = "These are your defenses,\ndrag them to the correct\ntimes up top to\ndefend your crystal!\nCLICK TO DELETE";
-    let startWaveText: string = "This is the start wave\nbutton, click it when you\n have set up your defenses\nto start defending."
-    let stringList: Array<string> = [turretText, startWaveText];
+    let startWaveText: string = "This is the start wave\nbutton, click it when you\nhave set up your defenses\nto start defending.";
+    let chestText: string = "Here is a chest, some enemies drop them.\nClick on it to pick it up\nthen go to open chests to open it.";
+    let powerupText: string = "Hold down spacebar to see your\npowerups and drag them to enemies to destroy them\ntime slows down while you choose";
+    let stringList: Array<string> = [turretText, startWaveText, chestText, powerupText];
     if (messageNumber > stringList.length-1)
       return;
     switch(messageNumber) {
@@ -595,6 +704,12 @@ hitEnemy(powerUp){
         break;
       case 1: // Start Button Text
         this.makeText(stringList[messageNumber], -250, -250); // Display it above the turrets
+        break;
+      case 2: // Chest Text
+        this.makeText(stringList[messageNumber], -250, -100);
+        break;
+      case 3: // Powerup Text
+        this.makeText(stringList[messageNumber], 0, 0);
         break;
     }
   }
@@ -633,7 +748,6 @@ hitEnemy(powerUp){
     this.setInvisibleHandler(); // Clears things off the screen 
     let levelWaves = this.levelInfo["level" + LevelComplete.levelNumber.toString()];
     let numEnemies = levelWaves[this.waveNumber];
-    console.log(this.spawnTimes.length);
     if (this.spawnTimes.length != 0) {
       for (let i = 0; i < parseInt(numEnemies); i++) { // Spawn the enemies, let the fun begin
         if (this.resetGame) {
@@ -818,33 +932,11 @@ hitEnemy(powerUp){
     this.chestButton.setY((this.scale.height/2) - (this.chestButton.height/2) + 400);
     this.chestButton.setInteractive();
     this.chestButton.on("pointerdown", () => {
-      let song: Phaser.Sound.BaseSound = this.getCurrentSong();
-      song.pause();
-      //this.scene.start("ChestScene", {powerup: this.powerUpNum, chest: this.chestNum});
+      this.handleMusic(3);
       this.scene.switch("ChestScene");
     });
   }
 
-
-  /**
-   * makePowerUpButton, handles displaying the button to switch to the chest scene on the screen when the wave of enemies 
-   *                  is over.
-   * 
-   * Consumes: Nothing
-   * Produces: Nothing
-   */
-  makePowerUpButton(): void {
-    this.powerUpButton = this.add.text(0, 0, "Power-Ups", {fill: "red", font: "bold 50px Serif"});
-    this.powerUpButton.setBackgroundColor("black");
-    this.powerUpButton.setX((this.scale.width/2) - (this.powerUpButton.width/2) + 350);
-    this.powerUpButton.setY((this.scale.height/2) - (this.chestButton.height/2) + 460);
-    this.powerUpButton.setInteractive();
-    this.powerUpButton.on("pointerdown", () => {
-      //console.log(this.chestNum);
-      //this.scene.start("PowerUp", {bombPowerUp: this.powerUpNum, chest: this.chestNum, bombBool: this.bombBool});
-      this.scene.switch("PowerUp");
-    });
-  }
 
    /**
    * getEnemyCoords, Returns a range of pixels for the enemy to spawn based on the random hour chosen.
@@ -982,20 +1074,31 @@ hitEnemy(powerUp){
    */
   moveProjectiles(turret: any, enemy: any, projectile: any): void {
       projectile.setRotation(turret.rotation-80.1); // Don't touch 
+      let chromeSpeed: number = 400;
+      let wizardSpeed: number = 400; 
+      let barrelSpeed: number = 400;
+      let purpleSpeed: number = 200;
+      let speedSlow: number = 350;
+      if (this.isScrollWheelUp) { // Slows projectiles while player is choosing powerup
+        chromeSpeed -= speedSlow;
+        wizardSpeed -= speedSlow;
+        barrelSpeed -= speedSlow;
+        purpleSpeed -= 150;
+      }
       if (turret === this.chromeTurret) {
-        this.physics.moveTo(projectile, enemy.x, enemy.y, 400); // Last arg is projectile speed
+        this.physics.moveTo(projectile, enemy.x, enemy.y, chromeSpeed); // Last arg is projectile speed
 
       }
       if (turret === this.wizardGuy) {
-        this.physics.moveTo(projectile, enemy.x, enemy.y, 400); // Last arg is projectile speed
+        this.physics.moveTo(projectile, enemy.x, enemy.y, wizardSpeed); // Last arg is projectile speed
 
       }
       if (turret === this.barrelTurret) {
-        this.physics.moveTo(projectile, enemy.x, enemy.y, 400); // Last arg is projectile speed
+        this.physics.moveTo(projectile, enemy.x, enemy.y, barrelSpeed); // Last arg is projectile speed
 
       }
       if (turret === this.purpleShip) {
-        this.physics.moveTo(projectile, enemy.x, enemy.y, 200); // Last arg is projectile speed
+        this.physics.moveTo(projectile, enemy.x, enemy.y, purpleSpeed); // Last arg is projectile speed
 
       }
   }
@@ -1010,23 +1113,37 @@ hitEnemy(powerUp){
    */
   armoredResponseCoalition(turret: any, enemy: any, time: number): void {
     let projectile: any = null;
-    if (turret === this.chromeTurret && (time - this.chromeTurret.bulletDelay > 200)) { // Magic numbers are just delays between each shot
-      this.beamSound.play({volume: .4});
+    let bulletDelay: number = 3000;
+    let chromeDelay: number = 200; // Milliseconds
+    let purpleDelay: number = 2000;
+    let barrelDelay: number = 1500;
+    let wizardDelay: number = 1000;
+    let soundRate: number = 1;
+    if (this.isScrollWheelUp) {
+      chromeDelay += bulletDelay;
+      purpleDelay += bulletDelay;
+      barrelDelay += bulletDelay;
+      wizardDelay += bulletDelay;
+      soundRate = .2;
+    }
+    let projectileSoundConfig = {rate: soundRate, volume: turret === this.chromeTurret || turret === this.purpleShip ? .2 : .4};
+    if (turret === this.chromeTurret && (time - this.chromeTurret.bulletDelay > chromeDelay)) { // Magic numbers are just delays between each shot
+      this.beamSound.play(projectileSoundConfig);
       projectile = new Projectile(this, this.chromeTurret, "laser_beam");
       this.chromeTurret.bulletDelay = new Date().getTime(); // Get new current time of day
     }
-    if (turret === this.purpleShip && (time - this.purpleShip.bulletDelay > 2000)) {
-      this.kamehamehaSound.play({volume: .4});
+    if (turret === this.purpleShip && (time - this.purpleShip.bulletDelay > purpleDelay)) {
+      this.kamehamehaSound.play(projectileSoundConfig);
       projectile = new Projectile(this, this.purpleShip, "kamehameha_beam");
       this.purpleShip.bulletDelay = new Date().getTime(); // Get new current time of day
     }
-    if (turret === this.barrelTurret && (time - this.barrelTurret.bulletDelay > 1500)) {
-      this.pewPewSound.play();
+    if (turret === this.barrelTurret && (time - this.barrelTurret.bulletDelay > barrelDelay)) {
+      this.pewPewSound.play(projectileSoundConfig);
       projectile = new Projectile(this, this.barrelTurret, "pixel_bullet");
       this.barrelTurret.bulletDelay = new Date().getTime(); // Get new current time of day
     }
-    if (turret === this.wizardGuy && (time - this.wizardGuy.bulletDelay > 1000)) {
-      this.fireBallSound.play();
+    if (turret === this.wizardGuy && (time - this.wizardGuy.bulletDelay > wizardDelay)) {
+      this.fireBallSound.play(projectileSoundConfig);
       projectile = new Projectile(this, this.wizardGuy, "fire_ball");
       this.wizardGuy.bulletDelay = new Date().getTime(); // Get new current time of day
     }
@@ -1058,13 +1175,18 @@ hitEnemy(powerUp){
 
 
   /**
-   * moveEnemy, updates the x and y position of the enemy based on the enemies speed attribute.
+   * moveEnemy, updates the x and y position of the enemy based on the enemies speed attribute. Slows all enemies down to a crawl
+   *            if the speedDown parsamter is not 0.
    * 
    * Consumes: enemy(Object)
    * Produces: Nothing
    */
   moveEnemy(enemy): void {
-    this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2); // Add 4rth paramter for speed
+    if (this.isScrollWheelUp) {
+      this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2, 5); // Add 4rth paramter for speed
+    } else {
+      this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2, enemy.moveSpeed);
+    }
   }
 
 
@@ -1129,6 +1251,79 @@ hitEnemy(powerUp){
     }
   }
 
+  /**
+   * displayPowerupBar, while the spacebar is held down, a wheel containing the powerups is displayed on screen and
+   *                    in game time is slowed down.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  displayPowerupBar(): void {
+    this.isSpacebarDown = true;
+    if (this.isSpacebarDown && !this.isScrollWheelUp) {
+      this.handleMusic(3);
+      this.stopSounds();
+      this.zaWarudo.play({volume: .6});
+      this.powerupWheel.setVisible(true);
+      for (let i = 0; i < this.powerupTextList.length; i++) {
+        this.powerupTextList[i].setVisible(true);
+      }
+      for (let i = 0; i < this.POWERUP_COUNT; i++) 
+        this.powerUpGroup.getChildren()[i].setVisible(true);
+      this.isScrollWheelUp = true;
+    }
+  }
+
+  
+  /**
+   * hidePowerBar, hides the powerbar and the powerups when the space bar is released. 
+   * 
+   * Consumes: Nothing 
+   * Produces: Nothing
+   */
+  hidePowerBar(): void {
+    this.powerupWheel.setVisible(false);
+    for (let i = 0; i < this.POWERUP_COUNT; i++) {
+      this.powerUpGroup.getChildren()[i].setVisible(false);
+      this.powerupTextList[i].setVisible(false);
+    }
+    this.isScrollWheelUp = false;
+    this.isSpacebarDown = false;
+    this.stopSounds();
+    if (this.zaWarudo.isPlaying)
+      this.zaWarudo.stop();
+    this.handleMusic(1);
+    this.hasPowerup = false;
+  }
+
+
+  /**
+   * stopSounds, stops the projectile sounds.
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
+  stopSounds(): void {
+    this.fireBallSound.stop();
+    this.kamehamehaSound.stop();
+    this.fireBallSound.stop();
+    this.beamSound.stop();
+  }
+
+
+  /**
+   * setPowerupAlpha, if the powerups array is non zero for each of its indices, set the powerup at that index to have an alpha
+   *                  value of 1, else .5.
+   * 
+   * Consumes: Nothing 
+   * Produces: Nothing
+   */
+  setPowerupAlpha(): void {
+    let powerups: any = this.powerUpGroup.getChildren();
+    for (let i = 0; i < powerups.length; i++) 
+      MainScene.powerUps[i] ? powerups[i].setAlpha(1) : powerups[i].setAlpha(.5);
+  }
+
 
   /**
    * update, runs rapidly, updating things in the game.
@@ -1137,7 +1332,13 @@ hitEnemy(powerUp){
    * Produces: Nothing
    */
   update(): void {
-    this.checkPowerUps();
+    for (let i = 0; i < this.powerupTextList.length; i++)
+      this.powerupTextList[i].setText("X" + MainScene.powerUps[i].toString());
+    this.setPowerupAlpha();
+    if (Phaser.Input.Keyboard.JustDown(this.spacebar)) 
+      console.log("X: " + this.game.input.mousePointer.x + " Y: " + this.game.input.mousePointer.y);
+    this.input.keyboard.on("keydown-" + "SPACE", () => {this.displayPowerupBar();}); 
+    this.input.keyboard.on("keyup-" + "SPACE", () => {this.hidePowerBar();}); 
     this.sceneSwitchUpdater(); // Handle sounds and level resets
     this.mainUpdater(); // Level switching among other things
     if (!this.tutorialTextArray.length) {

@@ -79,6 +79,17 @@ https://www.pinterest.de/pin/334321972342367674/
 Level Three Background
 https://www.google.com/url?sa=i&url=https%3A%2F%2Fsociety6.com%2Fproduct%2Fpixel-void_print&psig=AOvVaw1YwvRHUAChxaHzw33TtmVs&ust=1588615232426000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMjYq7qjmOkCFQAAAAAdAAAAABAD
 
+chest that drops from enemies
+https://www.shutterstock.com/search/treasure+chest+pixel 
+
+powerup wheel
+http://www.pngpix.com/download/pie-chart-png-transparent-image-2
+
+Glowing Purple Ball
+https://www.deviantart.com/venjix5/art/Purple-Energy-Ball-777800582
+
+Pickle With Face
+https://www.freepngimg.com/png/67663-beads-universe-vegetables-granger-potter-pickled-fictional
 
 
 

@@ -23,6 +23,8 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.audio("level_one_victory", "assets/audio/level1victory.mp3");
     this.load.audio("level_two_victory", "assets/audio/level2victory.mp3");
     this.load.audio("death_sound", "assets/audio/death.mp3");
+    this.load.audio("chest_pickup", "assets/audio/chestPickup.mp3");
+    this.load.audio("za_warudo", "assets/audio/zaWarudo.mp3");
 
     // Images 
 
@@ -61,6 +63,17 @@ export default class PreloadScene extends Phaser.Scene {
     // Health bar
     this.load.image("health_bar", "assets/images/healthbar.png");
 
+    // Powerup wheel
+    this.load.image("powerup_wheel", "assets/images/pieChart.png");
+    this.load.image("bombPowerup", "assets/images/bombPowerup.png")
+    this.load.image("spike_powerup", "assets/images/spikeBall.png")
+    this.load.image("energy_ball", "assets/images/glowBall.png")
+    this.load.image("pickle_rick", "assets/images/pickleRick.png")
+    this.load.image("pearl", "assets/images/pearl.png")
+
+    // Treasure chest
+    this.load.image("treasure_chest", "assets/images/treasureChest.png");
+
     // Iron Bars 
     this.load.image("iron_bar", "assets/images/ironBar.png");
 
@@ -89,7 +102,6 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image("clock", "assets/images/clock.png");
     this.load.image("hoursDot", "assets/images/hoursDot.png");
     this.load.image("minutesDot", "assets/images/minutesDot.png");
-    this.load.image("bombPowerup", "assets/images/bombPowerup.png")
 
     // Fonts
     this.load.bitmapFont("pixelFont", "assets/font/font.png", "assets/font/font.xml");

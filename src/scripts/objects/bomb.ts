@@ -8,7 +8,7 @@ export default class Bomb extends Phaser.GameObjects.Sprite {
         this.setScale(.2);
         this.setInteractive({draggable:true});
         scene.add.existing(this);
-        scene.powerUps.add(this); 
+        scene.powerUpGroup.add(this); 
         scene.physics.world.enableBody(this);
         this.body.rotation = scene.chromeTurret.rotation;
         //this.body.velocity.x = scene.chromeTurret.angle > 45 ? 500 : -500; // For shooting left and right
