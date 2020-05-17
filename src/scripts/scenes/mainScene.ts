@@ -13,7 +13,6 @@ import LoseScene from './loseScene';
 import VictoryScene from './victoryScene';
 import ChestScene from './chestScene';
 import Explosion from '../objects/explosion';
-import Bomb from '../objects/bomb';
 import Clone from '../objects/clone';
 
 function sleep (milliseconds) { // Making the program wait for the given time
