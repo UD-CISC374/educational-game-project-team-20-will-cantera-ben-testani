@@ -66,26 +66,28 @@ export default class ChestScene extends Phaser.Scene {
       immovable: false,
       allowGravity: false
     });
-    this.setUpScreen();
     this.makeHelpButton();
     this.makeBackButton();
     this.makeSubmitButton();
-    this.questionTime();
+    this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
+
+      gameObject.x = dragX;
+      gameObject.y = dragY;
+      
+    });
     if(MainScene.chestNum > 0){
       this.setUpScreen();
       this.makeHelpButton();
       this.makeBackButton();
       this.makeSubmitButton();
       this.questionTime();
-      this.hideNoChestScene();
+      //this.hideNoChestScene();
       // http://labs.phaser.io/index.html?dir=input/dragging/&q=
-      this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
-
-        gameObject.x = dragX;
-        gameObject.y = dragY;
-        
-      });
+      
     } 
+    else{
+      this.makeNoChestScene();
+    }
   }
 
 
@@ -653,11 +655,11 @@ export default class ChestScene extends Phaser.Scene {
 
   update() {
     if(MainScene.beginning){
+      MainScene.beginning = false;
       if(!MainScene.chestNum){
         this.makeNoChestScene();
       } else {
-        if (this.noChests != null)
-          this.noChests.setVisible(false);
+        this.setUpScreen();
       }
       this.chestNumLabel.setText("Chests: " + MainScene.chestNum);
     }
