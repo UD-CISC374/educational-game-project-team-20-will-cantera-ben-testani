@@ -85,6 +85,12 @@ https://www.shutterstock.com/search/treasure+chest+pixel
 powerup wheel
 http://www.pngpix.com/download/pie-chart-png-transparent-image-2
 
+Glowing Purple Ball
+https://www.deviantart.com/venjix5/art/Purple-Energy-Ball-777800582
+
+Pickle With Face
+https://www.freepngimg.com/png/67663-beads-universe-vegetables-granger-potter-pickled-fictional
+
 
 
 

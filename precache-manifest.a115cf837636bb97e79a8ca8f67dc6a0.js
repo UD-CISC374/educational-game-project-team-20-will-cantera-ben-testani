@@ -56,7 +56,11 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/audio/warsaw.mp3"
   },
   {
-    "revision": "d860a9ea140050b17dcb0b9e18512545",
+    "revision": "6a02c44cb678dc34ce0f20ccac0ebe53",
+    "url": "assets/audio/zaWarudo.mp3"
+  },
+  {
+    "revision": "a92242b8c51e838281d0bf8f494ff877",
     "url": "assets/citations.md"
   },
   {
@@ -148,6 +152,10 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/images/fountain.png"
   },
   {
+    "revision": "3388a3b06859ec9601ae8324e14ce7ce",
+    "url": "assets/images/glowBall.png"
+  },
+  {
     "revision": "8e6fda513af21f02b478e3c911509419",
     "url": "assets/images/grassBackground.png"
   },
@@ -188,6 +196,14 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/images/party_parrot.gif"
   },
   {
+    "revision": "21e2c04e6f4aa84ca429ddcd0da9dec8",
+    "url": "assets/images/pearl.png"
+  },
+  {
+    "revision": "36d03f79ba5ad87840abb32363195c90",
+    "url": "assets/images/pickleRick.png"
+  },
+  {
     "revision": "d1e6b385f1cd3145f6934fb96cd085ba",
     "url": "assets/images/pieChart.png"
   },
@@ -204,7 +220,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/images/rainbowFlame.png"
   },
   {
-    "revision": "dd4073b8739e82272603328c1bb8016f",
+    "revision": "5b23e2fd23d178691d61eada69e16768",
     "url": "assets/images/spikeBall.png"
   },
   {
@@ -236,12 +252,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "favicon.ico"
   },
   {
-    "revision": "36a3da397d5da0617666d8f6d995c732",
+    "revision": "1246023f9ace1c785953f01ef3c67f61",
     "url": "index.html"
   },
   {
-    "revision": "c8c01dd03fa579fe4030",
-    "url": "main.a45dd5649e0a056c5010.bundle.js"
+    "revision": "597bd1ee1f92916b8fde",
+    "url": "main.3ec19e46f7c367bcf146.bundle.js"
   },
   {
     "revision": "601680b9d7c735e2dac776c6e564a81b",
