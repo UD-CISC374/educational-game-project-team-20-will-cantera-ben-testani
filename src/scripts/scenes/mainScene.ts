@@ -58,7 +58,7 @@ export default class MainScene extends Phaser.Scene {
   // Powerup Stuff
   public powerUps: any;
   public static bombPowerUpNum = 1;
-  public static chestNum = 1;
+  public static chestNum = 2;
   public static bombBool = false;
   public static beginning: boolean;
 
