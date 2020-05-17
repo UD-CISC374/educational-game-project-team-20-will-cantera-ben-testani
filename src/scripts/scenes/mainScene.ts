@@ -63,6 +63,7 @@ export default class MainScene extends Phaser.Scene {
   private spacebar: Phaser.Input.Keyboard.Key;
   private chestPickupSound: Phaser.Sound.BaseSound;
   private zaWarudo: Phaser.Sound.BaseSound;
+  private explosionSound: Phaser.Sound.BaseSound;
 
 
   // Powerup Stuff                
@@ -156,6 +157,9 @@ export default class MainScene extends Phaser.Scene {
     // Death Sound
     this.deathSound = this.sound.add("death_sound", {volume: 2});
 
+    // Powerup Sound
+    this.explosionSound = this.sound.add("explosion_sound");
+
     // Time Slow Sound
     this.zaWarudo = this.sound.add("za_warudo");
 
@@ -227,6 +231,9 @@ export default class MainScene extends Phaser.Scene {
       powerupCount.depth = this.CLONE_DEPTH;
       powerupCount.setVisible(false);
       this.powerupTextList.push(powerupCount);
+      this.powerupTextList[i].setFontSize(24);
+      this.powerupTextList[i].setColor("black");
+      this.powerupTextList[i].setFontStyle("bold");
     }
   }
 
@@ -355,6 +362,7 @@ export default class MainScene extends Phaser.Scene {
    */
   powerupCollisionHandler(powerup: any, enemy: any): void {
     new Explosion(this, powerup.x, powerup.y);
+    this.explosionSound.play();
     console.log("Before: " + this.activePowerUps.getChildren().length.toString());
     this.activePowerUps.remove(powerup);
     powerup.destroy();

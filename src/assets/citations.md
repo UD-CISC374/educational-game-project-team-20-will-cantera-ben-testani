@@ -25,6 +25,11 @@ Summon In The Sunlight - by Jamserton
 https://www.youtube.com/watch?v=dzB2cN-AU8w
 
 
+Sounds:
+
+Powerup Explosion Sound
+https://www.youtube.com/watch?v=0rRlpg9iSZM
+
 
 Images:
 
@@ -90,6 +95,7 @@ https://www.deviantart.com/venjix5/art/Purple-Energy-Ball-777800582
 
 Pickle With Face
 https://www.freepngimg.com/png/67663-beads-universe-vegetables-granger-potter-pickled-fictional
+
 
 
 
