@@ -16,6 +16,7 @@ export default class ChestScene extends Phaser.Scene {
   response: Phaser.GameObjects.BitmapText;
   powerupNum: number; //number to return to mainScene
 
+  
   rewardGroup;
   submitButton;
   chestNumLabel;
@@ -71,6 +72,12 @@ export default class ChestScene extends Phaser.Scene {
     this.makeSubmitButton();
     this.questionTime();
     if(MainScene.chestNum > 0){
+      this.setUpScreen();
+      this.makeHelpButton();
+      this.makeBackButton();
+      this.makeSubmitButton();
+      this.questionTime();
+      this.hideNoChestScene();
       // http://labs.phaser.io/index.html?dir=input/dragging/&q=
       this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
 
@@ -93,6 +100,8 @@ export default class ChestScene extends Phaser.Scene {
     this.closedChest=this.add.image(this.scale.width/2, this.scale.height/2, "closeChest");
     this.openedChest=this.add.image(this.scale.width/2, this.scale.height/2, "openChest");
     this.hideOpenedChest();
+    this.noChests = this.add.text(0,0, "You have no chests", {fill: "red", font: "bold 80px Serif"});
+    this.hideNoChestScene();
     this.bombPowerup=this.add.image(this.scale.width/2, this.scale.height/2, "bombPowerup");
     this.spikePowerup = this.add.image(this.scale.width/2, this.scale.height/2, "spike_powerup");
     this.orbPowerup = this.add.image(this.scale.width/2, this.scale.height/2, "energy_ball");
@@ -187,9 +196,9 @@ export default class ChestScene extends Phaser.Scene {
     this.chestNumLabel = this.add.text(0, 0, "Chests: " + MainScene.chestNum, {fill: "red", font: "bold 80px Serif"});
     this.chestNumLabel.setBackgroundColor("black");
     this.chestNumLabel.setX(this.scale.width/2 - this.chestNumLabel.width/2)
-    this.noChests = this.add.text(0,0, "You have no chests", {fill: "red", font: "bold 80px Serif"});
     this.noChests.setX(this.scale.width/2-this.noChests.width/2);
     this.noChests.setY(this.scale.height/2-this.noChests.height/2);
+    this.noChests.setVisible(true);
 
     this.hideClosedChest();
     this.hideClock();
@@ -200,6 +209,9 @@ export default class ChestScene extends Phaser.Scene {
     this.hideResponse();
   }
 
+  hideNoChestScene(){
+    this.noChests.setVisible(false);
+  }
 
   /**
    * questionTime, generates a random time to ask the user to display on the clock
