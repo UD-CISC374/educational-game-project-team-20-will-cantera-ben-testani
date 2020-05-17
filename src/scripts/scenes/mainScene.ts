@@ -67,7 +67,7 @@ export default class MainScene extends Phaser.Scene {
 
   // Powerup Stuff                
   // Should enumerate this, it goes index: 0 = bomb, 1 = spike, 2 = purple orb, 3 = pickle, 4 = pearl
-  public static powerUps: Array<number> = [0, 0, 0, 0, 0];
+  public static powerUps: Array<number> = [1, 1, 1, 1, 1];
   private powerupCoords: Array<Array<number>> = [[550, 300], [350, 430], [430, 660], [670, 660], [750, 430]];
   private powerupTextList: Array<Phaser.GameObjects.Text> = [];
   public powerUpGroup: any;
@@ -360,14 +360,14 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   powerupCollisionHandler(powerup: any, enemy: any): void {
-    new Explosion(this, powerup.x, powerup.y);
-    this.explosionSound.play();
-    console.log("Before: " + this.activePowerUps.getChildren().length.toString());
-    this.activePowerUps.remove(powerup);
-    powerup.destroy();
-    console.log("After: " + this.activePowerUps.getChildren().length.toString());
-    this.collideMultiple(enemy); // Destroys many enemies in the vicinity.
-    enemy.destroy(); 
+    if (!this.isScrollWheelUp) {
+      new Explosion(this, powerup.x, powerup.y);
+      this.explosionSound.play();
+      this.activePowerUps.remove(powerup);
+      powerup.destroy();
+      this.collideMultiple(enemy); // Destroys many enemies in the vicinity.
+      enemy.destroy(); 
+    }
   }
 
 
@@ -656,8 +656,11 @@ export default class MainScene extends Phaser.Scene {
    * Consumes: text(String), x(number), y(number)
    * Produces: Nothing
    */
-  makeText(text: string, x: number, y: number) {
-    let textDisplay = this.add.text(0, 0, text, {fill: "white", font: "bold 24px Serif"});
+  makeText(messageIndex: number, text: string, x: number, y: number) {
+    let textSize: string = "24";
+    if (messageIndex === 3)
+      textSize = "35";
+    let textDisplay = this.add.text(0, 0, text, {fill: "white", font: "bold " + textSize + "px Serif"});
     textDisplay.setBackgroundColor("black");
     textDisplay.setX((this.scale.width/2) - (textDisplay.width/2) + x);
     textDisplay.setY((this.scale.height/2) - (textDisplay.height/2) + y);
@@ -677,25 +680,25 @@ export default class MainScene extends Phaser.Scene {
    * Produces: Nothing
    */
   runTutorial(messageNumber: number): void {
-    let turretText: string = "These are your defenses,\ndrag them to the correct\ntimes up top to\ndefend your crystal!\nCLICK TO DELETE";
-    let startWaveText: string = "This is the start wave\nbutton, click it when you\nhave set up your defenses\nto start defending.";
-    let chestText: string = "Here is a chest, some enemies drop them.\nClick on it to pick it up\nthen go to open chests to open it.";
-    let powerupText: string = "Hold down spacebar to see your\npowerups and drag them to enemies to destroy them\ntime slows down while you choose";
+    let turretText: string = "These are your defenses,\ndrag them around.\nCLICK TO DELETE";
+    let startWaveText: string = "This button will spawn enemies\nget ready!";
+    let chestText: string = "Here is a chest, enemies drop them.\nClick on it to pick it up.\nthen click \"open chests\" to open it.";
+    let powerupText: string = "Hold down spacebar to see your items\ndrag them to vulnerable spots.";
     let stringList: Array<string> = [turretText, startWaveText, chestText, powerupText];
     if (messageNumber > stringList.length-1)
       return;
     switch(messageNumber) {
       case 0: // Turret Text
-        this.makeText(stringList[messageNumber], -350, 200); // Display it above the turrets
+        this.makeText(0, stringList[messageNumber], -350, 260); // Display it above the turrets
         break;
       case 1: // Start Button Text
-        this.makeText(stringList[messageNumber], -250, -250); // Display it above the turrets
+        this.makeText(1, stringList[messageNumber], -270, -275); // Display it above the turrets
         break;
       case 2: // Chest Text
-        this.makeText(stringList[messageNumber], -250, -100);
+        this.makeText(2, stringList[messageNumber], -250, -100);
         break;
       case 3: // Powerup Text
-        this.makeText(stringList[messageNumber], 0, 0);
+        this.makeText(3, stringList[messageNumber], 0, 0);
         break;
     }
   }
@@ -1262,10 +1265,10 @@ export default class MainScene extends Phaser.Scene {
           this.input.on("drag", () => {
               if (clone.x != powerupType.x || clone.y != powerupType.y) {
                 if (!clone.isActive) { // Make sure this only happens once. This took way to long to figure out.
-                  this.activePowerUps.add(clone); 
-                  clone.isActive = true;
                   if (this.numClones[i]) 
                     this.numClones[i]--;
+                  clone.isActive = true;
+                  this.activePowerUps.add(clone); 
               } 
             }
           });   
