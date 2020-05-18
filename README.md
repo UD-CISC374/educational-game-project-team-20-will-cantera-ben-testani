@@ -1,32 +1,22 @@
-# educational-phaser-game-template
+# Time Commander
+By: William Fox Cantera, Benjamin Testani
 
-Template for designing educational Phaser Games
+# About
+Time Commander is a tower defense game where the player must use their knowledge of analog clocks and time formats to defend their time crystal against hordes of enemies by positioning their defenses at given clock positions. Through three action packed levels, players will experience an increasing size of enemy hordes and must use the items collected from vanquished enemies, along with their defenses to survive in each level. Players will face four types of enemies that will attempt to destroy the crystal. They will have four unique turrets and five possible consumable items to help them along the way.
 
-# Important Files
+# How To Play
+* The player should read the times displayd up top and place their defenses and consumable items at those times on the clock.
 
-These files are for coding your game:
+* To access consumable items, the player can hold down the spacebar to open up a wheel which they can drag the items from if they have any. 
 
-* [src/scripts/game.ts](src/scripts/game.ts): The starting file of your game.
+* Some enemies will drop chests, the player can click the chests to obtain them, and head to the "open chests" screen.
+    * - This scene will show the players a chest if they have any available. The player must drag the minute and hour dots to the analog clock
+      to match the time given by the prompt at the top and hit submit. If the player is correct, an image of the item they earned is displayed and will be available for use in thecoming waves of enemies.
+    * - If the player has multiple chests, they can hit the next chest button to keep opening them for more items. 
 
-These files are for documenting your game:
- 
-* [egdd.md](egdd.md): The educational game design document describing this game in more depth.
+* After a number of waves, the level is complete and the player simply clicks "next level" on the screen that pops up, after listening to the 
+* CRAZY music of course. 
 
-These [package.json](package.json) settings are for configuring the metadata of your game and should be updated:
+* After completing the third level, the game is over and a pleasent song and confetti animation plays.
 
-* `name`: This must be a lower-case version of your repository name on GitHub, without spaces.
-* `description`: Give a quick, one sentence summary of your game.
-* `game`:
-    * `url`: Change this to be the EXACT name of your repository on GitHub.
-    * `shortName`: Choose a short name for your game for [Progressive Web App](https://medium.com/@amberleyjohanna/seriously-though-what-is-a-progressive-web-app-56130600a093) packaging.
-    * `name`: Choose a longer, complete name for your game.
-* `repository`:
-    * `url`: Change this URL to be a link to your GitHub repository.
-* `homepage`: Change this URL to be a link to the final version of your game's EGDD.
-* `contributors`: This should be an array (list) of strings, where each string is like `"Barney Rubble <b@rubble.com> (http://barnyrubble.tumblr.com/)"`.
-
-You should edit the following images to create icons for your game, if it gets installed as a [Progressive Web App](https://medium.com/@amberleyjohanna/seriously-though-what-is-a-progressive-web-app-56130600a093):
-
-* [src/assets/icons/icons-192.png](src/assets/icons/icons-192.png): This is a 192x192 pixel version of your game's icon.
-* [src/assets/icons/icons-512.png](src/assets/icons/icons-512.png): This is a 512x512 pixel version of your game's icon.
-* [src/assets/icons/favicon.ico](src/assets/icons/favicon.ico): The [Favicon](https://en.wikipedia.org/wiki/Favicon) for your game.
+- If the player dies, or wants to play again after victory, they can just hit the play again button that pops up after the aformentioned      victory or defeat. 
