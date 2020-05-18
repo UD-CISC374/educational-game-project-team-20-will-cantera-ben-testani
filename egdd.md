@@ -4,7 +4,8 @@ waltz:
 meta:
   version: 0.0.2
   gdd authors:
-    - Your name goes here
+    - Ben Testani
+    - Will Cantera
   template authors:
     - Austin Cory Bart <acbart@udel.edu>
     - Mark Sheriff
@@ -44,10 +45,10 @@ through active problem solving involving clocks of various formats, timezones, a
 - Point and click onscreen to construct defenses in the direction hinted at by the announcer
 - Use the mouse to set the clocks involved with chest opening to the correct time to open the chest.
 - After surviving a number of waves, a new level is displayed, up to three levels
-- Use rewards earned from opening chests to buy defend the crystal by spending the upgrade points and using consumable items.
+- Use powerups earned from opening chests to buy defend the crystal
 - Select disposable items gathered in the game and use then on waves of enemies
 - If enemies make it to the time crystal, the crystals health is drained, the game is over when it reaches zero
-- Incorrect attempts at opening chests results in lost items that could have been critically important.
+- Hold the spacebar for a popup wheel of powerups the player can drag and drop into the scene.
 
 
 # Learning Aspects
@@ -90,7 +91,6 @@ Certainly, this game would be great to play during free time given to students i
 
 A pre-test and similar post-test should be designed to assess what progress was made as a result of playing the game:
   - Blank analog clocks without numbers with a given time with which to draw on the clock.
-  - Blank analog clocks with numbers and a given time to draw on the clock.
   - Basic arithmetic involved questions about how much time is between two or more given times.
 
 
@@ -120,27 +120,22 @@ Single Player Mode: The player makes their way through three levels by solving t
 - Survive waves of enemies:
     - Description: There are three levels the player must get through, each containing three waves of enemies to get past.
     - Alignment: This aligns with the learning objectives of reading time from analog and digital clocks in standard and military time because 
-                 the player must make their decisions with time and the clock in the game background in mind by using the hints to correctly place defenses.
-- Achieve a high score by the end of the game:
-    - Description: This is hopefully a motivator to come back and play the game more than once as the player can get feedback as to how well they
-                   did with the time questions throughout the game and know what to improve upon.
-    - Alignment: The score system pushes the learning objectives forward effectively by helping the player figure out what aspects of 
-                 telling time they are struggling with, and giving helplful tips for their unique needs.
+    the player must make their decisions with time and the clock in the game background in mind by using the hints to correctly place defenses.
 
 
 # Procedures/Actions
 
-The player can build structures by selecting and dragging them to the desired location. The player can earn upgrade points and consumable items by opening
-chests obtained from vanquished enemies. The points can buy upgrades to the players defenses and the consumable items can be used during enemy attacks to
+The player can build structures by selecting and dragging them to the desired location. The player can earn powerups by opening
+chests obtained from vanquished enemies. The powerups can be used during enemy attacks to
 help the defense clear out enemies or bail the player out if they did not correctly place a defense in an area being attacked. Chests can be opened up after 
 waves by interacting with the clock lock visual on the chest. If the player manages to set the clock to the correct time given on a digital clock, the
-chest opens.
+chest opens.  The Player can also drag and drop powerups gained from the chests to the game to help defend the time crystal.
 
 
 # Rules
 
 The main resource available to the player are the enemies they fend off. Successfully clearing these enemies off the screen with defensive structures
-give the enemies a chance to drop a chest the player can open to get powerful upgrades and consumable items. Failing to open chests results in a big loss for the player as they will not be able to upgrade their defenses or use consumable items. After fending off three waves of enemies, the player will have beaten the current level, and will have to go through two more levels, so three levels in total, each containing three waves. At the end of the game, regardless if the player won or lost, a summary of some stats is presented; such as waves survived, total points earned, enemies destroyed, how many chests were opened. These are used to give the player a final score and let them know which time questions they should work to improve on.
+give the enemies a chance to drop a chest the player can open to get powerful powerups. After fending off three waves of enemies, the player will have beaten the current level, and will have to go through two more levels, so three levels in total, each containing three waves. 
 
 
 # Objects/Entities
@@ -155,7 +150,7 @@ give the enemies a chance to drop a chest the player can open to get powerful up
 ## Core Gameplay Mechanics (Detailed)
 
 - There will be three main levels in the game. In each level, the player must survive three waves of enemies which will get increasingly numerous and difficult
- to deal with. Once the third level is complete, the game is over and the player has won. A final score will be given based on the amount of chests successfully opened and number of enemies vanquished.
+ to deal with. Once the third level is complete, the game is over and the player has won. A final screen will appear telling the user the won.
 - Text will come onto the players screen throughout the game indicating where the next set if enemies will come from. This is the direction that the player should build his defenses towards during the builing time. For example, if they player is warned enemies are approaching from 3:00, they should build a defense
 in that direction
 - While enemies are attacking, the player cannot build any additional structures. The idea is, they should have prepared correctly based on the hints given
@@ -167,18 +162,17 @@ in that direction
 - Enemy Movement: Enemies come in waves towards the players time crystal and if they reach it, the crystal is attacked until the player themselves interfere
  and stop them. Players defenses will be able to attack targets that have moved behind them to the crystal.
 - Layout of the map: The players base is in the middle of the screen where the time crystal is and will have space around it to build defenses against incoming enemies. Enemies walk onto the screen based on a random time and approach the time crystal. The time crystal is behind the players defensive line and this is the final location the enemies try to reach.
+- Player can drag and drop powerups gained from successfully opening chests to use to their advantage in defending the time crystal.
 
 
     
 ## Feedback
 
-- Correctly positioning the clock when opening a chest will reward the player with a consumable item and upgrade points, a noise queue will play to let them   
+- Correctly positioning the clock when opening a chest will reward the player with an upgrade, a noise queue will play to let them   
   know they are correct
-- Incorrect attempts at opening chests will play a bad sound, it will be clear the answer was wrong and occasionally a helpful hint is displayed.
+- Incorrect attempts at opening chests will play a bad sound, it will be clear the answer was wrong.
 - When completing each of the three levels, the player will observe the background and scenery change along with a change in the ambient music to fit a unique
-  theme for the given level. Also, upon level completion, the player will be rewarded according to how much health the ctrystal hass left and how many chests they were able to open
-- After playing the game, the ratio of correct to incorrect attempts at opening chests will be displayed to the player as well as the number of enemies    that got through at which times. The hope is that this will show players where their skill level is at and motivate them to do better next time.
-
+  theme for the given level.
 
 # Story and Gameplay
 
@@ -210,9 +204,8 @@ as we know it by building a defense with magical powers controlled by time again
       - The enemy always drops a chest and the player will have the opportunity to open it by setting the clock to the correct time given in 12 hour time.
       - This wraps up the tutorial portion
     - Now the first real wave comes, the player is given two additional defensive structures to place along with a warning of where the enemies are coming from
-      - The player should survive the onslaught and collect more chest drops for more consumable items as well as upgrade points to help with later waves.
+      - The player should survive the onslaught and collect more chest drops for more powerups to help with later waves.
       - After each wave the player has some time to set up more defenses based on given information about which direction enemies come from 
-      - Players may also purchase upgrades to defenses with points earned from opening chests.
     - This pattern continues for three waves per level. There are three levels in total, so nine waves overall.
     - Times at which the enemies appraoch the players base are random, enemy types are random, so the game has great replayability.
     - By the end of the third level, the player wins and is presented an overall summary of how they did.

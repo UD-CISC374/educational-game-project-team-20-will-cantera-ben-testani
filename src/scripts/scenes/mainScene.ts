@@ -1,7 +1,7 @@
-import ArmorGoblin from '../objects/armorGoblin';
-import TimeGoblin from '../objects/timeGoblin';
-import SpeedGoblin from '../objects/speedGoblin';
-import ThePunisher from '../objects/thePunisher';
+// import ArmorGoblin from '../objects/armorGoblin';
+// import TimeGoblin from '../objects/timeGoblin';
+// import SpeedGoblin from '../objects/speedGoblin';
+// import ThePunisher from '../objects/thePunisher';
 import { GameObjects } from 'phaser';
 import LevelComplete from './levelComplete';
 import Projectile from '../objects/projectile';
