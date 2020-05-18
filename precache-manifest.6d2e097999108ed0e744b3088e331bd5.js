@@ -76,24 +76,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/font/font.xml"
   },
   {
-    "revision": "53cefca2a0f75654486b180949686165",
+    "revision": "aed83ed35f05fa709fdb1263e65a14cf",
     "url": "assets/icons/favicon.ico"
   },
   {
-    "revision": "8ab30def0ad109a97117bd62db942d75",
-    "url": "assets/icons/icons-16.png"
-  },
-  {
-    "revision": "feee71db2bb3ba5d11b26658baf97783",
+    "revision": "c0f698d1ec3a9e46768724a81b64e6ef",
     "url": "assets/icons/icons-192.png"
   },
   {
-    "revision": "cb71713be71d0b8820c7ea6af9c5ddc6",
+    "revision": "e2a7e3bb6124798012a9471605597a9f",
     "url": "assets/icons/icons-512.png"
-  },
-  {
-    "revision": "200ce541edfaa71be93a1041736d1fee",
-    "url": "assets/icons/icons8-game-controller-16.png"
   },
   {
     "revision": "eb18d40489a113fe0495f2461e972090",
@@ -244,6 +236,14 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/images/yellowBall.png"
   },
   {
+    "revision": "b941399b16f4991a60776ee3d94ae286",
+    "url": "assets/screenshots/large.png"
+  },
+  {
+    "revision": "31eb02a07fe0cefcc830da906ed67129",
+    "url": "assets/screenshots/small.png"
+  },
+  {
     "revision": "6b049a7de07cc7981e2667d0cf8a03d7",
     "url": "assets/spritesheets/crystalSheet.png"
   },
@@ -252,16 +252,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "assets/spritesheets/explosion.png"
   },
   {
-    "revision": "53cefca2a0f75654486b180949686165",
+    "revision": "aed83ed35f05fa709fdb1263e65a14cf",
     "url": "favicon.ico"
   },
   {
-    "revision": "03c564862ab9c09f656bbe2b0c06d37e",
+    "revision": "8c6927582866c7a3ae852b224e1b8c0d",
     "url": "index.html"
   },
   {
-    "revision": "f32172c40eb9fa0a47ac",
-    "url": "main.ab6d747761958105b4c2.bundle.js"
+    "revision": "767e7c7a0669c1e38a11",
+    "url": "main.3f2958bdcbe17b8f1bc4.bundle.js"
   },
   {
     "revision": "601680b9d7c735e2dac776c6e564a81b",
