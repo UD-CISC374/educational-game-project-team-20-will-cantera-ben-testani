@@ -17,16 +17,16 @@ export default class ChestScene extends Phaser.Scene {
   powerupNum: number; //number to return to mainScene
 
   
-  rewardGroup;
-  submitButton;
-  chestNumLabel;
-  backButton;
-  helpButton;
-  hour;
-  min;
-  backGroup;
-  textGroup
-  chestNum;
+  rewardGroup: any;
+  submitButton: Phaser.GameObjects.Text;
+  chestNumLabel: Phaser.GameObjects.Text;
+  backButton: Phaser.GameObjects.Text;
+  helpButton: Phaser.GameObjects.Text;
+  hour: number;
+  min: number;
+  backGroup: Phaser.GameObjects.Group;
+  textGroup: Phaser.GameObjects.Group;
+  chestNum: number;
   noChests: Phaser.GameObjects.Text;
   spikePowerup: any;
   powerupIndex: number = 1;
@@ -60,7 +60,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  create() {
+  create(): void {
     MainScene.beginning = true;
     this.backGroup = this.add.group();
     this.textGroup = this.add.group();
@@ -108,7 +108,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  setUpScreen(){
+  setUpScreen(): void{
     this.noChestText = this.add.text(0, 0, "No Chests Available");
     this.noChestText.depth = 100;
     this.noChestText.setColor("red");
@@ -154,7 +154,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  makeHelpButton(){
+  makeHelpButton(): void{
     this.helpButton = this.add.text(0, 0, "Help", {fill: "red", font: "bold 80px Serif"});
     this.helpButton.setBackgroundColor("black");
     this.helpButton.setX(this.scale.width-this.helpButton.width);
@@ -171,7 +171,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  makeSubmitButton(){
+  makeSubmitButton(): void{
     this.submitButton = this.add.text(0, 0, "Submit", {fill: "red", font: "bold 80px Serif"});
     this.submitButton.setBackgroundColor("black");
     this.submitButton.setX(this.scale.width/2 - this.submitButton.width/2);
@@ -188,7 +188,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  makeBackButton(){
+  makeBackButton(): void{
     this.backButton = this.add.text(0, 0, "Back", {fill: "red", font: "bold 80px Serif"});
     this.backButton.setBackgroundColor("black");
     //this.backButton.setX(this.scale.width/2 - this.submitButton.width/2);
@@ -203,7 +203,7 @@ export default class ChestScene extends Phaser.Scene {
     });
   }
 
-  hideNoChestScene(){
+  hideNoChestScene(): void{
     this.noChests.setVisible(false);
   }
 
@@ -249,7 +249,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  onClickCheck(){
+  onClickCheck(): void{
     MainScene.beginning = false;
     this.hideResponse();
     let h = this.checkHour();
@@ -271,7 +271,7 @@ export default class ChestScene extends Phaser.Scene {
   }
 
 
-  resetScene(){
+  resetScene(): void{
     this.questionTime();
     this.hideResponse();
     this.showSubmit()
@@ -291,7 +291,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  hidePowerup(){
+  hidePowerup(): void{
     for(let i = 0; i < this.rewardGroup.getChildren().length; i++){
       this.rewardGroup.getChildren()[i].setVisible(false);
     }
@@ -304,7 +304,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  showPowerup(){
+  showPowerup(): void{
     this.powerupIndex = Math.floor(Math.random() * this.rewardGroup.getChildren().length);
     console.log(this.powerupIndex);
     if (this.powerupIndex === 0)
@@ -327,7 +327,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  setDots(){
+  setDots(): void{
     this.hoursDot.setX(this.scale.width/4 + this.scale.width/2);
     this.hoursDot.setY(this.scale.width/4 + this.scale.width/2);
     this.minuetsDot.setX(this.scale.width/4);
@@ -341,7 +341,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: A number representing if the answer is right or wrong
    * Produces: Nothing
    */
-  showResponse(num: number){
+  showResponse(num: number): void{
     if(num==1){
       this.response = this.add.bitmapText(0, 0, "pixelFont", "CORRECT ", 75);
       this.response.setX(this.scale.width/2 - this.response.width/2);
@@ -363,7 +363,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  hideResponse(){
+  hideResponse(): void{
     this.response.setVisible(false);
   }
 
@@ -373,7 +373,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  hideClosedChest(){
+  hideClosedChest(): void{
     this.closedChest.setVisible(false);
   }
 
@@ -383,7 +383,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  hideClock(){
+  hideClock(): void{
     this.clock.setVisible(false);
   }
 
@@ -393,7 +393,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  hideOpenedChest(){
+  hideOpenedChest(): void{
     this.openedChest.setVisible(false);
   }
 
@@ -403,7 +403,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  showClosedChest(){
+  showClosedChest(): void{
     this.closedChest.setVisible(true);
   }
 
@@ -413,7 +413,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  showClock(){
+  showClock(): void{
     this.clock.setVisible(true);
   }
 
@@ -423,7 +423,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  showOpenedChest(){
+  showOpenedChest(): void{
     this.openedChest.setVisible(true);
   }
 
@@ -433,7 +433,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  hideDots(){
+  hideDots(): void{
     this.hoursDot.setVisible(false);
     this.minuetsDot.setVisible(false);
   }
@@ -444,7 +444,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  showDots(){
+  showDots(): void{
     this.hoursDot.setVisible(true);
     this.minuetsDot.setVisible(true);
   }
@@ -455,7 +455,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  hideText(){
+  hideText(): void{
     this.hoursLabel.setVisible(false);
     this.minLabel.setVisible(false);
     this.mainLabel.setVisible(false);
@@ -468,7 +468,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  showText(){
+  showText(): void{
     this.hoursLabel.setVisible(true);
     this.minLabel.setVisible(true);
     this.mainLabel.setVisible(true);
@@ -481,7 +481,7 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  hideSubmit(){
+  hideSubmit(): void{
     this.submitButton.setVisible(false);
   }
 
@@ -491,13 +491,10 @@ export default class ChestScene extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-  showSubmit(){
+  showSubmit(): void{
     this.submitButton.setVisible(true);
   }
 
-  reset(){
-
-  }
   /**
    * checkMin, checks if the minute dot is within the bounds for the minute part of the time question
    * 
@@ -650,6 +647,12 @@ export default class ChestScene extends Phaser.Scene {
     return h;
   }
 
+  /**
+   * displayNoChests, displays the "no chest scene"
+   * 
+   * Consumes: Nothing
+   * Produces: Nothing
+   */
   displayNoChests(): void {
     this.hideClosedChest();
     this.hideOpenedChest();
