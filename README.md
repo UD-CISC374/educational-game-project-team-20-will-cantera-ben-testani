@@ -5,7 +5,7 @@ By: William Fox Cantera, Benjamin Testani
 Time Commander is a tower defense game where the player must use their knowledge of analog clocks and time formats to defend their time crystal against hordes of enemies by positioning their defenses at given clock positions. Through three action packed levels, players will experience an increasing size of enemy hordes and must use the items collected from vanquished enemies, along with their defenses to survive in each level. Players will face four types of enemies that will attempt to destroy the crystal. They will have four unique turrets and five possible consumable items to help them along the way.
 
 # How To Play
-* The player should read the times displayd up top and place their defenses and consumable items at those times on the clock.
+* The player should read the times displayed up top and place their defenses and consumable items at those times on the clock.
 
 * To access consumable items, the player can hold down the spacebar to open up a wheel which they can drag the items from if they have any. 
 
