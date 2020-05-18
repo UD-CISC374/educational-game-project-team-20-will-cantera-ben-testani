@@ -2,18 +2,16 @@ import ArmorGoblin from '../objects/armorGoblin';
 import TimeGoblin from '../objects/timeGoblin';
 import SpeedGoblin from '../objects/speedGoblin';
 import ThePunisher from '../objects/thePunisher';
-import { GameObjects, Game } from 'phaser';
+import { GameObjects } from 'phaser';
 import LevelComplete from './levelComplete';
-import ChromeTurret from '../objects/chromeTurret';
-import PurpleShip from '../objects/purpleShip';
-import BarrelGun from '../objects/barrelTurret';
-import WizardGuy from '../objects/wizardGuy';
 import Projectile from '../objects/projectile';
 import LoseScene from './loseScene';
 import VictoryScene from './victoryScene';
 import ChestScene from './chestScene';
 import Explosion from '../objects/explosion';
 import Clone from '../objects/clone';
+import Turret from '../objects/turret';
+import Enemy from '../objects/enemy';
 
 function sleep (milliseconds) { // Making the program wait for the given time
   return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -27,12 +25,13 @@ export default class MainScene extends Phaser.Scene {
   private readonly CLONE_DEPTH = 102;
   private readonly FRONT_FIRST: number = 101;
   private readonly FRONT_SECOND: number = 100;
+  private readonly ROTATION_MAGIC_NUMBER = 80.1;
   
   // Turrets and enemies, must be any to accept custom attributes
-  public chromeTurret: any;
-  private purpleShip: any;
-  private wizardGuy: any;
-  private barrelTurret: any;
+  public chromeTurret: Turret;
+  private purpleShip: Turret;
+  private wizardGuy: Turret;
+  private barrelTurret: Turret;
 
   // Phaser groups
   private enemies: any;
@@ -64,23 +63,22 @@ export default class MainScene extends Phaser.Scene {
   private zaWarudo: Phaser.Sound.BaseSound;
   private explosionSound: Phaser.Sound.BaseSound;
 
-
   // Powerup Stuff                
   // Should enumerate this, it goes index: 0 = bomb, 1 = spike, 2 = purple orb, 3 = pickle, 4 = pearl
   public static powerUps: Array<number> = [1, 1, 1, 1, 1];
   private powerupCoords: Array<Array<number>> = [[550, 300], [350, 430], [430, 660], [670, 660], [750, 430]];
   private powerupTextList: Array<Phaser.GameObjects.Text> = [];
-  public powerUpGroup: any;
-  private activePowerUps: any;
+  private activePowerUps: any; // Clones get put into here, removed on collision
   public static chestNum: number = 0;
   public static beginning: boolean;
 
-  private powerup1: any;
-  private powerup2: any;
-  private powerup3: any;
-  private powerup4: any;
-  private powerup5: any;
-
+  // Powerup Images
+  public powerUpGroup: any;
+  private flowerPowerup: Phaser.GameObjects.Image;
+  private spikePowerup: Phaser.GameObjects.Image;
+  private energyPowerup: Phaser.GameObjects.Image;
+  private picklePowerup: Phaser.GameObjects.Image;
+  private pearlPowerup: Phaser.GameObjects.Image;
 
   // Variables with set values
   private health: number = this.MAXHEALTH; // Width in pixels of the health bar
@@ -107,9 +105,9 @@ export default class MainScene extends Phaser.Scene {
   private waveNumber: string = "wave1"; // Keep track of what wave the player is on 
   private spawnTimes: Array<number> = []; // Will be filled in with random numbers between 1 and 12
   private isWaveStarted: boolean = false; // True if the wave is ongoing, false otherwise
-  private boxList: Array<any> = [];
+  private boxList: Array<Phaser.GameObjects.Rectangle> = [];
   private lockImageList: Array<any> = [];
-  private defensiveInventoryCoords: Array<any> = [];
+  private defensiveInventoryCoords: Array<Array<number>> = [];
   private isWaveDone: boolean = false;
   private tutorialTextArray: Array<GameObjects.Text> = [];
   private tutorialMessageNumber: number = 0;
@@ -123,8 +121,8 @@ export default class MainScene extends Phaser.Scene {
   /**
    * constructor, provides a reference to this scene
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   constructor() {
     super({ key: 'MainScene' });
@@ -132,11 +130,11 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * create, most of the code is moved to their own functions, that code is called in create to 
-   *         setup this screen.
+   * Runs once, this scene never ends. Sets up everything on screen. Starts playing the level one song. Sets up groups. Adds images 
+   *            and sound to the scene.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   create() {
     // Background Stuff
@@ -238,24 +236,25 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * addPowerups, adds the powerups to the scene, they are invisible until space is held down to see the powerup wheel. 
+   * addPowerups, adds the images of the powerups to the scene. Puts them in a group for easier manipulation. Sets their alpha to 
+   *              half because they are not available until they player has earned some. Sets them as interactive. 
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   addPowerups(): void {
-    this.powerup1 = this.add.image(500, 300, "bombPowerup");
-    this.powerup2 = this.add.image(300, 430, "spike_powerup");
-    this.powerup3 = this.add.image(380, 660, "energy_ball");
-    this.powerup4 = this.add.image(625, 660, "pickle_rick");
-    this.powerup5 = this.add.image(700, 430, "pearl");
+    this.flowerPowerup = this.add.image(500, 300, "bombPowerup");
+    this.spikePowerup = this.add.image(300, 430, "spike_powerup");
+    this.energyPowerup = this.add.image(380, 660, "energy_ball");
+    this.picklePowerup = this.add.image(625, 660, "pickle_rick");
+    this.pearlPowerup = this.add.image(700, 430, "pearl");
 
     this.powerUpGroup = this.physics.add.group(); // Make it a physics group
-    this.powerUpGroup.add(this.powerup1); 
-    this.powerUpGroup.add(this.powerup2);
-    this.powerUpGroup.add(this.powerup3);
-    this.powerUpGroup.add(this.powerup4);
-    this.powerUpGroup.add(this.powerup5);
+    this.powerUpGroup.add(this.flowerPowerup); 
+    this.powerUpGroup.add(this.spikePowerup);
+    this.powerUpGroup.add(this.energyPowerup);
+    this.powerUpGroup.add(this.picklePowerup);
+    this.powerUpGroup.add(this.pearlPowerup);
 
     for (let i = 0; i < this.POWERUP_COUNT; i++) {
       this.powerUpGroup.getChildren()[i].setAlpha(.5); // No powerups at first, all half visibility
@@ -267,10 +266,10 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * giveTrue, for some reason, the Phaser overlap function needs a callback that returns true?
+   * giveTrue, for some reason, the Phaser overlap function needs a callback that returns true. Here it is.
    * 
-   * Consumes: Nothing
-   * Produces: A boolean
+   * @param None
+   * @return None
    */
   giveTrue(): boolean {
     return true;
@@ -278,11 +277,13 @@ export default class MainScene extends Phaser.Scene {
 
   
   /**
-   * spawnChest, has a random chance to spawn a chest where an enemy died. 
+   * spawnChest, gets a random number between 0 and 9 when an enemy dies. If the number is 5, a chest is spawned on the enemies death
+   *             location. The player can click on the chest to pick it up and later open in the chest scene. 
    * 
-   * Consumes: enemyX, enemyY, ignoreChance -> numbers, boolean, the x and y location of the enemy that died
-   *                                                             true if ranndom should be ignored, false otherwise.
-   * Produces: Nothing
+   * @param enemyX -> number, the x position of the enemy on death
+   * @param enemyY -> number, the y position of the enemy on death
+   * @param ignoreChance -> boolean, if true, this function is guarenteed to spawn a chest, if false, it's random
+   * @return None
    */
   spawnChest(enemyX: number, enemyY: number, ignoreChance: boolean): void {
     let randomNumber: number = Math.floor(Math.random() * 9);
@@ -301,46 +302,45 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * handleBulletCollision, destroys projectiles and enemies.
+   * handleBulletCollision, when a bullet from the projectile group collides with an enemy from the enemy group, the projectile and enemy
+   *                        are destroyed. If the turret is the PurpleShip or the BarrelGun, the collideMultiple method is called to 
+   *                        destroy multiple enemies around the shot to compenstate for the slower firerate on those turrets.
    * 
-   * Consumes: projectile, enemy
-   * Produces: Nothing
+   * @param projectile -> any, the projectile in collision
+   * @param enemy -> any, the enemy hit by the projectile
+   * @return None
    */
-  handleBulletCollision(projectile, enemy): void {
+  handleBulletCollision(projectile: any, enemy: any): void {
     projectile.destroy();
     let enemyX: number = enemy.x;
     let enemyY: number = enemy.y;
     this.spawnChest(enemyX, enemyY, false); // false for indicating randomness
     enemy.destroy();
-    if (projectile.name === "kamehameha_beam" || projectile.name === "pixel_bullet") {
+    if (projectile.name === "kamehameha_beam" || projectile.name === "pixel_bullet")
       this.collideMultiple(enemy);
-    }
   }
 
 
   /**
    * collideMultiple, destroys multiple enemies based on how close they are to the enemy that collided with a projectile.
    * 
-   * Consumes: An enemy
-   * Produces: Nothing
+   * @param enemy -> any, the intial enemy hit
    */
-  collideMultiple(enemy) {
+  collideMultiple(enemy: any) {
     for (let i = 0; i < this.enemies.getChildren().length; i++) {
       let child = this.enemies.getChildren()[i];
-      if (child.x < enemy.x+50 && child.x > enemy.x - 50) {
-        if (child.y < enemy.y+50 && child.y > enemy.y - 50) {
+      if (child.x < enemy.x+50 && child.x > enemy.x - 50)
+        if (child.y < enemy.y+50 && child.y > enemy.y - 50)
           child.destroy();
-        }
-      }
     }
   }
 
 
   /**
-   * onDrag, defines the behaviour for the turrets when they are dragged. THe turrets get rotated to match the angle of the clock.
+   * onDrag, on drag, updates the objects x and y position, also updates the objects angle to match the clock. So this method ensures
+   *         that the turrets and powerups are facing the correct direction when they are dragged around the clock.
    * 
-   * Consumes: Nothing 
-   * Produces: Nothing
+   * @param object -> any, the object being dragged
    */
   onDrag(object: any): void {
     // Defining drag behaviour
@@ -354,10 +354,10 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * powerupCollisionHandler, destroys enemies that come into contact with an acitve powerup.
+   * powerupCollisionHandler, destroys enemies that come into contact with the active powerup group.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param powerup -> any, the powerup to destroy
+   * @param enemy -> any, the enemy to destroy
    */
   powerupCollisionHandler(powerup: any, enemy: any): void {
     if (!this.isScrollWheelUp) {
@@ -372,17 +372,17 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * makeDefenses, adds sprites to the game for the defensive structures when they are recieved.
+   * makeDefenses, adds turrets to the game for the defensive structures when they are recieved.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   addDefenses(): void {
-    // Starting Defense
-    this.chromeTurret = new ChromeTurret(this, this.defensiveInventoryCoords[0][0], this.defensiveInventoryCoords[0][1]);
-    this.purpleShip = new PurpleShip(this, this.defensiveInventoryCoords[1][0], this.defensiveInventoryCoords[1][1]);
-    this.barrelTurret = new BarrelGun(this, this.defensiveInventoryCoords[2][0], this.defensiveInventoryCoords[2][1]);
-    this.wizardGuy = new WizardGuy(this, this.defensiveInventoryCoords[3][0], this.defensiveInventoryCoords[3][1]);
+    // Initial turret positions
+    this.chromeTurret = new Turret(this, this.defensiveInventoryCoords[0][0], this.defensiveInventoryCoords[0][1], true, "chrome_turret");
+    this.purpleShip = new Turret(this, this.defensiveInventoryCoords[1][0], this.defensiveInventoryCoords[1][1], false, "purple_ship");
+    this.barrelTurret = new Turret(this, this.defensiveInventoryCoords[2][0], this.defensiveInventoryCoords[2][1], false, "barrel_turret");
+    this.wizardGuy = new Turret(this, this.defensiveInventoryCoords[3][0], this.defensiveInventoryCoords[3][1], false, "wizard_dude");
 
     this.chromeTurret.setInteractive({draggable: true}); // Chrome Turret is the only available turret at first
     this.onDrag(this.chromeTurret);
@@ -403,8 +403,8 @@ export default class MainScene extends Phaser.Scene {
    * handleBoxes, handles setting up the coordinates for the boxes thatr will be drawn on screen to represent
    *              the players inventory space for defensive structures. Calls the makeBoxes method to draw them.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   handleBoxes(): void {
     this.defensiveInventoryCoords = [[75, this.scale.height-150], [75, this.scale.height-50], 
@@ -419,8 +419,8 @@ export default class MainScene extends Phaser.Scene {
   /**
    * makeBoxes, draws a rectanglke on the screen with the given x and y coordinates.
    * 
-   * Consumes: x(number), y(number)
-   * Produces: Nothing
+   * @param x -> number, the x position of the box
+   * @param y -> number, the y position of the box
    */
   makeBoxes(x: number, y: number): void {
     let width: number = 100
@@ -433,26 +433,25 @@ export default class MainScene extends Phaser.Scene {
 
   /**
    * hurtCrystal, if an enemy collides with the crystal, it is hurt and loses some health. This method crops 
-   *              a percentage of the healthbar to indicate the crystal is losing life. 
+   *              a percentage of the healthbar to indicate the crystal is losing life. If health reaches 0, plays the death sequence.
    * 
-   * Consumes: crystal, enemy -> game objects
-   * Produces: Nothing
+   * @param crystal -> any, the time crystal, not used here, but required for the callback to compile
+   * @param enemy -> any, the enemy that hit the crystal
    */
-  hurtCrystal(crystal, enemy): void {
+  hurtCrystal(crystal: any, enemy: any): void {
     this.health -= 45;
     this.healthBar.setCrop(0, 0, this.health, 97); // Height in pixels of the health bar is 97
     enemy.destroy();
-    if (this.health - 45 < 0) {
+    if (this.health - 45 < 0) 
       this.deathSequence();
-    }
   }
 
 
   /**
-   * deathSequence, plays an animation and sound upon death.
+   * deathSequence, plays an animation and sound upon death. No return type because this method is asynchronous.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   async deathSequence() {
     // Death Clock
@@ -482,10 +481,11 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * resetGameProtocol, resets the game if the crystal health goes below 0. 
+   * resetGameProtocol, resets the game if the crystal health goes below 0, or the player dies, or the player reaches the end of the
+   *                    game and wants to restart.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param hasLost -> boolean, true if the player lost the game, false otherwise
+   * @return None
    */
   resetGameProtocol(hasLost: boolean): void {
     this.resetGame = true;
@@ -530,10 +530,10 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * getPossibleHours, generates an array of four number each is randomly chosen between 1 and 12.
+   * getPossibleHours, generates an array of four numbers, each is randomly chosen between 1 and 12.
    * 
-   * Consumes: Nothing
-   * Produces: randomHours(number array)
+   * @param None
+   * @return randomHours -> Array<number>, the array of ranom numbers
    */
   getPossibleHours(): Array<number> {
     let randomHours: Array<number> = [];
@@ -545,10 +545,11 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * announceTime, displays a warning onscreen telling the player which time the enemies will come from.
+   * announceTime, displays a warning onscreen telling the player which time the enemies will come from. Does this before each wave.
+   *               This code looks complicated, but it is just for formatting text on screen because I don't understand regular expressions. 
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   announceTime(): void {
     let times: String = "";
@@ -578,10 +579,11 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * getCurrentSong, gets the song currently playing in the game.
+   * getCurrentSong, gets the song currently playing in the game. This method is useful becuase it helps avoid duplicate code whenever 
+   *                 the song needs to pause.
    * 
-   * Consumes: Nothing
-   * Produces: song(Phaser Sound)
+   * @param None
+   * @return song -> Phaser.Sound.BaseSound, the song currently playing
    */
   getCurrentSong(): Phaser.Sound.BaseSound {
     let song: Phaser.Sound.BaseSound = this.levelOneTrack;
@@ -603,16 +605,13 @@ export default class MainScene extends Phaser.Scene {
 
   /**
    * handleMusic, plays the song for this scene. It is meant to be background music so it should'nt be to
-   *              loud. A config is set up for this. Handles whether the song should be stopped, started, or resumed.
+   *              loud. A config is set up for this. Handles whether the song should be paused, started, or resumed.
+   *              1: resume the song, 2: play the song, 3: pause the song
    * 
-   *              action -> 1: resume the song
-   *              action -> 2: play the song
-   *              action -> 3: pause the song
-   * 
-   * Consumes: action(number)
-   * Produces: Nothing
+   * @param action -> number, a number indicating which action this method shouild perform, resume, play, or pause
+   * @return None
    */
-  handleMusic(action: number) {
+  handleMusic(action: number): void {
     let song: Phaser.Sound.BaseSound = this.getCurrentSong();
     let trackConfig = {
       mute: false,
@@ -640,8 +639,8 @@ export default class MainScene extends Phaser.Scene {
   /**
    * makeTimeCrystal, displays the time crystal spritesheet in the center of the screen.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing 
+   * @param None
+   * @return None
    */
   makeTimeCrystal(): void {
     this.timeCrystal = this.physics.add.sprite(this.scale.width/2, this.scale.height/2, "time_crystal");
@@ -653,10 +652,13 @@ export default class MainScene extends Phaser.Scene {
    * makeText, makes interactive text onscreen with the specified text and x, y values. The text is destroyed when clicked.
    *           This method appends the text to the tutorialTextArray class attribute.
    * 
-   * Consumes: text(String), x(number), y(number)
-   * Produces: Nothing
+   * @param messageIndex -> number, the index at which to get the message from the message array
+   * @param text -> string, the message
+   * @param x -> number, the x coordinate of the message
+   * @param y -> number, the y coordinate of the message
+   * @return None
    */
-  makeText(messageIndex: number, text: string, x: number, y: number) {
+  makeText(messageIndex: number, text: string, x: number, y: number): void {
     let textSize: string = "24";
     if (messageIndex === 3)
       textSize = "35";
@@ -672,12 +674,13 @@ export default class MainScene extends Phaser.Scene {
     this.tutorialTextArray.push(textDisplay);
   }
 
+
   /**
    * runTutorial, displays some text boxes for the player tro see a tthe start of the game. They are displayed one
-   *              afte the other after being destroyed by the  player by a mouse click
-   * 
-   * Consumes: messageNumber -> number, the message to display
-   * Produces: Nothing
+   *              after the other after being destroyed by the player with a mouse click.
+   *
+   * @param messageNumber -> number, the index of the message list containing the messages to display
+   * @return None
    */
   runTutorial(messageNumber: number): void {
     let turretText: string = "These are your defenses,\ndrag them around.\nCLICK TO DELETE";
@@ -710,8 +713,8 @@ export default class MainScene extends Phaser.Scene {
    *           into the spawn times array. Right now the most positions enemies can come from is 4, what is the
    *           point of having the spawn anywhere, the player wouldn't learn anything. 
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   prepWave(): void {
     this.resetGame = false;
@@ -729,8 +732,8 @@ export default class MainScene extends Phaser.Scene {
   /**
    * startWave, starts the wave of enemies. Spawns in enemies based on the time at which they are supposed to spawn.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   async startWave() {
     this.enemySpawnText.destroy();
@@ -757,10 +760,11 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * endWave, handles incrementing some key values after the wave is over and getting ready for the next wave.
+   * endWave, handles incrementing some key values after the wave is over and getting ready for the next wave. If the player has won, lost,
+   *          or completed a level, this method switches scenes to the proper scene. 
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   endWave(): void {
     let waveIndex: number = parseInt(this.waveNumber[this.waveNumber.length-1]); // Get last character as number
@@ -787,8 +791,8 @@ export default class MainScene extends Phaser.Scene {
    * endWaveHelper, deletes all of the turret projectiles, sets certain objects back to being visible, updates the
    *                wave number, and updates the booleans isWaveStarted and isWWaveDone.
    * 
-   * Consumes: waveIndex(number)
-   * Produces: Nothing
+   * @param waveIndex -> number, the wave the player is currently on
+   * @return None
    */
   endWaveHelper(waveIndex: number): void {
     for (let i = 0; i < this.turretProjectiles.getChildren().length; i++)
@@ -810,8 +814,8 @@ export default class MainScene extends Phaser.Scene {
    *               This turret is then unlocked and the player is free to use it. Happens once at the end of each wave, so everey turret
    *               will be available to the player after the first level. 
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   unlockTurret(): void {
     let randomUnlock: number = Math.floor(Math.random() * 3) + 1; // Get random number between 1 and 3
@@ -852,11 +856,10 @@ export default class MainScene extends Phaser.Scene {
 
   
   /**
-   * setVisibleHandler, takes all of the objects that were set to invisible during the wave and sets
-   *                    them back to being visible again.
+   * setVisibleHandler, takes all of the objects that were set to invisible during the wave and sets them back to being visible again.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   setVisibleHandler(): void {
     this.waveStartButton.setVisible(true); // Bring back the start wave button
@@ -872,11 +875,10 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * setInvisibleHandler, takes objects that are only meant to be displayed on the prep phase and makes them invisble for
-   *                      the defend phase.
+   * setInvisibleHandler, takes objects that are only meant to be displayed on the prep phase and makes them invisble for the defend phase.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   setInvisibleHandler(): void {
     this.waveStartButton.setVisible(false);
@@ -895,8 +897,8 @@ export default class MainScene extends Phaser.Scene {
   /**
    * makeWaveStartButton, makes a button which when pressed, brings forth the wave of enemies.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   makeWaveStartButton(): void {
     this.waveStartButton = this.add.text(0, 200, "Start-Wave", {fill: "red", font: "bold 40px Serif"});
@@ -908,11 +910,10 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * makeChestButton, handles displaying the button to switch to the chest scene on the screen when the wave of enemies 
-   *                  is over.
+   * makeChestButton, handles displaying the button to switch to the chest scene on the screen when the wave of enemies is over.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   makeChestButton(): void {
     this.chestButton = this.add.text(0, 0, "Open Chests", {fill: "red", font: "bold 50px Serif"});
@@ -930,8 +931,8 @@ export default class MainScene extends Phaser.Scene {
    /**
    * getEnemyCoords, Returns a range of pixels for the enemy to spawn based on the random hour chosen.
    * 
-   * Consumes: hour(number)
-   * Produces: Coordinates(number array)
+   * @param hour -> number, the hour the enemy will spawn at
+   * @return coords -> Array<number> an array containing the x and y coordinates of the enemy like [x, y]
    */
   getEnemyCoords(hour: number): Array<number> {
     let coords: Array<number> = [0, 0, 0];
@@ -981,35 +982,46 @@ export default class MainScene extends Phaser.Scene {
 
   /**
    * spawnEnemy, spawns an enemy on an edge of the map based on the time the enemy is supposed to come out from.
-   * 
-   * Consumes: Coordinates(number array)
-   * Produces: An Object
+   *
+   * @param coords -> Array<number>, an array containing the coordinates of the enemy like [x, y]
+   * @return None
    */
   spawnEnemy(coords: Array<number>): void {
     let enemyNumber: number = Math.floor(Math.random() * this.numEnemies) + 1; // Gets random number between 1 and numEnemies
     let x: number = coords[0];
     let y: number = coords[1];
     let spawnPosition = coords[2];
+    let name: string = "";
+    let moveSpeed: number = 0;
+    let enemy: Enemy;
     switch(enemyNumber) {
       case 1:
-        let armorGoblin: ArmorGoblin = new ArmorGoblin(this, x, y, spawnPosition);
-        armorGoblin.setRotation(Phaser.Math.Angle.Between(500, 500, armorGoblin.x, armorGoblin.y)-80.1);
-        this.enemies.add(armorGoblin);
+        name = "armor_goblin";
+        moveSpeed = 50;
+        enemy = new Enemy(this, x, y, spawnPosition, moveSpeed, name);
+        enemy.setRotation(Phaser.Math.Angle.Between(500, 500, enemy.x, enemy.y)-this.ROTATION_MAGIC_NUMBER);
+        this.enemies.add(enemy);
         break;
       case 2:
-        let speedGoblin: SpeedGoblin = new SpeedGoblin(this, x, y, spawnPosition);
-        speedGoblin.setRotation(Phaser.Math.Angle.Between(500, 500, speedGoblin.x, speedGoblin.y)-80.1);
-        this.enemies.add(speedGoblin);
+        name = "speed_goblin";
+        moveSpeed = 100;
+        enemy = new Enemy(this, x, y, spawnPosition, moveSpeed, name);
+        enemy.setRotation(Phaser.Math.Angle.Between(500, 500, enemy.x, enemy.y)-this.ROTATION_MAGIC_NUMBER);
+        this.enemies.add(enemy);
         break;
       case 3:
-        let timeGoblin: TimeGoblin = new TimeGoblin(this, x, y, spawnPosition);
-        timeGoblin.setRotation(Phaser.Math.Angle.Between(500, 500, timeGoblin.x, timeGoblin.y)-80.1);
-        this.enemies.add(timeGoblin);
+        name = "time_goblin";
+        moveSpeed = 60;
+        enemy = new Enemy(this, x, y, spawnPosition, moveSpeed, name);
+        enemy.setRotation(Phaser.Math.Angle.Between(500, 500, enemy.x, enemy.y)-this.ROTATION_MAGIC_NUMBER);
+        this.enemies.add(enemy);
         break;
       case 4: 
-        let thePunisher: ThePunisher = new ThePunisher(this, x, y, spawnPosition);
-        thePunisher.setRotation(Phaser.Math.Angle.Between(500, 500, thePunisher.x, thePunisher.y)-80.1);
-        this.enemies.add(thePunisher);
+        name = "the_punisher";
+        moveSpeed = 75;
+        enemy = new Enemy(this, x, y, spawnPosition, moveSpeed, name);
+        enemy.setRotation(Phaser.Math.Angle.Between(500, 500, enemy.x, enemy.y)-this.ROTATION_MAGIC_NUMBER);
+        this.enemies.add(enemy);
         break;
     }
   }
@@ -1020,10 +1032,10 @@ export default class MainScene extends Phaser.Scene {
    *                    (hour) to be able to shoot at incoming enemies. Returns a number indicating the hour the
    *                     player put the turret at.
    * 
-   * Consumes: A turret
-   * Produces: A number
+   * @param turret -> Turret, the turret
+   * @return position -> number, the position of the turret
    */
-  getTurretPosition(turret: any): number {
+  getTurretPosition(turret: Turret): number {
     let position: number = 0;
     let rotation: number = turret.rotation*(180/Math.PI); // Convert radians to degrees
     if (((rotation > -13) && (rotation < 0)) || ((rotation > 0) && (rotation < 11))) { // Range for 12:00, special case, signs switch
@@ -1058,11 +1070,13 @@ export default class MainScene extends Phaser.Scene {
   /**
    * moveProjectiles, handles the custom movement for each turrets projectile.
    *
-   * Consumes: turret, enemy, projectile
-   * Produces: Nothing
+   * @param turret -> Turret, the turret
+   * @param enemy -> Enemy, the enemy
+   * @param projectile -> Projectile, the projectile
+   * @return None
    */
-  moveProjectiles(turret: any, enemy: any, projectile: any): void {
-      projectile.setRotation(turret.rotation-80.1); // Don't touch 
+  moveProjectiles(turret: Turret, enemy: Enemy, projectile: Enemy): void {
+      projectile.setRotation(turret.rotation-this.ROTATION_MAGIC_NUMBER); // Don't touch 
       let chromeSpeed: number = 400;
       let wizardSpeed: number = 400; 
       let barrelSpeed: number = 400;
@@ -1073,23 +1087,11 @@ export default class MainScene extends Phaser.Scene {
         wizardSpeed -= speedSlow;
         barrelSpeed -= speedSlow;
         purpleSpeed -= 150;
-      }
-      if (turret === this.chromeTurret) {
-        this.physics.moveTo(projectile, enemy.x, enemy.y, chromeSpeed); // Last arg is projectile speed
-
-      }
-      if (turret === this.wizardGuy) {
-        this.physics.moveTo(projectile, enemy.x, enemy.y, wizardSpeed); // Last arg is projectile speed
-
-      }
-      if (turret === this.barrelTurret) {
-        this.physics.moveTo(projectile, enemy.x, enemy.y, barrelSpeed); // Last arg is projectile speed
-
-      }
-      if (turret === this.purpleShip) {
-        this.physics.moveTo(projectile, enemy.x, enemy.y, purpleSpeed); // Last arg is projectile speed
-
-      }
+      } // Last parameter is the projectile speed
+      if (turret === this.chromeTurret) {this.physics.moveTo(projectile, enemy.x, enemy.y, chromeSpeed);}
+      if (turret === this.wizardGuy) {this.physics.moveTo(projectile, enemy.x, enemy.y, wizardSpeed);}
+      if (turret === this.barrelTurret) {this.physics.moveTo(projectile, enemy.x, enemy.y, barrelSpeed);}
+      if (turret === this.purpleShip) {this.physics.moveTo(projectile, enemy.x, enemy.y, purpleSpeed);}
   }
 
 
@@ -1097,10 +1099,12 @@ export default class MainScene extends Phaser.Scene {
    * armoredResponseCoalition, takes in a turret and spawns projectiles for the turret based on which clas it belongs to.
    *                           The projectile moves towards an enemy at a speed pre determined by the turret class. 
    * 
-   * Consumes: turret 
-   * Produces: Nothing
+   * @param turret -> Turret, the turret
+   * @param enemy -> Enemy, the enemy
+   * @param time -> number, the time delay
+   * @return None
    */
-  armoredResponseCoalition(turret: any, enemy: any, time: number): void {
+  armoredResponseCoalition(turret: Turret, enemy: Enemy, time: number): void {
     let projectile: any = null;
     let bulletDelay: number = 3000;
     let chromeDelay: number = 200; // Milliseconds
@@ -1142,21 +1146,20 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * shootAtEnemy, make defenses fire if an enemy is within their range.
+   * shootAtEnemy, make defenses fire if an enemy is within their range, so coming at the turret a tth e right hour(angle).
    * 
-   * Consumes: turret
-   * Produces: Nothing
+   * @param turret -> Turret, the turret to check
+   * @return None
    */
-  shootAtEnemy(turret: any): void {
+  shootAtEnemy(turret: Turret): void {
     const turretPlacement: number = this.getTurretPosition(turret);
     for (let i = 0; i < this.spawnTimes.length; i++) {
       if (this.spawnTimes[i] == turretPlacement) {
         let time: number = new Date().getTime(); // Returns milliseconds
         for (let i = 0; i < this.enemies.getChildren().length; i++) {
           let enemy = this.enemies.getChildren()[i];
-          if (enemy.spawnPosition == turretPlacement) { // My attempt at staggering the projectile spawn rate
+          if (enemy.spawnPosition == turretPlacement) // My attempt at staggering the projectile spawn rate
             this.armoredResponseCoalition(turret, enemy, time);
-          }
         }
       }
     }
@@ -1167,15 +1170,12 @@ export default class MainScene extends Phaser.Scene {
    * moveEnemy, updates the x and y position of the enemy based on the enemies speed attribute. Slows all enemies down to a crawl
    *            if the speedDown parsamter is not 0.
    * 
-   * Consumes: enemy(Object)
-   * Produces: Nothing
+   * @param enemy -> Enemy, the enemy to move
+   * @return None
    */
-  moveEnemy(enemy): void {
-    if (this.isScrollWheelUp) {
-      this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2, 5); // Add 4rth paramter for speed
-    } else {
-      this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2, enemy.moveSpeed);
-    }
+  moveEnemy(enemy: Enemy): void {
+    let speed: number = this.isScrollWheelUp ? 5 : enemy.moveSpeed; // 5 is a pretty slow movement speed
+    this.physics.moveTo(enemy, this.scale.width/2, this.scale.height/2, speed); // Add 4rth paramter for speed
   }
 
 
@@ -1183,8 +1183,8 @@ export default class MainScene extends Phaser.Scene {
    * sceneSwitchUpdater, Uses global boolean variables to do actions such as playing music one time after switching back from 
    *                     a sub scene to the main scene.
    *       
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   sceneSwitchUpdater(): void {
     if (LevelComplete.switching) {
@@ -1218,10 +1218,10 @@ export default class MainScene extends Phaser.Scene {
   
   /**
    * mainUpdater, this method is the most important in update. It handles resetting the game, going to the next level, spawning enemies, 
-   *              moving enemies, just about anythin yu could think of.
+   *              moving enemies, just about anything you could think of.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   mainUpdater(): void {
     let length = this.enemies.getChildren().length;
@@ -1242,21 +1242,23 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
-   * makeClones, makes clones of the powerups to be dragged and used. 
-   * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * makeClones, makes clones of the powerups to be dragged and used. These clones make it possible to drag and drop a clone of the
+   *             powerup image in one click because they are spawned in as the player gets more powerups. When the clone is clicked, 
+   *             it is added to the activepowerup group so they can collide with enemies.
+   *  
+   * @param None
+   * @return None
    */
   makeClones(): void {
     for (let i = 0; i < 5; i++) {
       if (MainScene.powerUps[i] > 0) {
         let powerupType: any; 
         let name: string = "";
-        if (i === 0) {powerupType = this.powerup1; name = "bombPowerup"};
-        if (i === 1) {powerupType = this.powerup2; name = "spike_powerup"};
-        if (i === 2) {powerupType = this.powerup3; name = "energy_ball"};
-        if (i === 3) {powerupType = this.powerup4; name = "pickle_rick"};
-        if (i === 4) {powerupType = this.powerup5; name = "pearl"};
+        if (i === 0) {powerupType = this.flowerPowerup; name = "bombPowerup"};
+        if (i === 1) {powerupType = this.spikePowerup; name = "spike_powerup"};
+        if (i === 2) {powerupType = this.energyPowerup; name = "energy_ball"};
+        if (i === 3) {powerupType = this.picklePowerup; name = "pickle_rick"};
+        if (i === 4) {powerupType = this.pearlPowerup; name = "pearl"};
         let depthCount: number = 0;
         this.numClones[i] = MainScene.powerUps[i];
         while (MainScene.powerUps[i] != 0) {
@@ -1286,8 +1288,8 @@ export default class MainScene extends Phaser.Scene {
    * displayPowerupBar, while the spacebar is held down, a wheel containing the powerups is displayed on screen and
    *                    in game time is slowed down.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   displayPowerupBar(): void {
     this.isSpacebarDown = true;
@@ -1297,7 +1299,6 @@ export default class MainScene extends Phaser.Scene {
         this.cloneList.getChildren()[i].setVisible(true);
         this.cloneList.getChildren()[i].setInteractive({draggable: true});
       }
-
       this.handleMusic(3);
       this.stopSounds();
       this.zaWarudo.play({volume: .6});
@@ -1315,8 +1316,8 @@ export default class MainScene extends Phaser.Scene {
   /**
    * hidePowerBar, hides the powerbar and the powerups when the space bar is released. 
    * 
-   * Consumes: Nothing 
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   hidePowerBar(): void {
     this.powerupWheel.setVisible(false);
@@ -1342,8 +1343,8 @@ export default class MainScene extends Phaser.Scene {
   /**
    * stopSounds, stops the projectile sounds.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   stopSounds(): void {
     this.fireBallSound.stop();
@@ -1357,8 +1358,8 @@ export default class MainScene extends Phaser.Scene {
    * setPowerupAlpha, if the powerups array is non zero for each of its indices, set the powerup at that index to have an alpha
    *                  value of 1, else .5.
    * 
-   * Consumes: Nothing 
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   setPowerupAlpha(): void {
     let powerups: any = this.powerUpGroup.getChildren();
@@ -1370,8 +1371,8 @@ export default class MainScene extends Phaser.Scene {
   /**
    * update, runs rapidly, updating things in the game.
    * 
-   * Consumes: Nothing
-   * Produces: Nothing
+   * @param None
+   * @return None
    */
   update(): void {
     for (let i = 0; i < this.powerupTextList.length; i++)
