@@ -10,12 +10,12 @@ Time Commander is a tower defense game where the player must use their knowledge
 * To access consumable items, the player can hold down the spacebar to open up a wheel which they can drag the items from if they have any. 
 
 * Some enemies will drop chests, the player can click the chests to obtain them, and head to the "open chests" screen.
-    * - This scene will show the players a chest if they have any available. The player must drag the minute and hour dots to the analog clock
+    - This scene will show the players a chest if they have any available. The player must drag the minute and hour dots to the analog clock
       to match the time given by the prompt at the top and hit submit. If the player is correct, an image of the item they earned is displayed and will be available for use in thecoming waves of enemies.
-    * - If the player has multiple chests, they can hit the next chest button to keep opening them for more items. 
+    - If the player has multiple chests, they can hit the next chest button to keep opening them for more items. 
 
 * After a number of waves, the level is complete and the player simply clicks "next level" on the screen that pops up, after listening to the 
-* CRAZY music of course. 
+CRAZY music of course. 
 
 * After completing the third level, the game is over and a pleasent song and confetti animation plays.
 
