@@ -17,7 +17,7 @@ export default class ChestHelp extends Phaser.Scene {
         super({ key: 'ChestHelp' });
     }
 
-    create() {
+    create(): void {
         this.drawText();
         this.makeExample();
         this.hideExample();
@@ -64,7 +64,7 @@ export default class ChestHelp extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-    resetScene(){
+    resetScene(): void{
         this.hideExample();
         this.showButtons();
         this.showText();
@@ -76,7 +76,7 @@ export default class ChestHelp extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-    makeExample(){
+    makeExample(): void{
         this.closedChest=this.add.image(this.scale.width/2, this.scale.height/2, "closeChest");
         this.clock=this.add.image(this.scale.width/2, this.scale.height/2, "clock");
         this.mainLabel=this.add.bitmapText(140, 150, "pixelFont", "TIME TO DISPLAY ON CLOCK:", 75);
@@ -98,7 +98,7 @@ export default class ChestHelp extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-    clearScreen(){
+    clearScreen(): void{
         this.hideButtons();
         this.hideText();
     }
@@ -109,7 +109,7 @@ export default class ChestHelp extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-    showExample(){
+    showExample(): void{
         this.closedChest.setVisible(true);
         this.clock.setVisible(true);
         this.mainLabel.setVisible(true);
@@ -124,7 +124,7 @@ export default class ChestHelp extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-    hideExample(){
+    hideExample(): void{
         this.closedChest.setVisible(false);
         this.clock.setVisible(false);
         this.mainLabel.setVisible(false);
@@ -139,7 +139,7 @@ export default class ChestHelp extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-    hideButtons(){
+    hideButtons(): void{
         this.exampleButton.setVisible(false);
         //this.backButton.setVisible(false);
     }
@@ -150,7 +150,7 @@ export default class ChestHelp extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-    hideText(){
+    hideText(): void{
         this.helpText.setVisible(false);
     }
 
@@ -160,7 +160,7 @@ export default class ChestHelp extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-    showButtons(){
+    showButtons(): void{
         this.exampleButton.setVisible(true);
         this.backButton.setVisible(true);
     }
@@ -171,7 +171,7 @@ export default class ChestHelp extends Phaser.Scene {
    * Consumes: Nothing
    * Produces: Nothing
    */
-    showText(){
+    showText(): void{
         this.helpText.setVisible(true);
     }
 
