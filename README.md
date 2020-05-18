@@ -21,6 +21,9 @@ CRAZY music of course.
 
 - If the player dies, or wants to play again after victory, they can just hit the play again button that pops up after the aformentioned      victory or defeat. 
 
+# Photo of the Game in Action
+![large](https://user-images.githubusercontent.com/47586729/82261099-6e845b00-992c-11ea-8170-2db51d66c929.PNG) 
+
 # Link to Demo of Game
 https://www.youtube.com/watch?v=z5yHWI2EYsA 
 
