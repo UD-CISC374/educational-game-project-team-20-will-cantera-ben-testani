@@ -509,8 +509,8 @@ export default class MainScene extends Phaser.Scene {
     MainScene.powerUps = [1,1,1,1,1];
     for (let i = 0; i < this.chestArray.length; i++) 
       this.chestArray[i].destroy();
-    let cloneLen: number = this.cloneList.getChildren();
     let clones: any = this.cloneList.getChildren();
+    let cloneLen: number = clones.length;
     for (let i = 0; i < cloneLen; i++)
       clones[0].destroy();
     let powerupLen: number = this.activePowerUps.getChildren();
