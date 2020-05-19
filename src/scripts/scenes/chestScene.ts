@@ -318,6 +318,7 @@ export default class ChestScene extends Phaser.Scene {
     if (this.powerupIndex === 4)
       this.pearlPowerup.setVisible(true);
     MainScene.powerUps[this.powerupIndex] += 2;
+    MainScene.numClones[this.powerupIndex] += 2;
     MainScene.chestNum--;
   }
 

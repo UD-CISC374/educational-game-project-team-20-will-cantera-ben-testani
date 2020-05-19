@@ -62,6 +62,7 @@ export default class MainScene extends Phaser.Scene {
   // Powerup Stuff                
   // Should enumerate this, it goes index: 0 = bomb, 1 = spike, 2 = purple orb, 3 = pickle, 4 = pearl
   public static powerUps: Array<number> = [1, 1, 1, 1, 1];
+  public static numClones: Array<number> = [1,1,1,1,1]; // Just for displaying the number of powerups as text on screen
   private powerupCoords: Array<Array<number>> = [[550, 300], [350, 430], [430, 660], [670, 660], [750, 430]];
   private powerupTextList: Array<Phaser.GameObjects.Text> = [];
   private activePowerUps: any; // Clones get put into here, removed on collision
@@ -111,7 +112,6 @@ export default class MainScene extends Phaser.Scene {
   private isLevelSwitching: boolean = false;
   private isSpacebarDown: boolean = false;
   private isScrollWheelUp: boolean = false;
-  private numClones: Array<number> = [0,0,0,0,0]; // Just for displaying the number of powerups as text on screen
   private chestArray: Array<Phaser.GameObjects.Image> = [];
 
 
@@ -229,6 +229,10 @@ export default class MainScene extends Phaser.Scene {
       this.powerupTextList[i].setColor("black");
       this.powerupTextList[i].setFontStyle("bold");
     }
+
+    // Set Spacebar Actions
+    this.input.keyboard.on("keydown-" + "SPACE", () => {this.displayPowerupBar();}); 
+    this.input.keyboard.on("keyup-" + "SPACE", () => {this.hidePowerBar();}); 
   }
 
 
@@ -494,7 +498,7 @@ export default class MainScene extends Phaser.Scene {
       this.isWaveDone = false;
       this.isWaveStarted = false;
     }
-    this.numClones = [0,0,0,0,0];
+    MainScene.numClones = [0,0,0,0,0];
     MainScene.powerUps = [1,1,1,1,1];
     for (let i = 0; i < this.chestArray.length; i++) 
       this.chestArray[i].destroy();
@@ -1256,7 +1260,7 @@ export default class MainScene extends Phaser.Scene {
    */
   updatePowerupCount(): void {
     for (let i = 0; i < this.powerupTextList.length; i++) // Update the on screen count
-      this.powerupTextList[i].setText("X" + this.numClones[i].toString());
+      this.powerupTextList[i].setText("X" + MainScene.numClones[i].toString());
   }
 
 
@@ -1279,15 +1283,14 @@ export default class MainScene extends Phaser.Scene {
         if (i === 3) {powerupType = this.picklePowerup; name = "pickle_rick"};
         if (i === 4) {powerupType = this.pearlPowerup; name = "pearl"};
         let depthCount: number = 0;
-        this.numClones[i] += MainScene.powerUps[i];
         while (MainScene.powerUps[i] != 0) {
           MainScene.powerUps[i]--;
           let clone: any = new Clone(this, powerupType.x, powerupType.y, powerupType.texture, name);
           this.input.on("drag", () => {
               if (clone.x != powerupType.x || clone.y != powerupType.y) {
                 if (!clone.isActive) { // Make sure this only happens once. This took way to long to figure out.
-                  if (this.numClones[i]) 
-                    this.numClones[i]--;
+                  if (MainScene.numClones[i]) 
+                    MainScene.numClones[i]--;
                   clone.isActive = true;
                   this.activePowerUps.add(clone); 
               } 
@@ -1387,6 +1390,20 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
+   * showTutorial, shows the next tutorial box if there is one
+   * 
+   * @param None
+   * @return None
+   */
+  showTutorial(): void {
+    if (!this.tutorialTextArray.length) {
+      this.runTutorial(this.tutorialMessageNumber);
+      this.tutorialMessageNumber++;
+    }
+  }
+
+
+  /**
    * update, runs rapidly, updating things in the game.
    * 
    * @param None
@@ -1395,15 +1412,8 @@ export default class MainScene extends Phaser.Scene {
   update(): void {
     this.updatePowerupCount();
     this.setPowerupAlpha();
-    if (Phaser.Input.Keyboard.JustDown(this.spacebar)) 
-      console.log("X: " + this.game.input.mousePointer.x + " Y: " + this.game.input.mousePointer.y);
-    this.input.keyboard.on("keydown-" + "SPACE", () => {this.displayPowerupBar();}); 
-    this.input.keyboard.on("keyup-" + "SPACE", () => {this.hidePowerBar();}); 
     this.sceneSwitchUpdater(); // Handle sounds and level resets
     this.mainUpdater(); // Level switching among other things
-    if (!this.tutorialTextArray.length) {
-      this.runTutorial(this.tutorialMessageNumber);
-      this.tutorialMessageNumber++;
-    }
+    this.showTutorial();
   }
 }
