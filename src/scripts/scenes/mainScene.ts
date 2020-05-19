@@ -1,7 +1,3 @@
-import ArmorGoblin from '../objects/armorGoblin';
-import TimeGoblin from '../objects/timeGoblin';
-import SpeedGoblin from '../objects/speedGoblin';
-import ThePunisher from '../objects/thePunisher';
 import { GameObjects } from 'phaser';
 import LevelComplete from './levelComplete';
 import Projectile from '../objects/projectile';
@@ -96,9 +92,9 @@ export default class MainScene extends Phaser.Scene {
       //"wave4": 45
     },
     "level3": {
-      "wave1": 12,
-      "wave2": 20,
-      "wave3": 40
+      "wave1": 20,
+      "wave2": 28,
+      "wave3": 45
       //"wave4": 10
     }
   };
@@ -116,6 +112,7 @@ export default class MainScene extends Phaser.Scene {
   private isSpacebarDown: boolean = false;
   private isScrollWheelUp: boolean = false;
   private numClones: Array<number> = [0,0,0,0,0]; // Just for displaying the number of powerups as text on screen
+  private chestArray: Array<Phaser.GameObjects.Image> = [];
 
 
   /**
@@ -286,12 +283,11 @@ export default class MainScene extends Phaser.Scene {
    * @return None
    */
   spawnChest(enemyX: number, enemyY: number, ignoreChance: boolean): void {
-    let randomNumber: number = Math.floor(Math.random() * 9);
-    if (ignoreChance)
-      randomNumber = 5;
+    let randomNumber: number = ignoreChance ? 5 : Math.floor(Math.random() * 9);
     if (randomNumber === 5) { // 1 in 10 chance
       let chest: GameObjects.Image = this.add.image(enemyX, enemyY, "treasure_chest");
       chest.setInteractive();
+      this.chestArray.push(chest);
       chest.on("pointerdown", () => {
         MainScene.chestNum++; // Increment global static chest count
         this.chestPickupSound.play();
@@ -498,6 +494,16 @@ export default class MainScene extends Phaser.Scene {
       this.isWaveDone = false;
       this.isWaveStarted = false;
     }
+    this.numClones = [0,0,0,0,0];
+    MainScene.powerUps = [1,1,1,1,1];
+    for (let i = 0; i < this.chestArray.length; i++) 
+      this.chestArray[i].destroy();
+    let cloneLen: number = this.cloneList.getChildren();
+    for (let i = 0; i < cloneLen; i++)
+      this.cloneList.getChildren()[0].destroy();
+    let powerupLen: number = this.activePowerUps.getChildren();
+    for(let i = 0; i < powerupLen; i++)
+      this.activePowerUps.getChildren()[0].destroy();
     let turretGroup = this.turrets.getChildren();
     let turretLen: number = turretGroup.length
     for (let i = 0; i < turretLen; i++) {
@@ -1207,6 +1213,7 @@ export default class MainScene extends Phaser.Scene {
     }
     if (ChestScene.switching) {
       ChestScene.switching = false;
+      this.updatePowerupCount();
       this.handleMusic(1);
     }
     if (VictoryScene.switching) {
@@ -1242,6 +1249,18 @@ export default class MainScene extends Phaser.Scene {
 
 
   /**
+   * updatePowerupCount, draws the number of powerups available to the player when they use them or gain more.
+   * 
+   * @param None
+   * @return None
+   */
+  updatePowerupCount(): void {
+    for (let i = 0; i < this.powerupTextList.length; i++) // Update the on screen count
+      this.powerupTextList[i].setText("X" + this.numClones[i].toString());
+  }
+
+
+  /**
    * makeClones, makes clones of the powerups to be dragged and used. These clones make it possible to drag and drop a clone of the
    *             powerup image in one click because they are spawned in as the player gets more powerups. When the clone is clicked, 
    *             it is added to the activepowerup group so they can collide with enemies.
@@ -1260,7 +1279,7 @@ export default class MainScene extends Phaser.Scene {
         if (i === 3) {powerupType = this.picklePowerup; name = "pickle_rick"};
         if (i === 4) {powerupType = this.pearlPowerup; name = "pearl"};
         let depthCount: number = 0;
-        this.numClones[i] = MainScene.powerUps[i];
+        this.numClones[i] += MainScene.powerUps[i];
         while (MainScene.powerUps[i] != 0) {
           MainScene.powerUps[i]--;
           let clone: any = new Clone(this, powerupType.x, powerupType.y, powerupType.texture, name);
@@ -1303,9 +1322,8 @@ export default class MainScene extends Phaser.Scene {
       this.stopSounds();
       this.zaWarudo.play({volume: .6});
       this.powerupWheel.setVisible(true);
-      for (let i = 0; i < this.powerupTextList.length; i++) {
+      for (let i = 0; i < this.powerupTextList.length; i++)
         this.powerupTextList[i].setVisible(true);
-      }
       for (let i = 0; i < this.POWERUP_COUNT; i++) 
         this.powerUpGroup.getChildren()[i].setVisible(true);
       this.isScrollWheelUp = true;
@@ -1375,8 +1393,7 @@ export default class MainScene extends Phaser.Scene {
    * @return None
    */
   update(): void {
-    for (let i = 0; i < this.powerupTextList.length; i++)
-      this.powerupTextList[i].setText("X" + this.numClones[i].toString());
+    this.updatePowerupCount();
     this.setPowerupAlpha();
     if (Phaser.Input.Keyboard.JustDown(this.spacebar)) 
       console.log("X: " + this.game.input.mousePointer.x + " Y: " + this.game.input.mousePointer.y);
