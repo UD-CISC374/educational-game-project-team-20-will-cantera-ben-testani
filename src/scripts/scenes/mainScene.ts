@@ -496,6 +496,7 @@ export default class MainScene extends Phaser.Scene {
   resetGameProtocol(hasLost: boolean): void {
     this.resetGame = true;
     MainScene.chestNum = 0;
+    this.chestsOnScene = 0;
     this.levelTwoBackground.setVisible(false);
     this.levelThreeBackground.setVisible(false);
     this.levelOneBackground.setVisible(true);
