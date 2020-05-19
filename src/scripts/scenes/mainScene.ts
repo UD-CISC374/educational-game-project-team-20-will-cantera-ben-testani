@@ -22,6 +22,7 @@ export default class MainScene extends Phaser.Scene {
   private readonly FRONT_FIRST: number = 101;
   private readonly FRONT_SECOND: number = 100;
   private readonly ROTATION_MAGIC_NUMBER = 80.1;
+  private readonly MAX_CHESTS = 4;
   
   // Turrets and enemies, must be any to accept custom attributes
   public chromeTurret: Turret;
@@ -113,6 +114,7 @@ export default class MainScene extends Phaser.Scene {
   private isSpacebarDown: boolean = false;
   private isScrollWheelUp: boolean = false;
   private chestArray: Array<Phaser.GameObjects.Image> = [];
+  private chestsOnScene: number = 0;
 
 
   /**
@@ -288,15 +290,19 @@ export default class MainScene extends Phaser.Scene {
    */
   spawnChest(enemyX: number, enemyY: number, ignoreChance: boolean): void {
     let randomNumber: number = ignoreChance ? 5 : Math.floor(Math.random() * 9);
-    if (randomNumber === 5) { // 1 in 10 chance
-      let chest: GameObjects.Image = this.add.image(enemyX, enemyY, "treasure_chest");
-      chest.setInteractive();
-      this.chestArray.push(chest);
-      chest.on("pointerdown", () => {
-        MainScene.chestNum++; // Increment global static chest count
-        this.chestPickupSound.play();
-        chest.destroy();
-      });
+    if (this.chestsOnScene < this.MAX_CHESTS) { // Don't spawn too many chests
+      if (randomNumber === 5) { // 1 in 10 chance
+        let chest: GameObjects.Image = this.add.image(enemyX, enemyY, "treasure_chest");
+        chest.setInteractive();
+        this.chestArray.push(chest);
+        this.chestsOnScene++;
+        chest.on("pointerdown", () => {
+          MainScene.chestNum++; // Increment global static chest count
+          this.chestPickupSound.play();
+          this.chestsOnScene--;
+          chest.destroy();
+        });
+      }
     }
   }
 
@@ -498,16 +504,18 @@ export default class MainScene extends Phaser.Scene {
       this.isWaveDone = false;
       this.isWaveStarted = false;
     }
-    MainScene.numClones = [0,0,0,0,0];
+    MainScene.numClones = [1,1,1,1,1];
     MainScene.powerUps = [1,1,1,1,1];
     for (let i = 0; i < this.chestArray.length; i++) 
       this.chestArray[i].destroy();
     let cloneLen: number = this.cloneList.getChildren();
+    let clones: any = this.cloneList.getChildren();
     for (let i = 0; i < cloneLen; i++)
-      this.cloneList.getChildren()[0].destroy();
+      clones[0].destroy();
     let powerupLen: number = this.activePowerUps.getChildren();
+    let actives: any = this.activePowerUps.getChildren();
     for(let i = 0; i < powerupLen; i++)
-      this.activePowerUps.getChildren()[0].destroy();
+      actives[0].destroy();
     let turretGroup = this.turrets.getChildren();
     let turretLen: number = turretGroup.length
     for (let i = 0; i < turretLen; i++) {
